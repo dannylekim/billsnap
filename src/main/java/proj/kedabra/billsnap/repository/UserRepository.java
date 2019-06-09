@@ -2,11 +2,10 @@ package proj.kedabra.billsnap.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
-import proj.kedabra.billsnap.entities.Example;
+import proj.kedabra.billsnap.entities.Account;
 
 @Repository
-public interface ExampleRepository extends CrudRepository<Example, Long> {
+public interface UserRepository extends CrudRepository<Account, Long> {
 
-    Example getById(Long id);
-
+    Account getById(Long id);
 }
