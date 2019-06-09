@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.entities;
 
 import lombok.Data;
 import proj.kedabra.billsnap.utils.AccountStatusEnum;
+import proj.kedabra.billsnap.utils.GenderEnum;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -21,14 +22,15 @@ public class Account implements Serializable {
     private String firstName;
     private String middleName;
     private String lastName;
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private GenderEnum gender;
     private String phoneNumber;
     private LocalDate birthDate;
 
     @Enumerated(EnumType.STRING)
     private AccountStatusEnum status;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private Location location;
 

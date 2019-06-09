@@ -44,6 +44,8 @@ create table if not exists account
     phone_number varchar(20)    null,
     birth_date   date           null,
     status       account_status not null,
+    created      timestamp not null default current_timestamp,
+    updated      timestamp not null default current_timestamp,
     location_id  integer
         constraint "USER_location_id_fkey"
             references location,
@@ -56,8 +58,12 @@ create table if not exists bill
 (
     id          int auto_increment primary key,
     name        varchar(30)    null,
-    responsible integer        not null,
-    creator     integer        not null,
+    responsible integer     not null
+        constraint bill_responsible_id_fk
+            references account,
+    creator     integer     not null
+        constraint bill_creator_id_fk
+            references account,
     status      varchar(15)    not null,
     created     timestamp with time zone default current_timestamp,
     updated     timestamp with time zone default current_timestamp,
