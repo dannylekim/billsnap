@@ -17,7 +17,7 @@ create type if not exists bill_status as enum ('RESOLVED', 'OPEN');
 
 create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
-create type if not exists gender as enum ('M', 'F');
+create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create table if not exists location
 (
@@ -36,7 +36,6 @@ create table if not exists account
     id           int auto_increment primary key,
     email        varchar(50)    null,
     password     varchar(20)    null,
-    title        varchar(3)     null,
     first_name   varchar(30)    not null,
     middle_name  varchar(20)    null,
     last_name    varchar(30)    not null,
@@ -44,6 +43,8 @@ create table if not exists account
     phone_number varchar(20)    null,
     birth_date   date           null,
     status       account_status not null,
+    created      timestamp not null default current_timestamp,
+    updated      timestamp not null default current_timestamp,
     location_id  integer
         constraint "USER_location_id_fkey"
             references location,
@@ -56,8 +57,12 @@ create table if not exists bill
 (
     id          int auto_increment primary key,
     name        varchar(30)    null,
-    responsible integer        not null,
-    creator     integer        not null,
+    responsible integer     not null
+        constraint bill_responsible_id_fk
+            references account,
+    creator     integer     not null
+        constraint bill_creator_id_fk
+            references account,
     status      varchar(15)    not null,
     created     timestamp with time zone default current_timestamp,
     updated     timestamp with time zone default current_timestamp,
@@ -125,7 +130,7 @@ create table if not exists bills_vs_groups
         primary key (group_id, bill_id)
 );
 
-create table if not exists items
+create table if not exists item
 (
     id      int auto_increment primary key,
     bill_id integer        not null
@@ -139,7 +144,7 @@ create table if not exists items_vs_accounts
 (
     item_id    integer       not null
         constraint "ITEM_VS_USERS_item_id_fkey"
-            references items,
+            references item,
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,
