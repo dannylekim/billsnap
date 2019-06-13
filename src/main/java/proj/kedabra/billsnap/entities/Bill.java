@@ -8,6 +8,8 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Entity
@@ -48,7 +50,8 @@ public class Bill implements Serializable {
 
     private boolean active;
 
-
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill")
+    private List<Item> items = new ArrayList<>();
 
 
 }
