@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.utils;
+package proj.kedabra.billsnap.utils.enums;
 
 public enum BillStatusEnum {
     RESOLVED("RESOLVED"),
@@ -7,6 +7,7 @@ public enum BillStatusEnum {
     private final String status;
 
     BillStatusEnum(final String status) {
+
         this.status = status;
     }
 

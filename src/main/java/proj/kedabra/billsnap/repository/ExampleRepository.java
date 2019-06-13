@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.repository;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
+
 import proj.kedabra.billsnap.entities.Example;
 
 @Repository

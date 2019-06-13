@@ -10,6 +10,8 @@ create type group_role as enum ('ADMIN', 'MEMBER');
 
 create type gender as enum ('M', 'F');
 
+create type title as enum('Mr.', 'Mrs.', 'M.', 'Ms.');
+
 create table if not exists location
 (
     id          serial not null
@@ -33,7 +35,7 @@ create table if not exists account
             primary key,
     email        varchar(50),
     password     varchar(20),
-    title        varchar(3),
+    title        title,
     first_name   varchar(30)    not null,
     middle_name  varchar(20),
     last_name    varchar(30)    not null,
@@ -132,7 +134,7 @@ create table if not exists bills_vs_groups
         primary key (group_id, bill_id)
 );
 
-create table if not exists items
+create table if not exists item
 (
     id      serial         not null
         constraint "ITEMS_pkey"
@@ -148,7 +150,7 @@ create table if not exists items_vs_accounts
 (
     item_id    integer       not null
         constraint "ITEM_VS_USERS_item_id_fkey"
-            references items,
+            references item,
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,

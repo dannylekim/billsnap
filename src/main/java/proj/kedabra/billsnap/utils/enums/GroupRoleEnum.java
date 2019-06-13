@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.utils;
+package proj.kedabra.billsnap.utils.enums;
 
 public enum GroupRoleEnum {
     ADMIN("ADMIN"),

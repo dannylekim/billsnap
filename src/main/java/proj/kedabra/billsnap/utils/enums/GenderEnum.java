@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.utils;
+package proj.kedabra.billsnap.utils.enums;
 
 public enum GenderEnum {
     M("M"),
@@ -6,7 +6,7 @@ public enum GenderEnum {
 
     private final String gender;
 
-    GenderEnum(String gender){
+    GenderEnum(String gender) {
         this.gender = gender;
     }
 
