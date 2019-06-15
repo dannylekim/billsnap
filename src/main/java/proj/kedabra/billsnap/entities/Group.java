@@ -45,7 +45,9 @@ public class Group implements Serializable {
     private Boolean approvalOption;
 
     @OneToMany(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinTable(name = "groups_vs_accounts", joinColumns = @JoinColumn(name = "group_id"), inverseJoinColumns = @JoinColumn(name = "bill_id"))
+    @JoinTable(name = "bills_vs_groups",
+            joinColumns = @JoinColumn(name = "group_id"),
+            inverseJoinColumns = @JoinColumn(name = "bill_id"))
     private List<Bill> bills = new ArrayList<>();
 
 }
