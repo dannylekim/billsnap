@@ -50,4 +50,6 @@ public class Group implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "bill_id"))
     private List<Bill> bills = new ArrayList<>();
 
+    @OneToMany(mappedBy = "group", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AccountGroup> accounts = new ArrayList<>();
 }

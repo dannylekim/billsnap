@@ -91,5 +91,6 @@ public class Bill implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Item> items = new ArrayList<>();
 
-
+    @OneToMany(mappedBy = "bill", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AccountBill> accounts = new ArrayList<>();
 }

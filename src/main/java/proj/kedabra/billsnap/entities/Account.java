@@ -2,6 +2,8 @@ package proj.kedabra.billsnap.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,6 +14,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
@@ -71,4 +74,12 @@ public class Account implements Serializable {
     @JoinColumn(name = "id")
     private Location location;
 
+    @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AccountGroup> groups = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AccountBill> bills = new ArrayList<>();
+
+    @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
+    private List<AccountItem> items = new ArrayList<>();
 }
