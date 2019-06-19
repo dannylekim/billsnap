@@ -41,14 +41,12 @@ public class Bill implements Serializable {
     @Column(name = "name", length = 30)
     private String name;
 
-    @Column(name = "responsible", nullable = false)
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "responsible", referencedColumnName = "id", nullable = false)
     private Account responsible;
 
-    @Column(name = "creator", nullable = false)
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
     private Account creator;
 
     @Column(name = "status")
@@ -80,9 +78,8 @@ public class Bill implements Serializable {
     @Enumerated(EnumType.STRING)
     private SplitByEnum splitBy;
 
-    @Column(name = "location_id")
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
 
     @Column(name = "active", nullable = false)

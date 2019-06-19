@@ -69,9 +69,8 @@ public class Account implements Serializable {
     @Enumerated(EnumType.STRING)
     private AccountStatusEnum status;
 
-    @Column(name = "location_id")
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
-    @JoinColumn(name = "id")
+    @JoinColumn(name = "location_id", referencedColumnName = "id")
     private Location location;
 
     @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)

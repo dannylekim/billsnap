@@ -32,9 +32,6 @@ public class Item implements Serializable {
     @SequenceGenerator(name = "ITEMS_id_seq", sequenceName = "ITEMS_id_seq", allocationSize = 1)
     private Long id;
 
-    @Column(name = "bill_id", nullable = false)
-    private Long billID;
-
     @Column(name = "name", length = 30, nullable = false)
     private String name;
 
@@ -42,7 +39,7 @@ public class Item implements Serializable {
     private BigDecimal cost;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bill_id")
+    @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
     @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL)
