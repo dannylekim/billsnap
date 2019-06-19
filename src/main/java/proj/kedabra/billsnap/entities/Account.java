@@ -65,7 +65,7 @@ public class Account implements Serializable {
     @Column(name = "birth_date")
     private LocalDate birthDate;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private AccountStatusEnum status;
 

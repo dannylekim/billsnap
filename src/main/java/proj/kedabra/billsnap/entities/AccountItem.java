@@ -28,6 +28,6 @@ public class AccountItem {
     @MapsId("itemId")
     private Item item;
 
-    @Column(name = "percentage", precision = 4, scale = 4)
+    @Column(name = "percentage", precision = 4, scale = 4, nullable = false)
     private BigDecimal percentage;
 }

@@ -30,7 +30,7 @@ public class AccountGroup {
     @MapsId("groupId")
     private Group group;
 
-    @Column(name = "role")
+    @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private GroupRoleEnum groupRole;
 

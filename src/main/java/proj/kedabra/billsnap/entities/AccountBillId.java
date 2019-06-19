@@ -13,9 +13,9 @@ public class AccountBillId implements Serializable {
 
     private static final long serialVersionUID = -7567078408665995383L;
 
-    @Column(name = "account_id")
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
 
-    @Column(name = "bill_id")
+    @Column(name = "bill_id", nullable = false)
     private Long billId;
 }

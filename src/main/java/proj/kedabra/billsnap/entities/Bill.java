@@ -49,7 +49,7 @@ public class Bill implements Serializable {
     @JoinColumn(name = "creator", referencedColumnName = "id", nullable = false)
     private Account creator;
 
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
     private BillStatusEnum status;
 
@@ -74,7 +74,7 @@ public class Bill implements Serializable {
     @Column(name = "tip_amount", precision = 14, scale = 2)
     private BigDecimal tipAmount;
 
-    @Column(name = "split_by")
+    @Column(name = "split_by", nullable = false)
     @Enumerated(EnumType.STRING)
     private SplitByEnum splitBy;
 

@@ -13,10 +13,10 @@ public class AccountGroupId implements Serializable {
 
     private static final long serialVersionUID = 8264971067739711860L;
 
-    @Column(name = "account_id")
+    @Column(name = "account_id", nullable = false)
     private Long accountId;
 
-    @Column(name = "group_id")
+    @Column(name = "group_id", nullable = false)
     private Long groupId;
 
 }
