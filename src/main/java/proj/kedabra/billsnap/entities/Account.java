@@ -43,9 +43,6 @@ public class Account implements Serializable {
     @Column(name = "password", length = 20)
     private String password;
 
-    @Column(name = "title", length = 3)
-    private String title;
-
     @Column(name = "first_name", length = 30, nullable = false)
     private String firstName;
 

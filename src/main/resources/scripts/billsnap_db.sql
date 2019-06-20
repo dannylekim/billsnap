@@ -8,9 +8,7 @@ create type bill_status as enum ('RESOLVED', 'OPEN');
 
 create type group_role as enum ('ADMIN', 'MEMBER');
 
-create type gender as enum ('M', 'F');
-
-create type title as enum('Mr.', 'Mrs.', 'M.', 'Ms.');
+create type gender as enum ('Male', 'Female', 'Other');
 
 create table if not exists location
 (
@@ -35,7 +33,6 @@ create table if not exists account
             primary key,
     email        varchar(50),
     password     varchar(20),
-    title        title,
     first_name   varchar(30)    not null,
     middle_name  varchar(20),
     last_name    varchar(30)    not null,

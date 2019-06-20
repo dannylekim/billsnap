@@ -1,8 +1,9 @@
 package proj.kedabra.billsnap.utils.enums;
 
 public enum GenderEnum {
-    M("M"),
-    F("F");
+    MALE("MALE"),
+    FEMALE("FEMALE"),
+    OTHER("OTHER");
 
     private final String gender;
 

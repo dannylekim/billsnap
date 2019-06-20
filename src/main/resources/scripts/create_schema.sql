@@ -17,9 +17,7 @@ create type if not exists bill_status as enum ('RESOLVED', 'OPEN');
 
 create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
-create type if not exists gender as enum ('M', 'F');
-
-create type if not exists title as enum('Mr.', 'Mrs.', 'M.', 'Ms.');
+create type if not exists gender as enum ('Male', 'Female', 'Other');
 
 create table if not exists location
 (
@@ -38,7 +36,6 @@ create table if not exists account
     id           int auto_increment primary key,
     email        varchar(50)    null,
     password     varchar(20)    null,
-    title        title     null,
     first_name   varchar(30)    not null,
     middle_name  varchar(20)    null,
     last_name    varchar(30)    not null,
