@@ -8,7 +8,7 @@ create type bill_status as enum ('RESOLVED', 'OPEN');
 
 create type group_role as enum ('ADMIN', 'MEMBER');
 
-create type gender as enum ('Male', 'Female', 'Other');
+create type gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create table if not exists location
 (

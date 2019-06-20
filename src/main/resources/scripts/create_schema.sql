@@ -17,7 +17,7 @@ create type if not exists bill_status as enum ('RESOLVED', 'OPEN');
 
 create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
-create type if not exists gender as enum ('Male', 'Female', 'Other');
+create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create table if not exists location
 (
