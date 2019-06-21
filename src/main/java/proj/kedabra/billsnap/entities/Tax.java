@@ -16,7 +16,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "tax")
+@Table(name = "tax", schema = "public")
 @IdClass(TaxId.class)
 public class Tax implements Serializable {
 

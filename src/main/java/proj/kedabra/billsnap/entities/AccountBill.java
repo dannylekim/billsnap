@@ -13,8 +13,8 @@ import javax.persistence.Table;
 import lombok.Data;
 
 @Data
-@Entity(name = "AccountBill")
-@Table(name = "bills_vs_accounts")
+@Entity
+@Table(name = "bills_vs_accounts", schema = "public")
 public class AccountBill {
 
     @EmbeddedId

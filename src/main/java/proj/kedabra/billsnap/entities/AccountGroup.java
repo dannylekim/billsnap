@@ -15,8 +15,8 @@ import lombok.Data;
 import proj.kedabra.billsnap.utils.enums.GroupRoleEnum;
 
 @Data
-@Entity(name = "AccountGroup")
-@Table(name = "groups_vs_accounts")
+@Entity
+@Table(name = "groups_vs_accounts", schema = "public")
 public class AccountGroup {
 
     @EmbeddedId
