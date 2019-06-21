@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import proj.kedabra.billsnap.entities.Example;
 import proj.kedabra.billsnap.service.ExampleService;
 
@@ -16,6 +17,7 @@ public class ExampleController {
 
     @Autowired
     public ExampleController(final ExampleService exampleService) {
+
         this.exampleService = exampleService;
     }
 
