@@ -1,11 +1,12 @@
 package proj.kedabra.billsnap.entities;
 
-import lombok.Data;
+import java.io.Serializable;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
-import java.io.Serializable;
+
+import lombok.Data;
 
 @Data
 @Entity
@@ -16,8 +17,11 @@ public class Example implements Serializable {
 
     @Id
     private Long id;
+
     private String firstName;
+
     private String lastName;
+
     private String career;
 
 }
