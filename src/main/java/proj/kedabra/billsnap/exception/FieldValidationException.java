@@ -11,10 +11,10 @@ public class FieldValidationException extends BillSnapException {
 
     private static final long serialVersionUID = 4200035927552159732L;
 
-    private List<ObjectError> errors;
+    private final List<ObjectError> errors;
 
-    public FieldValidationException(String message, Throwable ex, List<ObjectError> errors) {
-        super(message, ex);
+    public FieldValidationException(List<ObjectError> errors) {
+        super("Invalid Inputs. Please fix the following errors");
         this.errors = errors;
     }
 }

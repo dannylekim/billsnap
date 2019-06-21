@@ -21,7 +21,7 @@ class BillSnapExceptionHandlerTest {
     void shouldReturnFieldValidationResponseEntity() {
         //Given
         var fieldError = FieldErrorFixture.getDefault(0);
-        var ex = new FieldValidationException("TEST", new Exception("hello"), List.of(fieldError));
+        var ex = new FieldValidationException(List.of(fieldError));
 
         //When
         ResponseEntity<ApiError> response = billSnapExceptionHandler.handleFieldValidation(ex);

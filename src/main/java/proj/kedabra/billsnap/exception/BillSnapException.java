@@ -15,4 +15,9 @@ abstract class BillSnapException extends RuntimeException {
         this.message = message;
         this.ex = ex;
     }
+
+    BillSnapException(final String message) {
+        this.message = message;
+        this.ex = null;
+    }
 }
