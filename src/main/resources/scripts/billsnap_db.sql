@@ -8,7 +8,7 @@ create type bill_status as enum ('RESOLVED', 'OPEN');
 
 create type group_role as enum ('ADMIN', 'MEMBER');
 
-create type gender as enum ('M', 'F');
+create type gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create table if not exists location
 (
@@ -33,7 +33,6 @@ create table if not exists account
             primary key,
     email        varchar(50),
     password     varchar(20),
-    title        varchar(3),
     first_name   varchar(30)    not null,
     middle_name  varchar(20),
     last_name    varchar(30)    not null,
@@ -41,6 +40,8 @@ create table if not exists account
     phone_number varchar(20),
     birth_date   date,
     status       account_status not null,
+    created      timestamptz not null default clock_timestamp(),
+    updated      timestamptz not null default clock_timestamp(),
     location_id  integer
         constraint "USER_location_id_fkey"
             references location,
@@ -55,8 +56,12 @@ create table if not exists bill
         constraint "BILLS_pkey"
             primary key,
     name        varchar(30),
-    responsible integer     not null,
-    creator     integer     not null,
+    responsible integer     not null
+        constraint bill_responsible_id_fk
+            references account,
+    creator     integer     not null
+        constraint bill_creator_id_fk
+            references account,
     status      varchar(15) not null,
     created     timestamp with time zone default clock_timestamp(),
     updated     timestamp with time zone default clock_timestamp(),
@@ -126,7 +131,7 @@ create table if not exists bills_vs_groups
         primary key (group_id, bill_id)
 );
 
-create table if not exists items
+create table if not exists item
 (
     id      serial         not null
         constraint "ITEMS_pkey"
@@ -142,7 +147,7 @@ create table if not exists items_vs_accounts
 (
     item_id    integer       not null
         constraint "ITEM_VS_USERS_item_id_fkey"
-            references items,
+            references item,
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,

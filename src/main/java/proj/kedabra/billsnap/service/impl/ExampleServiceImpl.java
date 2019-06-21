@@ -1,12 +1,13 @@
 package proj.kedabra.billsnap.service.impl;
 
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import proj.kedabra.billsnap.entities.Example;
 import proj.kedabra.billsnap.repository.ExampleRepository;
 import proj.kedabra.billsnap.service.ExampleService;
-
-import java.util.Objects;
 
 @Service
 public class ExampleServiceImpl implements ExampleService {
@@ -14,7 +15,7 @@ public class ExampleServiceImpl implements ExampleService {
     private final ExampleRepository exampleRepository;
 
     @Autowired
-    public ExampleServiceImpl(final ExampleRepository exampleRepository){
+    public ExampleServiceImpl(final ExampleRepository exampleRepository) {
         this.exampleRepository = exampleRepository;
     }
 
