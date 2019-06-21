@@ -1,11 +1,3 @@
-CREATE TABLE IF NOT EXISTS example
-(
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(250) NOT NULL,
-    last_name  VARCHAR(250) NOT NULL,
-    career     VARCHAR(250) DEFAULT NULL
-);
-
 -- Please note that in H2 we do not have functions except for java defined ones. Therefore, if we want this test db to be exactly
 -- the same as the production db, there must be some extra written code here in java notation.
 
