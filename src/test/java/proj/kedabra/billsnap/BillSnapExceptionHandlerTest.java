@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import proj.kedabra.billsnap.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.exception.FieldValidationException;
 
 class BillSnapExceptionHandlerTest {
 

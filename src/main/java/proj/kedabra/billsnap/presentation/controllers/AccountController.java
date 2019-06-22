@@ -15,7 +15,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
 import proj.kedabra.billsnap.ApiError;
-import proj.kedabra.billsnap.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 

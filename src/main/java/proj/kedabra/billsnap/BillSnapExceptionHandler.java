@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
-import proj.kedabra.billsnap.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.exception.FieldValidationException;
 
 @ControllerAdvice
 public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
