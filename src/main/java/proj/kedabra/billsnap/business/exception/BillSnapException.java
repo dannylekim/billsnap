@@ -3,6 +3,7 @@ package proj.kedabra.billsnap.business.exception;
 import lombok.Getter;
 
 @Getter
+@SuppressWarnings("MissingOverride")
 abstract class BillSnapException extends RuntimeException {
 
     private static final long serialVersionUID = 3872812859698299907L;

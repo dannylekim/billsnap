@@ -8,9 +8,7 @@ import proj.kedabra.billsnap.business.entities.Account;
 @Repository
 public interface AccountRepository extends CrudRepository<Account, Long> {
 
-    Account getById(Long id);
+    boolean existsAccountByEmail(String email);
 
     Account getAccountByEmail(String email);
-
-    boolean existsAccountByEmail(String email);
 }

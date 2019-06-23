@@ -1,12 +1,15 @@
-package proj.kedabra.billsnap;
+package proj.kedabra.billsnap.presentation;
 
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -18,17 +21,32 @@ import lombok.Data;
 public class ApiError {
 
     @ApiModelProperty(name = "Http status of the error")
-    private final HttpStatus status;
+    private HttpStatus status;
 
     @ApiModelProperty(name = "Time of the error", position = 1)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
-    private final ZonedDateTime timestamp = ZonedDateTime.now(ZoneId.systemDefault());
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
+    private LocalDateTime timestamp = LocalDateTime.now(ZoneId.systemDefault());
 
     @ApiModelProperty(name = "The error message", position = 2)
-    private final String message;
+    private String message;
 
     @ApiModelProperty(name = "The list of Sub errors if they exist. Generally only for validation", position = 3)
     private List<ApiSubError> errors = new ArrayList<>();
+
+    /**
+     * Set a timestamp from a string with the format dd-MM-yyyy HH:mm:ss. Mostly used for testing purposes.
+     *
+     * @param timestamp String of format dd-MM-yyyy HH:mm:ss
+     */
+    public void setTimestamp(String timestamp){
+        this.timestamp = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
+    }
+
+    /**
+     * Do not use this constructor. It is solely for mapping/testing purposes
+     */
+    public ApiError() {
+    }
 
     public ApiError(HttpStatus status, String message) {
         this.status = status;

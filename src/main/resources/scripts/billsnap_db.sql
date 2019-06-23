@@ -32,14 +32,14 @@ create table if not exists account
         constraint "USER_pkey"
             primary key,
     email        varchar(50),
-    password     varchar(20),
+    password     varchar(100),
     first_name   varchar(30)    not null,
     middle_name  varchar(20),
     last_name    varchar(30)    not null,
     gender       gender,
     phone_number varchar(20),
     birth_date   date,
-    status       account_status not null,
+    status       account_status not null default 'REGISTERED',
     created      timestamptz not null default clock_timestamp(),
     updated      timestamptz not null default clock_timestamp(),
     location_id  integer

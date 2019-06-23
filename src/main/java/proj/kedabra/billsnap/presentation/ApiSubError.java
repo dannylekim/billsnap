@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap;
+package proj.kedabra.billsnap.presentation;
 
 import org.springframework.validation.FieldError;
 
@@ -16,6 +16,12 @@ public class ApiSubError {
 
     @ApiModelProperty(name = "The error message that details the invalid field's value", position = 2)
     private String message;
+
+    /**
+     * Do not use. Solely for testing/mapping purposes
+     */
+    public ApiSubError(){
+    }
 
     public ApiSubError(FieldError error) {
         this.field = error.getField();

@@ -40,7 +40,7 @@ public class Account implements Serializable {
     @Column(name = "email", length = 50)
     private String email;
 
-    @Column(name = "password", length = 20)
+    @Column(name = "password", length = 100)
     private String password;
 
     @Column(name = "first_name", length = 30, nullable = false)
@@ -64,7 +64,7 @@ public class Account implements Serializable {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private AccountStatusEnum status;
+    private AccountStatusEnum status = AccountStatusEnum.REGISTERED;
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, cascade = CascadeType.ALL)
     @JoinColumn(name = "location_id", referencedColumnName = "id")

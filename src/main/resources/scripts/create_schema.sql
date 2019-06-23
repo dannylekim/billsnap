@@ -11,6 +11,8 @@ create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
 create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
+create sequence if not exists USER_ID_SEQ start with 1 increment by 1;
+
 create table if not exists location
 (
     id          int auto_increment primary key,
@@ -25,16 +27,16 @@ create table if not exists location
 
 create table if not exists account
 (
-    id           int auto_increment primary key,
+    id           int primary key,
     email        varchar(50)    null,
-    password     varchar(20)    null,
+    password     varchar(100)    null,
     first_name   varchar(30)    not null,
     middle_name  varchar(20)    null,
     last_name    varchar(30)    not null,
     gender       gender         null,
     phone_number varchar(20)    null,
     birth_date   date           null,
-    status       account_status not null,
+    status       account_status not null default 'REGISTERED',
     created      timestamp not null default current_timestamp,
     updated      timestamp not null default current_timestamp,
     location_id  integer

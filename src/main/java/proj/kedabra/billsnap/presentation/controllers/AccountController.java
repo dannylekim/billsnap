@@ -14,13 +14,26 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 
-import proj.kedabra.billsnap.ApiError;
+import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.facade.AccountFacade;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
+import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 
 @RestController
 public class AccountController {
+
+
+    private final AccountFacade accountFacade;
+
+    private final AccountMapper mapper;
+
+    public AccountController(final AccountFacade accountFacade, AccountMapper mapper) {
+        this.accountFacade = accountFacade;
+        this.mapper = mapper;
+    }
 
 
     @PostMapping("/register")
@@ -38,7 +51,13 @@ public class AccountController {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
-        return null;
+
+        AccountDTO newCreationDTO = mapper.toDTO(accountCreationResource);
+        AccountDTO accountDTO = accountFacade.registerAccount(newCreationDTO);
+
+        return mapper.toResource(accountDTO);
+
+
     }
 
 

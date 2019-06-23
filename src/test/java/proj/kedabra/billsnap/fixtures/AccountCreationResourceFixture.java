@@ -11,7 +11,7 @@ public class AccountCreationResourceFixture {
         resource.setEmail("test@email.com");
         resource.setFirstName("Naruto");
         resource.setLastName("Uchiha");
-        resource.setPassword("notsecure");
+        resource.setPassword("password");
 
         return resource;
     }
