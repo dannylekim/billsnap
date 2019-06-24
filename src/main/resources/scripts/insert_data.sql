@@ -1,6 +1,2 @@
 -- noinspection SqlResolveForFile
-
-INSERT INTO example (first_name, last_name, career) VALUES
-('Aliko', 'Dangote', 'Billionaire Industrialist'),
-('Bill', 'Gates', 'Billionaire Tech Entrepreneur'),
-('Folrunsho', 'Alakija', 'Billionaire Oil Magnate');
+INSERT INTO account VALUES (1000, 'test@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null)
