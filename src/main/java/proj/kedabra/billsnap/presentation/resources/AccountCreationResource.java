@@ -1,5 +1,7 @@
 package proj.kedabra.billsnap.presentation.resources;
 
+import java.io.Serializable;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
@@ -8,7 +10,9 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
-public class AccountCreationResource {
+public class AccountCreationResource implements Serializable {
+
+    private static final long serialVersionUID = -5979473809095168700L;
 
     @NotEmpty
     @Email

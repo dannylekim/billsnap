@@ -10,6 +10,25 @@ create type group_role as enum ('ADMIN', 'MEMBER');
 
 create type gender as enum ('MALE', 'FEMALE', 'OTHER');
 
+create function count_not_nulls(p_array anyarray) returns bigint
+    immutable
+    language sql
+as
+$$
+SELECT COUNT(x)
+from unnest($1) as x
+$$;
+
+create function is_split_by_balance(bill_id integer) returns boolean
+    language plpgsql
+as
+$$
+begin
+    select b.status = 'BALANCE' from "bill" b where b.id = bill_id;
+end;
+$$;
+
+
 create table if not exists location
 (
     id          serial not null
@@ -32,14 +51,14 @@ create table if not exists account
         constraint "USER_pkey"
             primary key,
     email        varchar(50),
-    password     varchar(20),
+    password     varchar(100),
     first_name   varchar(30)    not null,
     middle_name  varchar(20),
     last_name    varchar(30)    not null,
     gender       gender,
     phone_number varchar(20),
     birth_date   date,
-    status       account_status not null,
+    status       account_status not null default 'REGISTERED',
     created      timestamptz not null default clock_timestamp(),
     updated      timestamptz not null default clock_timestamp(),
     location_id  integer
@@ -171,24 +190,6 @@ create table if not exists bills_vs_accounts
         check ((is_split_by_balance(bill_id) AND (percentage IS NOT NULL)) OR
                ((NOT is_split_by_balance(bill_id)) AND (percentage IS NULL)))
 );
-
-create function count_not_nulls(p_array anyarray) returns bigint
-    immutable
-    language sql
-as
-$$
-SELECT COUNT(x)
-from unnest($1) as x
-$$;
-
-create function is_split_by_balance(bill_id integer) returns boolean
-    language plpgsql
-as
-$$
-begin
-    select b.status = 'BALANCE' from "bill" b where b.id = bill_id;
-end;
-$$;
 
 
 

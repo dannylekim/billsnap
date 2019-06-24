@@ -17,7 +17,7 @@ public class BillsnapApplication {
         ConfigurableEnvironment environment = context.getEnvironment();
 
         String url = environment.getProperty("server.address", "localhost") + ":" +
-                environment.getProperty("server.port", "8000") +
+                environment.getProperty("server.port", "8080") +
                 environment.getProperty("server.servlet.context-path", "");
 
         log.info("Server located at: http://" + url);
