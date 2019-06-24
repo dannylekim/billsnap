@@ -1,11 +1,3 @@
-CREATE TABLE IF NOT EXISTS example
-(
-    id         INT AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(250) NOT NULL,
-    last_name  VARCHAR(250) NOT NULL,
-    career     VARCHAR(250) DEFAULT NULL
-);
-
 -- Please note that in H2 we do not have functions except for java defined ones. Therefore, if we want this test db to be exactly
 -- the same as the production db, there must be some extra written code here in java notation.
 
@@ -18,6 +10,8 @@ create type if not exists bill_status as enum ('RESOLVED', 'OPEN');
 create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
 create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
+
+create sequence if not exists account_ID_SEQ start with 1 increment by 1;
 
 create table if not exists location
 (
@@ -33,16 +27,16 @@ create table if not exists location
 
 create table if not exists account
 (
-    id           int auto_increment primary key,
+    id           int primary key,
     email        varchar(50)    null,
-    password     varchar(20)    null,
+    password     varchar(100)    null,
     first_name   varchar(30)    not null,
     middle_name  varchar(20)    null,
     last_name    varchar(30)    not null,
     gender       gender         null,
     phone_number varchar(20)    null,
     birth_date   date           null,
-    status       account_status not null,
+    status       account_status not null default 'REGISTERED',
     created      timestamp not null default current_timestamp,
     updated      timestamp not null default current_timestamp,
     location_id  integer
