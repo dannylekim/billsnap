@@ -1,10 +1,11 @@
 package proj.kedabra.billsnap;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import proj.kedabra.billsnap.presentation.ApiSubError;
 
 class ApiSubErrorTest {
 
@@ -19,12 +20,9 @@ class ApiSubErrorTest {
         var subError = new ApiSubError(fieldError);
 
         //Then
-        assertEquals("objectName1", subError.getObjectName());
         assertEquals("field1", subError.getField());
         assertEquals("rejectedValue1", subError.getRejectedValue());
         assertEquals("defaultMessage1", subError.getMessage());
-        assertEquals("real1", subError.getErrorCode());
-        assertArrayEquals(new String[]{"one1", "two1", "three1"}, subError.getArguments());
 
 
     }

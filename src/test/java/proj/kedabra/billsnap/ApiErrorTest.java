@@ -13,10 +13,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
+import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.presentation.ApiSubError;
+
 
 class ApiErrorTest {
 
 
+    private static final String TESTMESSAGE = "TESTMESSAGE";
     @Test
     @DisplayName("Should have all fields mapped")
     void shouldHaveAllFieldsMapped() {
@@ -28,11 +32,11 @@ class ApiErrorTest {
                 .collect(Collectors.toList());
 
         //When
-        var apiError = new ApiError(HttpStatus.I_AM_A_TEAPOT, "TESTMESSAGE", errors);
+        var apiError = new ApiError(HttpStatus.I_AM_A_TEAPOT, TESTMESSAGE, errors);
 
         //Then
         assertEquals(HttpStatus.I_AM_A_TEAPOT, apiError.getStatus());
-        assertEquals("TESTMESSAGE", apiError.getMessage());
+        assertEquals(TESTMESSAGE, apiError.getMessage());
         assertEquals(3, apiError.getErrors().size());
         assertEquals(new ApiSubError(FieldErrorFixture.getDefault(0)), apiError.getErrors().get(0));
         assertEquals(new ApiSubError(FieldErrorFixture.getDefault(2)), apiError.getErrors().get(1));
@@ -48,7 +52,7 @@ class ApiErrorTest {
         var errors = List.of(mock(FieldError.class), mock(ObjectError.class));
 
         //When
-        var apiError = new ApiError(HttpStatus.I_AM_A_TEAPOT, "TESTMESSAGE", errors);
+        var apiError = new ApiError(HttpStatus.I_AM_A_TEAPOT, TESTMESSAGE, errors);
 
         //Then
         assertEquals(1, apiError.getErrors().size());
