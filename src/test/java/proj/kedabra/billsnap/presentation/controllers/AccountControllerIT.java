@@ -49,6 +49,9 @@ class AccountControllerIT {
 
     private static final String ENDPOINT = "/register";
 
+    private final String CUSTOM_EMAIL_ERROR_MESSAGE = "Must be in an email format. ex: test@email.com.";
+
+
     @Test
     @DisplayName("Should return error for invalid email")
     void shouldReturnErrorForInvalidEmail() throws Exception {
@@ -62,7 +65,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("must be a well-formed email address", error.getErrors().get(0).getMessage());
+        assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
 
     }
 
@@ -79,7 +82,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
 
-        List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage).filter(msg -> msg.equals("must be a well-formed email address") || msg.equals("size must be between 0 and 50")).collect(Collectors.toList());
+        List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage).filter(msg -> msg.equals(CUSTOM_EMAIL_ERROR_MESSAGE) || msg.equals("size must be between 0 and 50")).collect(Collectors.toList());
         assertEquals(2, errorMessages.size());
     }
 

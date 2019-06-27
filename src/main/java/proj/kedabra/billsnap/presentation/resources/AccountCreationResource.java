@@ -15,7 +15,7 @@ public class AccountCreationResource implements Serializable {
     private static final long serialVersionUID = -5979473809095168700L;
 
     @NotBlank
-    @Email
+    @Email(message = "{email.emailFormat}")
     @Size(max = 50)
     @ApiModelProperty(name = "Desired email of the user. Must not already exist, and must be email format and max size of 50. Required")
     private String email;
