@@ -6,17 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
-import org.junit.Before;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -25,7 +18,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -53,7 +45,7 @@ class AccountControllerIT {
 
     private static final String INVALID_INPUTS = "Invalid Inputs. Please fix the following errors";
 
-    private static final String MUST_NOT_BE_EMPTY = "must not be empty";
+    private static final String MUST_NOT_BE_BLANK = "must not be blank";
 
     private static final String ENDPOINT = "/register";
 
@@ -104,7 +96,23 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_EMPTY, error.getErrors().get(0).getMessage());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for blank email")
+    void shouldReturnErrorForBlank() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setEmail(" ");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(2, error.getErrors().size());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -120,7 +128,23 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_EMPTY, error.getErrors().get(0).getMessage());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for blank password")
+    void shouldReturnErrorForBlankPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword(" ");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -152,7 +176,23 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_EMPTY, error.getErrors().get(0).getMessage());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for blank first Name")
+    void shouldReturnErrorForBlankFirstName() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setFirstName(" ");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -185,7 +225,23 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_EMPTY, error.getErrors().get(0).getMessage());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for blank last name")
+    void shouldReturnErrorForBlankLastName() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setLastName(" ");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
     }
 
     @Test
