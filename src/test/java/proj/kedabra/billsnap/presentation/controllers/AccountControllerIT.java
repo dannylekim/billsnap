@@ -167,6 +167,70 @@ class AccountControllerIT {
     }
 
     @Test
+    @DisplayName("Should return error for too short of a password")
+    void shouldReturnErrorForShortPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("Cd233");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals("size must be more than 8", error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a symbol")
+    void shouldReturnErrorForNoSymbolInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("Abc123456");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals("password must contain a symbol", error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a number")
+    void shouldReturnErrorForNoNumberInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("Abcwerlkjbcx");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals("password must contain a number", error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a lower case and an upper case character")
+    void shouldReturnErrorForNoLowerAndUpperCaseInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("asdf12345");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals("password must contain an upper and a lower case", error.getErrors().get(0).getMessage());
+    }
+
+    @Test
     @DisplayName("Should return error for empty first Name")
     void shouldReturnErrorForEmptyFirstName() throws Exception {
         //Given
