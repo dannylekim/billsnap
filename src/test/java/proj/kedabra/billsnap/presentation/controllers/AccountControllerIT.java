@@ -51,6 +51,12 @@ class AccountControllerIT {
 
     private final String CUSTOM_EMAIL_ERROR_MESSAGE = "Must be in an email format. ex: test@email.com.";
 
+    private static final String INVALID_LENGTH_IN_PASSWORD = "size must be between 8 and 20";
+
+    private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
+
+    private int isErrorSearchSuccessful = -1;
+
 
     @Test
     @DisplayName("Should return error for invalid email")
@@ -65,7 +71,18 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
+
+        for (int i = 0; i < error.getErrors().size(); i++) {
+            if (error.getErrors().get(i).getMessage().equals(CUSTOM_EMAIL_ERROR_MESSAGE)) {
+                isErrorSearchSuccessful = i;
+            }
+        }
+        if (isErrorSearchSuccessful >= 0) {
+            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(isErrorSearchSuccessful).getMessage());
+            isErrorSearchSuccessful = -1;
+        } else {
+            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
+        }
 
     }
 
@@ -115,7 +132,18 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(2, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+
+        for (int i = 0; i < error.getErrors().size(); i++) {
+            if (error.getErrors().get(i).getMessage().equals(MUST_NOT_BE_BLANK)) {
+                isErrorSearchSuccessful = i;
+            }
+        }
+        if (isErrorSearchSuccessful >= 0) {
+            assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(isErrorSearchSuccessful).getMessage());
+            isErrorSearchSuccessful = -1;
+        } else {
+            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
+        }
     }
 
     @Test
@@ -130,8 +158,19 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(2, error.getErrors().size());
+
+        for (int i = 0; i < error.getErrors().size(); i++) {
+            if (error.getErrors().get(i).getMessage().equals(INVALID_LENGTH_IN_PASSWORD)) {
+                isErrorSearchSuccessful = i;
+            }
+        }
+        if (isErrorSearchSuccessful >= 0) {
+            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(isErrorSearchSuccessful).getMessage());
+            isErrorSearchSuccessful = -1;
+        } else {
+            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
+        }
     }
 
     @Test
@@ -146,8 +185,19 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(2, error.getErrors().size());
+
+        for (int i = 0; i < error.getErrors().size(); i++) {
+            if (error.getErrors().get(i).getMessage().equals(INVALID_LENGTH_IN_PASSWORD)) {
+                isErrorSearchSuccessful = i;
+            }
+        }
+        if (isErrorSearchSuccessful >= 0) {
+            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(isErrorSearchSuccessful).getMessage());
+            isErrorSearchSuccessful = -1;
+        } else {
+            assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
+        }
     }
 
     @Test
@@ -155,7 +205,7 @@ class AccountControllerIT {
     void shouldReturnErrorForLongPassword() throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
-        creationResource.setPassword("00000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+        creationResource.setPassword("00000000000000000000000000000000000000000000000000000000000000000000000000Avc#");
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
@@ -163,7 +213,8 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("size must be between 0 and 20", error.getErrors().get(0).getMessage());
+        assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
+
     }
 
     @Test
@@ -171,7 +222,7 @@ class AccountControllerIT {
     void shouldReturnErrorForShortPassword() throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
-        creationResource.setPassword("Cd233");
+        creationResource.setPassword("C@d233");
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
@@ -179,7 +230,8 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("size must be more than 8", error.getErrors().get(0).getMessage());
+        assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
+
     }
 
     @Test
@@ -195,7 +247,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("password must contain a symbol", error.getErrors().get(0).getMessage());
+        assertEquals("Password must contain an upper and lower case, a number, and a symbol.", error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -211,7 +263,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("password must contain a number", error.getErrors().get(0).getMessage());
+        assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -227,7 +279,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("password must contain an upper and a lower case", error.getErrors().get(0).getMessage());
+        assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -293,6 +345,7 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+
     }
 
     @Test
@@ -309,6 +362,7 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+
     }
 
     @Test
@@ -325,6 +379,7 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals("size must be between 0 and 30", error.getErrors().get(0).getMessage());
+
     }
 
     @Test
@@ -341,7 +396,7 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(3, error.getErrors().size());
+        assertEquals(4, error.getErrors().size());
     }
 
     @Test
