@@ -21,6 +21,7 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 @RestController
 public class AccountController {
@@ -45,6 +46,7 @@ public class AccountController {
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.CREATED)
+    @ObfuscateArgs
     public AccountResource createAccount(@ApiParam(required = true, name = "Registration Details", value = "Minimum registration details")
                                          @RequestBody @Valid AccountCreationResource accountCreationResource,
                                          BindingResult bindingResult) {
