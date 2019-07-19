@@ -10,6 +10,7 @@ import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
+
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface AccountMapper {
 

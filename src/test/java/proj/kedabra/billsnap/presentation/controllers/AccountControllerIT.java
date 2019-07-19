@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -51,7 +53,6 @@ class AccountControllerIT {
 
     private final String CUSTOM_EMAIL_ERROR_MESSAGE = "Must be in an email format. ex: test@email.com.";
 
-
     @Test
     @DisplayName("Should return error for invalid email")
     void shouldReturnErrorForInvalidEmail() throws Exception {
@@ -81,8 +82,8 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-
         List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage).filter(msg -> msg.equals(CUSTOM_EMAIL_ERROR_MESSAGE) || msg.equals("size must be between 0 and 50")).collect(Collectors.toList());
+
         assertEquals(2, errorMessages.size());
     }
 
@@ -148,6 +149,7 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+
     }
 
     @Test
