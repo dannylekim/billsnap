@@ -22,7 +22,7 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected ApiError handleIllegaArgument(final IllegalArgumentException ex) {
+    protected ApiError handleIllegalArgument(final IllegalArgumentException ex) {
         return new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
