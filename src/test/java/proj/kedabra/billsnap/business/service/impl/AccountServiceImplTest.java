@@ -15,7 +15,6 @@ import org.mockito.MockitoAnnotations;
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.mapper.AccountMapperImpl;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.fixtures.AccountCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 
 class AccountServiceImplTest {

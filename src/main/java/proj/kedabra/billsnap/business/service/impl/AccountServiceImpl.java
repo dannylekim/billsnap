@@ -11,6 +11,7 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
+import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -30,6 +31,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    @ObfuscateArgs
     public AccountDTO registerAccount(final AccountDTO accountDTO) {
 
         if (accountRepository.existsAccountByEmail(accountDTO.getEmail())) {
