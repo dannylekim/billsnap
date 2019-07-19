@@ -71,18 +71,7 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-
-        for (int i = 0; i < error.getErrors().size(); i++) {
-            if (error.getErrors().get(i).getMessage().equals(CUSTOM_EMAIL_ERROR_MESSAGE)) {
-                isErrorSearchSuccessful = i;
-            }
-        }
-        if (isErrorSearchSuccessful >= 0) {
-            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(isErrorSearchSuccessful).getMessage());
-            isErrorSearchSuccessful = -1;
-        } else {
-            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
-        }
+        assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
 
     }
 
@@ -345,7 +334,6 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
-
     }
 
     @Test
@@ -362,7 +350,6 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
-
     }
 
     @Test
@@ -379,7 +366,6 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals("size must be between 0 and 30", error.getErrors().get(0).getMessage());
-
     }
 
     @Test
