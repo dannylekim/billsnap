@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -19,7 +19,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -53,6 +52,11 @@ class AccountControllerIT {
 
     private final String CUSTOM_EMAIL_ERROR_MESSAGE = "Must be in an email format. ex: test@email.com.";
 
+    private static final String INVALID_LENGTH_IN_PASSWORD = "size must be between 8 and 20";
+
+    private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
+
+
     @Test
     @DisplayName("Should return error for invalid email")
     void shouldReturnErrorForInvalidEmail() throws Exception {
@@ -82,8 +86,8 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage).filter(msg -> msg.equals(CUSTOM_EMAIL_ERROR_MESSAGE) || msg.equals("size must be between 0 and 50")).collect(Collectors.toList());
 
+        List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage).filter(msg -> msg.equals(CUSTOM_EMAIL_ERROR_MESSAGE) || msg.equals("size must be between 0 and 50")).collect(Collectors.toList());
         assertEquals(2, errorMessages.size());
     }
 
@@ -116,7 +120,11 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(2, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(MUST_NOT_BE_BLANK::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
+
     }
 
     @Test
@@ -131,8 +139,11 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(2, error.getErrors().size());
+
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(INVALID_LENGTH_IN_PASSWORD::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
     }
 
     @Test
@@ -147,9 +158,11 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(1, error.getErrors().size());
-        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(2, error.getErrors().size());
 
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(INVALID_LENGTH_IN_PASSWORD::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
     }
 
     @Test
@@ -157,7 +170,7 @@ class AccountControllerIT {
     void shouldReturnErrorForLongPassword() throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
-        creationResource.setPassword("00000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+        creationResource.setPassword("00000000000000000000000000000000000000000000000000000000000000000000000000Avc#");
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
@@ -165,7 +178,73 @@ class AccountControllerIT {
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
-        assertEquals("size must be between 0 and 20", error.getErrors().get(0).getMessage());
+        assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
+
+    }
+
+    @Test
+    @DisplayName("Should return error for too short of a password")
+    void shouldReturnErrorForShortPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("C@d233");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
+
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a symbol")
+    void shouldReturnErrorForNoSymbolInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("Abc123456");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals("Password must contain an upper and lower case, a number, and a symbol.", error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a number")
+    void shouldReturnErrorForNoNumberInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("Abcwerlkjbcx");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error for password not containing a lower case and an upper case character")
+    void shouldReturnErrorForNoLowerAndUpperCaseInPassword() throws Exception {
+        //Given
+        var creationResource = AccountCreationResourceFixture.getDefault();
+        creationResource.setPassword("asdf12345");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
     }
 
     @Test
@@ -279,7 +358,7 @@ class AccountControllerIT {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
         assertEquals(INVALID_INPUTS, error.getMessage());
-        assertEquals(3, error.getErrors().size());
+        assertEquals(4, error.getErrors().size());
     }
 
     @Test
