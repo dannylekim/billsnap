@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -54,8 +55,6 @@ class AccountControllerIT {
     private static final String INVALID_LENGTH_IN_PASSWORD = "size must be between 8 and 20";
 
     private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
-
-    private int isErrorSearchSuccessful = -1;
 
 
     @Test
@@ -122,17 +121,10 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(2, error.getErrors().size());
 
-        for (int i = 0; i < error.getErrors().size(); i++) {
-            if (error.getErrors().get(i).getMessage().equals(MUST_NOT_BE_BLANK)) {
-                isErrorSearchSuccessful = i;
-            }
-        }
-        if (isErrorSearchSuccessful >= 0) {
-            assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(isErrorSearchSuccessful).getMessage());
-            isErrorSearchSuccessful = -1;
-        } else {
-            assertEquals(CUSTOM_EMAIL_ERROR_MESSAGE, error.getErrors().get(0).getMessage());
-        }
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(MUST_NOT_BE_BLANK::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
+
     }
 
     @Test
@@ -149,17 +141,9 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(2, error.getErrors().size());
 
-        for (int i = 0; i < error.getErrors().size(); i++) {
-            if (error.getErrors().get(i).getMessage().equals(INVALID_LENGTH_IN_PASSWORD)) {
-                isErrorSearchSuccessful = i;
-            }
-        }
-        if (isErrorSearchSuccessful >= 0) {
-            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(isErrorSearchSuccessful).getMessage());
-            isErrorSearchSuccessful = -1;
-        } else {
-            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(0).getMessage());
-        }
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(INVALID_LENGTH_IN_PASSWORD::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
     }
 
     @Test
@@ -176,17 +160,9 @@ class AccountControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(2, error.getErrors().size());
 
-        for (int i = 0; i < error.getErrors().size(); i++) {
-            if (error.getErrors().get(i).getMessage().equals(INVALID_LENGTH_IN_PASSWORD)) {
-                isErrorSearchSuccessful = i;
-            }
-        }
-        if (isErrorSearchSuccessful >= 0) {
-            assertEquals(INVALID_LENGTH_IN_PASSWORD, error.getErrors().get(isErrorSearchSuccessful).getMessage());
-            isErrorSearchSuccessful = -1;
-        } else {
-            assertEquals(INVALID_PASSWORD, error.getErrors().get(0).getMessage());
-        }
+        final var errorList = error.getErrors().stream().map(ApiSubError::getMessage).filter(INVALID_LENGTH_IN_PASSWORD::equals).collect(Collectors.toList());
+
+        assertFalse(errorList.isEmpty());
     }
 
     @Test
