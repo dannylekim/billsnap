@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.facade.AccountFacade;
 import proj.kedabra.billsnap.business.service.AccountService;
+import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 @Service
 public class AccountFacadeImpl implements AccountFacade {
@@ -21,6 +22,7 @@ public class AccountFacadeImpl implements AccountFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @ObfuscateArgs
     public AccountDTO registerAccount(AccountDTO accountDTO) {
         return accountService.registerAccount(accountDTO);
     }
