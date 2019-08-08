@@ -34,7 +34,7 @@ public class AccountController {
 
     private final AccountMapper mapper;
 
-    public AccountController(final AccountFacade accountFacade, AccountMapper mapper) {
+    public AccountController(final AccountFacade accountFacade, final AccountMapper mapper) {
         this.accountFacade = accountFacade;
         this.mapper = mapper;
     }
