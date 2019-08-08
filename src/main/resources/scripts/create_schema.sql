@@ -13,6 +13,8 @@ create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create sequence if not exists account_ID_SEQ start with 1 increment by 1;
 
+create sequence if not exists BILLS_id_seq start with 1 increment by 1;
+
 create table if not exists location
 (
     id          int auto_increment primary key,
@@ -49,7 +51,7 @@ create table if not exists account
 
 create table if not exists bill
 (
-    id          int auto_increment primary key,
+    id          int primary key,
     name        varchar(30)    null,
     responsible integer     not null
         constraint bill_responsible_id_fk

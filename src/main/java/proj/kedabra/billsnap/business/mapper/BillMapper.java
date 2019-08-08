@@ -18,6 +18,6 @@ public interface BillMapper {
 
     BillDTO toDTO(BillCreationResource billCreationResource);
 
-    BillResource toResource(BillDTO accountDTO);
+    BillResource toResource(BillDTO billDTO);
 
 }
