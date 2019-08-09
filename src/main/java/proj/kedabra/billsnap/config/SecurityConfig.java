@@ -19,7 +19,6 @@ import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationFailureHandler;
 import proj.kedabra.billsnap.security.JwtAuthenticationFilter;
 import proj.kedabra.billsnap.security.JwtAuthenticationSuccessHandler;
-import proj.kedabra.billsnap.security.JwtAuthorizationFilter;
 import proj.kedabra.billsnap.security.JwtUtil;
 import proj.kedabra.billsnap.security.LoginValidator;
 
@@ -27,11 +26,11 @@ import proj.kedabra.billsnap.security.LoginValidator;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private UserDetailsServiceImpl userDetailsServiceImpl;
+    private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     @Autowired
     public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil, ObjectMapper mapper) {
@@ -58,7 +57,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated()
                 .and()
                 .addFilter(jwtAuthenticationFilter())
-                .addFilter(jwtAuthorizationFilter())
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
@@ -79,10 +77,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         filter.setAuthenticationFailureHandler(failureHandler);
 
         return filter;
-    }
-
-    private JwtAuthorizationFilter jwtAuthorizationFilter() throws Exception {
-        return new JwtAuthorizationFilter(authenticationManager(), jwtUtil);
     }
 
     private PasswordEncoder passwordEncoder() {

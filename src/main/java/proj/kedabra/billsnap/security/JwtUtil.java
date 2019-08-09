@@ -30,27 +30,29 @@ public class JwtUtil implements Serializable {
 
     private static final long serialVersionUID = 5249861017865007332L;
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    private final String jwtSecret;
 
-    @Value("${jwt.expiration}")
-    private Long jwtExpiration;
+    private final Long jwtExpiration;
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
+
+    private static final String LOGIN_SUCCESS_MESSAGE = "Successfully logged in";
 
     @Autowired
-    public JwtUtil(ObjectMapper mapper){
+    public JwtUtil(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration){
         this.mapper = mapper;
+        this.jwtSecret = jwtSecret;
+        this.jwtExpiration = jwtExpiration;
     }
 
     String generateToken(User user) {
 
-        var roles = user.getAuthorities()
+        List<String> roles = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toList());
 
-        var signingKey = jwtSecret.getBytes(UTF_8);
+        byte[] signingKey = jwtSecret.getBytes(UTF_8);
 
         return Jwts.builder()
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)
@@ -84,7 +86,7 @@ public class JwtUtil implements Serializable {
     String loginSuccessJson(String token) throws IOException {
         try {
             final LoginResponseResource loginResponseResource = new LoginResponseResource();
-            loginResponseResource.setMessage("Successfully logged in");
+            loginResponseResource.setMessage(LOGIN_SUCCESS_MESSAGE);
             loginResponseResource.setToken(token);
 
             return mapper.writeValueAsString(loginResponseResource);

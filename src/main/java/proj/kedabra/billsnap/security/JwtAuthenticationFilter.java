@@ -25,11 +25,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
 
-    private JwtUtil jwtUtil;
+    private final JwtUtil jwtUtil;
 
-    private LoginValidator validator;
+    private final LoginValidator validator;
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, LoginValidator validator, ObjectMapper mapper) {
         this.authenticationManager = authenticationManager;

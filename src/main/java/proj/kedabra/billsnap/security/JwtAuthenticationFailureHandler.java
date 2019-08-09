@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 
@@ -17,7 +18,7 @@ import proj.kedabra.billsnap.presentation.ApiError;
 
 public class JwtAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
-    private ObjectMapper mapper;
+    private final ObjectMapper mapper;
 
     public JwtAuthenticationFailureHandler(ObjectMapper mapper) {
         this.mapper = mapper;
@@ -34,8 +35,12 @@ public class JwtAuthenticationFailureHandler implements AuthenticationFailureHan
             ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, exception.getMessage());
             writeToHttpResponse(apiError, response);
         }
-        else {
+        else if (exception instanceof BadCredentialsException){
             ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Username or password is incorrect.");
+            writeToHttpResponse(apiError, response);
+        }
+        else {
+            ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error has occurred, please try again later.");
             writeToHttpResponse(apiError, response);
         }
     }
