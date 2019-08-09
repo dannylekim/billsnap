@@ -24,9 +24,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email){
-//        Optional<Account> optionalUser = accountRepository.getAccountByEmail(email);
-//        return toUserDetails(optionalUser.orElseThrow(
-//                () -> new UsernameNotFoundException(String.format("No user found with email '%s'.", email))));
         try{
             Account user = accountRepository.getAccountByEmail(email);
             return toUserDetails(user);
