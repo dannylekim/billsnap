@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.presentation.resources;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotBlank;
@@ -24,4 +25,8 @@ public class BillCreationResource {
     @NotNull
     @ApiModelProperty(name = "List of items that were on the bill", position = 3)
     private List<ItemResource> items;
+
+    private BigDecimal tipAmount;
+
+    private BigDecimal tipPercentage;
 }

@@ -16,6 +16,7 @@ public class BillDTOFixture {
         billDTO.setName("Monthly Rent");
         billDTO.setCategory("Rent");
         billDTO.setCompany("Landlord");
+        billDTO.setTipAmount(BigDecimal.ZERO);
 
         final ArrayList<ItemDTO> items = new ArrayList<>();
         final var itemDTO = new ItemDTO();

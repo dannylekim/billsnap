@@ -1,7 +1,5 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
-import java.math.BigDecimal;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,50 +9,45 @@ import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.business.repository.BillRepository;
-import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.service.BillService;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
 
     private final AccountRepository accountRepository;
 
-    private final BillRepository billRepository;
-
+    private final BillService billService;
     private final BillMapper billMapper;
 
+
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, final BillRepository billRepository, final BillMapper billMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper) {
         this.accountRepository = accountRepository;
-        this.billRepository = billRepository;
+        this.billService = billService;
         this.billMapper = billMapper;
+
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillDTO addPersonalBill(final String email, final BillDTO billDTO) {
 
+        //done in bill facade
+        if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
+            throw new IllegalArgumentException("Only one type of tipping is supported. " +
+                    "Please make sure only either tip amount or tip percent is set.");
+        }
+
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException("Account does not exist"));
 
+        final Bill bill = billService.createBillToAccount(billDTO, account);
 
-        final Bill bill = billMapper.toEntity(billDTO);
-        bill.setStatus(BillStatusEnum.OPEN);
-
-        AccountBill accountBill = new AccountBill();
-        accountBill.setBill(bill);
-        accountBill.setAccount(account);
-        accountBill.setPercentage(BigDecimal.valueOf(100));
-        account.getBills().add(accountBill);
-
-        bill.setAccounts(List.of(accountBill));
-
-        return billMapper.toDTO(billRepository.save(bill));
+        return billMapper.toDTO(bill);
 
     }
 }

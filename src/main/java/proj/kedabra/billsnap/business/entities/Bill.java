@@ -3,8 +3,8 @@ package proj.kedabra.billsnap.business.entities;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -21,6 +21,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
@@ -54,10 +56,10 @@ public class Bill implements Serializable {
     private BillStatusEnum status;
 
     @Column(name = "created")
-    private ZonedDateTime created;
+    private ZonedDateTime created = ZonedDateTime.now();
 
     @Column(name = "updated")
-    private ZonedDateTime updated;
+    private ZonedDateTime updated = ZonedDateTime.now();
 
     @Column(name = "category", length = 20)
     private String category;
@@ -86,11 +88,17 @@ public class Bill implements Serializable {
     private Boolean active;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Item> items = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Item> items = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Tax> taxes = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Tax> taxes = new HashSet<>();
 
     @OneToMany(mappedBy = "bill", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<AccountBill> accounts = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<AccountBill> accounts = new HashSet<>();
 }

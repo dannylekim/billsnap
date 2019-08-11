@@ -2,8 +2,8 @@ package proj.kedabra.billsnap.business.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -18,6 +18,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Data
 @Entity
@@ -43,5 +45,7 @@ public class Item implements Serializable {
     private Bill bill;
 
     @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<AccountItem> accounts = new ArrayList<>();
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Set<AccountItem> accounts = new HashSet<>();
 }

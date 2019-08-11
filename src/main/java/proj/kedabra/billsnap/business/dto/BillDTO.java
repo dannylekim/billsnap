@@ -1,5 +1,7 @@
 package proj.kedabra.billsnap.business.dto;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -15,5 +17,9 @@ public class BillDTO {
 
     private String company;
 
-    private List<ItemDTO> items;
+    private List<ItemDTO> items = new ArrayList<>();
+
+    private BigDecimal tipAmount;
+
+    private BigDecimal tipPercent;
 }

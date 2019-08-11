@@ -21,7 +21,7 @@ public class AccountItem implements Serializable {
     private static final long serialVersionUID = -7299388616155721671L;
 
     @EmbeddedId
-    private AccountItemId id;
+    private AccountItemId id = new AccountItemId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("accountId")

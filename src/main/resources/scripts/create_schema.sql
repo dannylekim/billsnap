@@ -15,9 +15,18 @@ create sequence if not exists account_ID_SEQ start with 1 increment by 1;
 
 create sequence if not exists BILLS_id_seq start with 1 increment by 1;
 
+create sequence if not exists ITEMS_ID_SEQ start with 1 increment by 1;
+
+create sequence if not exists GROUPS_id_seq start with 1 increment by 1;
+
+create sequence if not exists LOCATION_id_seq start with 1 increment by 1;
+
+create sequence if not exists LOCATION_id_seq start with 1 increment by 1;
+
+
 create table if not exists location
 (
-    id          int auto_increment primary key,
+    id          int primary key,
     name        varchar(50)  null,
     description varchar(100) null,
     address     varchar(50)  null,
@@ -94,7 +103,7 @@ create table if not exists tax
 
 create table if not exists "group"
 (
-    id              int auto_increment primary key,
+    id              int primary key,
     name            varchar(30) not null,
     created         timestamp with time zone default current_timestamp,
     updated         timestamp with time zone default current_timestamp,
@@ -128,7 +137,7 @@ create table if not exists bills_vs_groups
 
 create table if not exists item
 (
-    id      int auto_increment primary key,
+    id      int primary key,
     bill_id integer        not null
         constraint "ITEMS_bill_id_fkey"
             references bill,
@@ -144,7 +153,7 @@ create table if not exists items_vs_accounts
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4) not null,
+    percentage numeric(7, 4) not null,
     constraint "ITEM_VS_USERS_pkey"
         primary key (item_id, account_id)
 );
@@ -157,7 +166,7 @@ create table if not exists bills_vs_accounts
     account_id integer       not null
         constraint "BILLS_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4) null,
+    percentage numeric(7, 4) null,
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
 
