@@ -38,6 +38,12 @@ public class JwtUtil implements Serializable {
 
     private static final String LOGIN_SUCCESS_MESSAGE = "Successfully logged in";
 
+    private static final String TOKEN_TYPE = "JWT";
+
+    private static final String TOKEN_ISSUER = "secure-api";
+
+    private static final String TOKEN_AUDIENCE = "secure-app";
+
     @Autowired
     public JwtUtil(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration){
         this.mapper = mapper;
@@ -56,12 +62,12 @@ public class JwtUtil implements Serializable {
 
         return Jwts.builder()
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)
-                .setHeaderParam("typ", SecurityConstants.TOKEN_TYPE)
-                .setIssuer(SecurityConstants.TOKEN_ISSUER)
-                .setAudience(SecurityConstants.TOKEN_AUDIENCE)
+                .setHeaderParam("typ", TOKEN_TYPE)
+                .setIssuer(TOKEN_ISSUER)
+                .setAudience(TOKEN_AUDIENCE)
                 .setSubject(user.getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .claim("rol", roles)
+                .claim("roles", roles)
                 .compact();
     }
 
@@ -77,9 +83,15 @@ public class JwtUtil implements Serializable {
     }
 
     Collection<GrantedAuthority> getJwtAuthorities(Claims parsedToken) {
-        return ((List<?>) parsedToken.get("rol"))
+//        return ((List<?>) parsedToken.get("roles"))
+//                .stream()
+//                .map(authority -> new SimpleGrantedAuthority((String) authority))
+//                .collect(Collectors.toList());
+
+        return ((List<?>) parsedToken.get("roles"))
                 .stream()
-                .map(authority -> new SimpleGrantedAuthority((String) authority))
+                .map(String.class::cast)
+                .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
 

@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -67,6 +68,8 @@ class JwtAuthenticationIT {
 
     private final String MUST_NOT_BE_BLANK = "must not be blank";
 
+    private final String WRONG_SIZE = "size must be between 0 and 50";
+
     private final String BAD_CREDENTIALS = "Username or password is incorrect.";
 
     private final String WRONG_REQ_METHOD = "Incorrect login request method.";
@@ -92,8 +95,12 @@ class JwtAuthenticationIT {
         String content = result.getResponse().getContentAsString();
         JSONObject contentJson = new JSONObject(content);
 
+        assertNotNull(result.getResponse().getHeader("Authorization"));
+        String trimmedAuthorizationHeader = result.getResponse().getHeader("Authorization").replace("Bearer ", "");
+
         assertEquals(HttpServletResponse.SC_OK, result.getResponse().getStatus());
         assertEquals(LOGIN_SUCCESS, contentJson.getString("message"));
+        assertEquals(trimmedAuthorizationHeader, contentJson.getString("token"));
     }
 
     @Test
@@ -135,7 +142,7 @@ class JwtAuthenticationIT {
     }
 
     @Test
-    @DisplayName("Login with empty email should return error 400.")
+    @DisplayName("Login with blank email should return error 400.")
     void LoginWithBlankEmailShouldReturnError() throws Exception {
         //Given
         var loginResource = LoginResourceFixture.getDefault();
@@ -152,17 +159,57 @@ class JwtAuthenticationIT {
 
         List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage)
                 .filter(msg -> msg.equals(INVALID_EMAIL) || msg.equals(MUST_NOT_BE_BLANK)).collect(Collectors.toList());
-        assertFalse(errorMessages.isEmpty());
-
+        assertEquals(2, errorMessages.size());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
     @Test
-    @DisplayName("Login with empty password should return error 400.")
+    @DisplayName("Login with blank password should return error 400.")
     void LoginWithBlankPasswordShouldReturnError() throws Exception {
         //Given
         var loginResource = LoginResourceFixture.getDefault();
         loginResource.setPassword(" ");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsString(loginResource))
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(1, error.getErrors().size());
+        assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
+    }
+
+    @Test
+    @DisplayName("Login where email is too long should return error 400.")
+    void LoginWithEmailTooLongShouldReturnError() throws Exception {
+        //Given
+        var loginResource = LoginResourceFixture.getDefault();
+        loginResource.setEmail("emailtoolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com");
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(loginResource))
+                .contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(2, error.getErrors().size());
+        List<String> errorMessages = error.getErrors().stream().map(ApiSubError::getMessage)
+                .filter(msg -> msg.equals(INVALID_EMAIL) || msg.equals(WRONG_SIZE)).collect(Collectors.toList());
+        assertEquals(2, errorMessages.size());
+        assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
+
+    }
+
+    @Test
+    @DisplayName("Login where email is null should return error 400.")
+    void LoginWithNullEmailShouldReturnError() throws Exception {
+        //Given
+        var loginResource = LoginResourceFixture.getDefault();
+        loginResource.setEmail(null);
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsString(loginResource))

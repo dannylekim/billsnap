@@ -31,12 +31,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final ObjectMapper mapper;
 
+    private static final String AUTH_LOGIN_URL = "/login";
+
+    private static final String TOKEN_HEADER = "Authorization";
+
+    private static final String TOKEN_PREFIX = "Bearer ";
+
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, LoginValidator validator, ObjectMapper mapper) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.validator = validator;
         this.mapper = mapper;
-        setFilterProcessesUrl(SecurityConstants.AUTH_LOGIN_URL);
+        setFilterProcessesUrl(AUTH_LOGIN_URL);
     }
 
     @Override
@@ -78,7 +84,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String token = jwtUtil.generateToken(user);
 
-        response.addHeader(SecurityConstants.TOKEN_HEADER, SecurityConstants.TOKEN_PREFIX + token);
+        response.addHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(jwtUtil.loginSuccessJson(token));
     }

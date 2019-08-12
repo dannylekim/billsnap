@@ -44,6 +44,7 @@ class UserDetailsServiceImplIT {
         //Then
         assertEquals(accountObj.getEmail(), userDetailsObj.getUsername());
         assertEquals(accountObj.getPassword(), userDetailsObj.getPassword());
+        assertEquals(1,  userDetailsObj.getAuthorities().size());
         assertEquals("ROLE_USER", userDetailsObj.getAuthorities().stream().findFirst().orElseThrow().getAuthority());
     }
 
