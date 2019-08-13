@@ -19,6 +19,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwsHeader;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -40,19 +41,14 @@ public class JwtUtil implements Serializable {
 
     private static final String TOKEN_TYPE = "JWT";
 
-    private static final String TOKEN_ISSUER = "secure-api";
-
-    private static final String TOKEN_AUDIENCE = "secure-app";
-
     @Autowired
-    public JwtUtil(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration){
+    public JwtUtil(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration) {
         this.mapper = mapper;
         this.jwtSecret = jwtSecret;
         this.jwtExpiration = jwtExpiration;
     }
 
     String generateToken(User user) {
-
         List<String> roles = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -62,33 +58,32 @@ public class JwtUtil implements Serializable {
 
         return Jwts.builder()
                 .signWith(Keys.hmacShaKeyFor(signingKey), SignatureAlgorithm.HS512)
+                .setHeaderParam("alg", SignatureAlgorithm.HS512)
                 .setHeaderParam("typ", TOKEN_TYPE)
-                .setIssuer(TOKEN_ISSUER)
-                .setAudience(TOKEN_AUDIENCE)
                 .setSubject(user.getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
                 .claim("roles", roles)
                 .compact();
     }
 
-    Claims parseToken(String token) {
+    Claims getJwtBody(String token) {
+        byte[] signingKey = jwtSecret.getBytes(UTF_8);
         return Jwts.parser()
-                .setSigningKey(jwtSecret)
+                .setSigningKey(signingKey)
                 .parseClaimsJws(token.replace("Bearer ", ""))
                 .getBody();
     }
 
-    String getJwtUsername(Claims parsedToken) {
-        return parsedToken.getSubject();
+    JwsHeader getJwtHeaders(String token) {
+        byte[] signingKey = jwtSecret.getBytes(UTF_8);
+        return Jwts.parser()
+                .setSigningKey(signingKey)
+                .parseClaimsJws(token.replace("Bearer ", ""))
+                .getHeader();
     }
 
-    Collection<GrantedAuthority> getJwtAuthorities(Claims parsedToken) {
-//        return ((List<?>) parsedToken.get("roles"))
-//                .stream()
-//                .map(authority -> new SimpleGrantedAuthority((String) authority))
-//                .collect(Collectors.toList());
-
-        return ((List<?>) parsedToken.get("roles"))
+    Collection<GrantedAuthority> getJwtAuthorities(Claims jwtBody) {
+        return ((List<?>) jwtBody.get("roles"))
                 .stream()
                 .map(String.class::cast)
                 .map(SimpleGrantedAuthority::new)
