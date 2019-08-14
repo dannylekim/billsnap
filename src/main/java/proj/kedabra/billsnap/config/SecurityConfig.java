@@ -1,10 +1,8 @@
 package proj.kedabra.billsnap.config;
 
-import javax.validation.Validation;
-import javax.validation.Validator;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,14 +11,13 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.validation.beanvalidation.SpringValidatorAdapter;
+import org.springframework.validation.Validator;
 
 import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationFailureHandler;
 import proj.kedabra.billsnap.security.JwtAuthenticationFilter;
 import proj.kedabra.billsnap.security.JwtAuthenticationSuccessHandler;
 import proj.kedabra.billsnap.security.JwtUtil;
-import proj.kedabra.billsnap.security.LoginValidator;
 
 @Configuration
 @EnableWebSecurity
@@ -32,11 +29,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final ObjectMapper mapper;
 
+    private final Validator validator;
+
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil, ObjectMapper mapper) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil, ObjectMapper mapper, @Qualifier("getValidator") Validator validator) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtUtil = jwtUtil;
         this.mapper = mapper;
+        this.validator = validator;
     }
 
     @Override
@@ -67,14 +67,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        Validator javaxValidator = Validation.buildDefaultValidatorFactory().getValidator();
-        SpringValidatorAdapter adapter = new SpringValidatorAdapter(javaxValidator);
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil, new LoginValidator(adapter), mapper);
-
-        JwtAuthenticationSuccessHandler successHandler = new JwtAuthenticationSuccessHandler();
-        JwtAuthenticationFailureHandler failureHandler = new JwtAuthenticationFailureHandler(mapper);
-        filter.setAuthenticationSuccessHandler(successHandler);
-        filter.setAuthenticationFailureHandler(failureHandler);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil, validator, mapper);
+        filter.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
+        filter.setAuthenticationFailureHandler(new JwtAuthenticationFailureHandler(mapper));
 
         return filter;
     }

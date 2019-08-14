@@ -17,6 +17,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
+import org.springframework.validation.Validator;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final JwtUtil jwtUtil;
 
-    private final LoginValidator validator;
+    private final Validator validator;
 
     private final ObjectMapper mapper;
 
@@ -37,7 +38,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, LoginValidator validator, ObjectMapper mapper) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, Validator validator, ObjectMapper mapper) {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.validator = validator;
@@ -79,7 +80,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
-                                            FilterChain filterChain, Authentication authResult) throws IOException{
+                                            FilterChain filterChain, Authentication authResult) throws IOException {
         User user = ((User) authResult.getPrincipal());
 
         String token = jwtUtil.generateToken(user);
