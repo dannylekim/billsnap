@@ -64,7 +64,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 validator.validate(loginAttempt, errors);
 
                 if (errors.hasErrors()) {
-                    throw new LoginValidationException(errors);
+                    throw new LoginValidationException(errors.getAllErrors());
                 }
                 username = loginAttempt.getEmail();
                 password = loginAttempt.getPassword();

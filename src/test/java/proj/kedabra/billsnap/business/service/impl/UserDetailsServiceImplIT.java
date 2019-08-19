@@ -2,7 +2,6 @@ package proj.kedabra.billsnap.business.service.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -32,19 +31,18 @@ class UserDetailsServiceImplIT {
 
     @Test
     @DisplayName("Should return UserDetails object built from inputted Account object")
-    void shouldReturnUserDetailsBuiltFromAccount(){
+    void shouldReturnUserDetailsBuiltFromAccount() {
         //Given
-//        assertTrue(accountRepository.existsAccountByEmail("userdetails@service.com"));
         var existingEmail = "userdetails@service.com";
-        Account accountObj = accountRepository.getAccountByEmail("userdetails@service.com");
+        Account accountObj = accountRepository.getAccountByEmail(existingEmail);
 
         //When
-        UserDetails userDetailsObj = userDetailsServiceImpl.loadUserByUsername("userdetails@service.com");
+        UserDetails userDetailsObj = userDetailsServiceImpl.loadUserByUsername(existingEmail);
 
         //Then
         assertEquals(accountObj.getEmail(), userDetailsObj.getUsername());
         assertEquals(accountObj.getPassword(), userDetailsObj.getPassword());
-        assertEquals(1,  userDetailsObj.getAuthorities().size());
+        assertEquals(1, userDetailsObj.getAuthorities().size());
         assertEquals("ROLE_USER", userDetailsObj.getAuthorities().stream().findFirst().orElseThrow().getAuthority());
     }
 

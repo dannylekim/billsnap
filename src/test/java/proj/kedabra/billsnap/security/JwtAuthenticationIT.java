@@ -1,8 +1,8 @@
 package proj.kedabra.billsnap.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
@@ -25,7 +25,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.web.FilterChainProxy;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -76,6 +75,8 @@ class JwtAuthenticationIT {
 
     private final String NOT_JSON_CONTENT = "Login request input is not JSON content-type.";
 
+    private final String USER_FIELD = "email";
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
@@ -119,6 +120,8 @@ class JwtAuthenticationIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals("", error.getErrors().get(0).getRejectedValue());
+        assertEquals(USER_FIELD, error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -138,6 +141,8 @@ class JwtAuthenticationIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals("", error.getErrors().get(0).getRejectedValue());
+        assertEquals("password", error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -179,6 +184,8 @@ class JwtAuthenticationIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertEquals(" ", error.getErrors().get(0).getRejectedValue());
+        assertEquals("password", error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -220,6 +227,8 @@ class JwtAuthenticationIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
+        assertNull(error.getErrors().get(0).getRejectedValue());
+        assertEquals(USER_FIELD, error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -228,7 +237,8 @@ class JwtAuthenticationIT {
     void LoginWithInvalidEmailFormatShouldReturnError() throws Exception {
         //Given
         var loginResource = LoginResourceFixture.getDefault();
-        loginResource.setEmail("invalid email");
+        String invalidEmail = "invalid email";
+        loginResource.setEmail(invalidEmail);
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(loginResource))
@@ -239,6 +249,8 @@ class JwtAuthenticationIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(INVALID_EMAIL, error.getErrors().get(0).getMessage());
+        assertEquals(invalidEmail, error.getErrors().get(0).getRejectedValue());
+        assertEquals(USER_FIELD, error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -320,7 +332,7 @@ class JwtAuthenticationIT {
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsString(loginResource))
-        .contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().is4xxClientError()).andReturn();
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().is4xxClientError()).andReturn();
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 

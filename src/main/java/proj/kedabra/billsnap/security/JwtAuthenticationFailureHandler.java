@@ -28,24 +28,21 @@ public class JwtAuthenticationFailureHandler implements AuthenticationFailureHan
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
 
         if (exception instanceof LoginValidationException) {
-            ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, exception.getMessage(), ((LoginValidationException) exception).getErrorsList().getAllErrors());
+            ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, exception.getMessage(), ((LoginValidationException) exception).getErrorsList());
             writeToHttpResponse(apiError, response);
-        }
-        else if (exception instanceof AuthenticationServiceException) {
+        } else if (exception instanceof AuthenticationServiceException) {
             ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, exception.getMessage());
             writeToHttpResponse(apiError, response);
-        }
-        else if (exception instanceof BadCredentialsException){
+        } else if (exception instanceof BadCredentialsException) {
             ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Username or password is incorrect.");
             writeToHttpResponse(apiError, response);
-        }
-        else {
+        } else {
             ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error has occurred, please try again later.");
             writeToHttpResponse(apiError, response);
         }
     }
 
-    private void writeToHttpResponse(ApiError apiError, HttpServletResponse response) throws IOException{
+    private void writeToHttpResponse(ApiError apiError, HttpServletResponse response) throws IOException {
         response.setStatus(apiError.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(mapper.writeValueAsString(apiError));
