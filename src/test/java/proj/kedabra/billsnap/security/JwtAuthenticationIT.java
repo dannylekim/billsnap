@@ -77,6 +77,8 @@ class JwtAuthenticationIT {
 
     private final String USER_FIELD = "email";
 
+    private final String PASSWORD_FIELD = "password";
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
@@ -142,7 +144,7 @@ class JwtAuthenticationIT {
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
         assertEquals("", error.getErrors().get(0).getRejectedValue());
-        assertEquals("password", error.getErrors().get(0).getField());
+        assertEquals(PASSWORD_FIELD, error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 
@@ -185,7 +187,7 @@ class JwtAuthenticationIT {
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
         assertEquals(" ", error.getErrors().get(0).getRejectedValue());
-        assertEquals("password", error.getErrors().get(0).getField());
+        assertEquals(PASSWORD_FIELD, error.getErrors().get(0).getField());
         assertEquals(HttpServletResponse.SC_BAD_REQUEST, result.getResponse().getStatus());
     }
 

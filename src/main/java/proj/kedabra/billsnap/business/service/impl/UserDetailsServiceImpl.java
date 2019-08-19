@@ -24,12 +24,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email){
-        try{
-            Account user = accountRepository.getAccountByEmail(email);
-            return toUserDetails(user);
-        } catch (NullPointerException ex) {
-            throw new UsernameNotFoundException(String.format("No user found with email '%s'.", email));
-        }
+        Optional<Account> optionalUser = Optional.ofNullable(accountRepository.getAccountByEmail(email));
+        return toUserDetails(optionalUser.orElseThrow(
+                () -> new UsernameNotFoundException(String.format("No user found with email '%s'.", email))));
     }
 
     private UserDetails toUserDetails(Account user) {

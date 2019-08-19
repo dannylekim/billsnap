@@ -35,12 +35,12 @@ class UserDetailsServiceImplTest {
     @DisplayName("Should return exception if account cannot be retrieved from database")
     void ShouldReturnExceptionIfAccountCannotBeRetrieved() {
         //Given
-        final String email = "nonexistent@email.com";
-        when(accountRepository.getAccountByEmail(email)).thenReturn(null);
+        final String nonExistentEmail = "nonexistent@email.com";
+        when(accountRepository.getAccountByEmail(nonExistentEmail)).thenReturn(null);
 
         //When /Then
-        UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(email));
-        assertEquals("No user found with email 'nonexistent@email.com'.", ex.getMessage());
+        UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(nonExistentEmail));
+        assertEquals(String.format("No user found with email '%s'.", nonExistentEmail), ex.getMessage());
     }
 
     @Test
@@ -48,11 +48,12 @@ class UserDetailsServiceImplTest {
     void ShouldReturnUserDetailsBuiltFromAccount(){
         //Given
         var accountObj = AccountEntityFixture.getDefaultAccount();
-        accountObj.setEmail("userdetails@unittest.com");
-        when(accountRepository.getAccountByEmail("userdetails@unittest.com")).thenReturn(accountObj);
+        final String email = "userdetails@unittest.com";
+        accountObj.setEmail(email);
+        when(accountRepository.getAccountByEmail(email)).thenReturn(accountObj);
 
         //When
-        UserDetails userDetailsObj = userDetailsService.loadUserByUsername("userdetails@unittest.com");
+        UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
 
         //Then
         assertEquals(accountObj.getEmail(), userDetailsObj.getUsername());

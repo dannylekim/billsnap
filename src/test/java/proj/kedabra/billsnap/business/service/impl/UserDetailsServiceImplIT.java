@@ -55,6 +55,6 @@ class UserDetailsServiceImplIT {
         //When/Then
         UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsServiceImpl.loadUserByUsername(nonExistentEmail));
-        assertEquals("No user found with email 'nonexistent@email.com'.", ex.getMessage());
+        assertEquals(String.format("No user found with email '%s'.", nonExistentEmail), ex.getMessage());
     }
 }
