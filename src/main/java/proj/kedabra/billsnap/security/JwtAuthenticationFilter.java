@@ -19,9 +19,12 @@ import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
+import lombok.extern.slf4j.Slf4j;
+
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 
+@Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
@@ -49,12 +52,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         if (!request.getMethod().equals("POST")) {
+            log.warn("Error at Login POST method check.", new AuthenticationServiceException("Incorrect login request method."));
             throw new AuthenticationServiceException("Incorrect login request method.");
         }
         String username;
         String password;
 
         if (request.getContentType() == null || !request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
+            log.warn("Error at Login request content-type check.", new AuthenticationServiceException("Login request input is not JSON content-type."));
             throw new AuthenticationServiceException("Login request input is not JSON content-type.");
         } else {
             try {
@@ -64,12 +69,14 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                 validator.validate(loginAttempt, errors);
 
                 if (errors.hasErrors()) {
+                    log.warn("Error at Login validation check.", new LoginValidationException(errors.getAllErrors()));
                     throw new LoginValidationException(errors.getAllErrors());
                 }
                 username = loginAttempt.getEmail();
                 password = loginAttempt.getPassword();
 
             } catch (IOException e) {
+                log.warn("IOException when processing login request content.", new AuthenticationServiceException(e.getMessage()));
                 throw new AuthenticationServiceException(e.getMessage());
             }
         }
