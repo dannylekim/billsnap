@@ -32,7 +32,7 @@ import proj.kedabra.billsnap.presentation.ApiError;
 
 class JwtAuthenticationFailureHandlerTest {
 
-    private JwtAuthenticationFailureHandler failureHandler = new JwtAuthenticationFailureHandler(new ObjectMapper());
+    private JwtAuthenticationFailureHandler failureHandler;
 
     private final ObjectMapper mapper = new ObjectMapper();
 
@@ -49,6 +49,7 @@ class JwtAuthenticationFailureHandlerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
+        failureHandler = new JwtAuthenticationFailureHandler(mapper);
     }
 
     @Test
@@ -57,7 +58,7 @@ class JwtAuthenticationFailureHandlerTest {
         //Given
         HttpServletRequest req = mock(HttpServletRequest.class);
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
-        List<ObjectError> errors = new ArrayList<ObjectError>() {
+        List<ObjectError> errors = new ArrayList<>() {
             private static final long serialVersionUID = -3822136398237937509L;
 
             {
