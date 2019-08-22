@@ -66,14 +66,6 @@ public class JwtUtil implements Serializable {
                 .compact();
     }
 
-    Claims getJwtBody(String token) {
-        byte[] signingKey = jwtSecret.getBytes(UTF_8);
-        return Jwts.parser()
-                .setSigningKey(signingKey)
-                .parseClaimsJws(token.replace("Bearer ", ""))
-                .getBody();
-    }
-
     JwsHeader getJwtHeaders(String token) {
         byte[] signingKey = jwtSecret.getBytes(UTF_8);
         return Jwts.parser()
@@ -82,8 +74,12 @@ public class JwtUtil implements Serializable {
                 .getHeader();
     }
 
-    Collection<GrantedAuthority> getJwtAuthorities(Claims jwtBody) {
-        return ((List<?>) jwtBody.get("roles"))
+    String getJwtUsername(String token) {
+        return getJwtBody(token).getSubject();
+    }
+
+    Collection<GrantedAuthority> getJwtAuthorities(String token) {
+        return ((List<?>) getJwtBody(token).get("roles"))
                 .stream()
                 .map(String.class::cast)
                 .map(SimpleGrantedAuthority::new)
@@ -100,5 +96,13 @@ public class JwtUtil implements Serializable {
         } catch (JsonProcessingException e) {
             throw new IOException(e);
         }
+    }
+
+    private Claims getJwtBody(String token) {
+        byte[] signingKey = jwtSecret.getBytes(UTF_8);
+        return Jwts.parser()
+                .setSigningKey(signingKey)
+                .parseClaimsJws(token.replace("Bearer ", ""))
+                .getBody();
     }
 }

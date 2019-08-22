@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.fixtures;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
@@ -12,13 +11,9 @@ public class UserFixture {
     private UserFixture() {}
 
     public static User getDefault() {
-        String email = "user@userdetails.com";
+        String email = "user@user.com";
         String role = "ROLE_USER";
-        List<GrantedAuthority> authorities = new ArrayList<>() {
-            private static final long serialVersionUID = 821620366318873776L;
-
-            {add(new SimpleGrantedAuthority(role));}
-        };
+        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
         return new User(email, "pass", authorities);
     }
 }

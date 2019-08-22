@@ -2,14 +2,15 @@ package proj.kedabra.billsnap.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.Collection;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockitoAnnotations;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
 
 import proj.kedabra.billsnap.fixtures.UserFixture;
@@ -34,8 +35,8 @@ class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("Should return JSON success string given a String token")
-    void ShouldReturnJsonFormatSuccessGivenAStringToken() throws Exception {
+    @DisplayName("Should return JSON success String given a token")
+    void ShouldReturnJsonFormatSuccessGivenAToken() throws Exception {
         //Given
         String testToken = "tester_token";
 
@@ -49,23 +50,44 @@ class JwtUtilTest {
     }
 
     @Test
-    @DisplayName("Generated JWT should contain Username and role when parsed")
-    void GeneratedJWTShouldContainUsernameAndRole() {
+    @DisplayName("JWT should contain Username used to create the token")
+    void JWTShouldContainUsername() {
         //Given
-        User someUser = UserFixture.getDefault();
-        String userRole = someUser.getAuthorities().iterator().next().toString();
+        String token = jwtUtil.generateToken(UserFixture.getDefault());
 
         //When
-        String generatedToken = jwtUtil.generateToken(someUser);
-        Claims jwtBody = jwtUtil.getJwtBody(generatedToken);
-        JwsHeader jwtHeader = jwtUtil.getJwtHeaders(generatedToken);
+        String username = jwtUtil.getJwtUsername(token);
 
         //Then
-        assertEquals(someUser.getUsername(), jwtBody.getSubject());
-        assertEquals(1, jwtUtil.getJwtAuthorities(jwtBody).size());
-        assertEquals(userRole, jwtUtil.getJwtAuthorities(jwtBody).iterator().next().toString());
+        assertEquals(UserFixture.getDefault().getUsername(), username);
+    }
 
-        assertEquals("JWT", jwtHeader.getType());
-        assertEquals("HS512", jwtHeader.getAlgorithm());
+    @Test
+    @DisplayName("JWT should contain Authorities used to create the token")
+    void JwtShouldContainAuthorities() {
+        //Given
+        String token = jwtUtil.generateToken(UserFixture.getDefault());
+        String userRole = UserFixture.getDefault().getAuthorities().iterator().next().toString();
+
+        //When
+        Collection<GrantedAuthority> authorities = jwtUtil.getJwtAuthorities(token);
+
+        //Then
+        assertEquals(1, authorities.size());
+        assertEquals(userRole, authorities.iterator().next().toString());
+    }
+
+    @Test
+    @DisplayName("JWT should contain Type and Algorithm in Headers")
+    void JwtShouldContainTypeAndAlgorithmInHeaders() {
+        //Given
+        String token = jwtUtil.generateToken(UserFixture.getDefault());
+
+        //When
+        JwsHeader jwtHeaders = jwtUtil.getJwtHeaders(token);
+
+        //Then
+        assertEquals("JWT", jwtHeaders.getType());
+        assertEquals("HS512", jwtHeaders.getAlgorithm());
     }
 }

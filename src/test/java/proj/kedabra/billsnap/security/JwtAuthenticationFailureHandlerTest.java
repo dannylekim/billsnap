@@ -6,7 +6,6 @@ import static org.mockito.Mockito.mock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -58,13 +57,7 @@ class JwtAuthenticationFailureHandlerTest {
         //Given
         HttpServletRequest req = mock(HttpServletRequest.class);
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
-        List<ObjectError> errors = new ArrayList<>() {
-            private static final long serialVersionUID = -3822136398237937509L;
-
-            {
-                add(new FieldError("BlankError", "username", "", false, new String[0], new Object[0], MUST_NOT_BE_BLANK));
-            }
-        };
+        List<ObjectError> errors = List.of(new FieldError("BlankError", "username", "", false, new String[0], new Object[0], MUST_NOT_BE_BLANK));
         LoginValidationException ex = new LoginValidationException(errors);
 
         //When

@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.security;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -10,9 +11,11 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.IOException;
 import java.util.Objects;
 
 import javax.servlet.FilterChain;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -200,11 +203,38 @@ class JwtAuthenticationFilterTest {
         assertThrows(BadCredentialsException.class, () -> filter.attemptAuthentication(mockRequest, resp));
     }
 
+    @Test
+    @DisplayName("Should throw Exception upon Request content processing IOException")
+    void ShouldThrowIOExceptionUponRequestContentProcessingError() {
+        //Given
+        MockHttpServletRequest mockRequest = populateMockRequest();
+        HttpServletResponse resp = mock(HttpServletResponse.class);
+
+        mockRequest.setContent("invalid request content".getBytes(UTF_8));
+
+        //When/Then
+        assertThrows(AuthenticationServiceException.class, () -> filter.attemptAuthentication(mockRequest, resp));
+    }
+
+    @Test
+    @DisplayName("Should throw Exception upon Request getReader() IOException")
+    void ShouldThrowIOExceptionUponRequestReaderError() throws Exception {
+        //Given
+        HttpServletRequest req = mock(HttpServletRequest.class);
+        HttpServletResponse resp = mock(HttpServletResponse.class);
+
+        when(req.getMethod()).thenReturn("POST");
+        when(req.getContentType()).thenReturn(MediaType.APPLICATION_JSON_VALUE);
+        when(req.getReader()).thenThrow(IOException.class);
+
+        //When/Then
+        assertThrows(AuthenticationServiceException.class, () -> filter.attemptAuthentication(req, resp));
+    }
+
     private MockHttpServletRequest populateMockRequest() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setContentType(MediaType.APPLICATION_JSON_VALUE);
         request.setMethod("POST");
         return request;
     }
-
 }
