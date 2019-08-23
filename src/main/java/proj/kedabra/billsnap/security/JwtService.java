@@ -16,7 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwsHeader;
@@ -26,8 +26,8 @@ import io.jsonwebtoken.security.Keys;
 
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 
-@Component
-public class JwtUtil implements Serializable {
+@Service
+public class JwtService implements Serializable {
 
     private static final long serialVersionUID = 5249861017865007332L;
 
@@ -42,7 +42,7 @@ public class JwtUtil implements Serializable {
     private static final String TOKEN_TYPE = "JWT";
 
     @Autowired
-    public JwtUtil(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration) {
+    public JwtService(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration) {
         this.mapper = mapper;
         this.jwtSecret = jwtSecret;
         this.jwtExpiration = jwtExpiration;

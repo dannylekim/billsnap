@@ -16,9 +16,9 @@ import io.jsonwebtoken.JwsHeader;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 
-class JwtUtilTest {
+class JwtServiceTest {
 
-    private JwtUtil jwtUtil;
+    private JwtService jwtService;
 
     private final static String JSON_SUCCESS = "Successfully logged in";
 
@@ -31,7 +31,7 @@ class JwtUtilTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        jwtUtil = new JwtUtil(mapper, JWT_SECRET, JWT_EXP);
+        jwtService = new JwtService(mapper, JWT_SECRET, JWT_EXP);
     }
 
     @Test
@@ -41,7 +41,7 @@ class JwtUtilTest {
         String testToken = "tester_token";
 
         //When
-        String jsonSuccess = jwtUtil.loginSuccessJson(testToken);
+        String jsonSuccess = jwtService.loginSuccessJson(testToken);
         LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
 
         //Then
@@ -53,10 +53,10 @@ class JwtUtilTest {
     @DisplayName("JWT should contain Username used to create the token")
     void JWTShouldContainUsername() {
         //Given
-        String token = jwtUtil.generateToken(UserFixture.getDefault());
+        String token = jwtService.generateToken(UserFixture.getDefault());
 
         //When
-        String username = jwtUtil.getJwtUsername(token);
+        String username = jwtService.getJwtUsername(token);
 
         //Then
         assertEquals(UserFixture.getDefault().getUsername(), username);
@@ -66,11 +66,11 @@ class JwtUtilTest {
     @DisplayName("JWT should contain Authorities used to create the token")
     void JwtShouldContainAuthorities() {
         //Given
-        String token = jwtUtil.generateToken(UserFixture.getDefault());
+        String token = jwtService.generateToken(UserFixture.getDefault());
         String userRole = UserFixture.getDefault().getAuthorities().iterator().next().toString();
 
         //When
-        Collection<GrantedAuthority> authorities = jwtUtil.getJwtAuthorities(token);
+        Collection<GrantedAuthority> authorities = jwtService.getJwtAuthorities(token);
 
         //Then
         assertEquals(1, authorities.size());
@@ -81,10 +81,10 @@ class JwtUtilTest {
     @DisplayName("JWT should contain Type and Algorithm in Headers")
     void JwtShouldContainTypeAndAlgorithmInHeaders() {
         //Given
-        String token = jwtUtil.generateToken(UserFixture.getDefault());
+        String token = jwtService.generateToken(UserFixture.getDefault());
 
         //When
-        JwsHeader jwtHeaders = jwtUtil.getJwtHeaders(token);
+        JwsHeader jwtHeaders = jwtService.getJwtHeaders(token);
 
         //Then
         assertEquals("JWT", jwtHeaders.getType());

@@ -29,7 +29,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private final AuthenticationManager authenticationManager;
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     private final Validator validator;
 
@@ -41,9 +41,9 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, Validator validator, ObjectMapper mapper) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, Validator validator, ObjectMapper mapper) {
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
         this.validator = validator;
         this.mapper = mapper;
         setFilterProcessesUrl(AUTH_LOGIN_URL);
@@ -83,11 +83,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                                             FilterChain filterChain, Authentication authResult) throws IOException {
         User user = ((User) authResult.getPrincipal());
 
-        String token = jwtUtil.generateToken(user);
+        String token = jwtService.generateToken(user);
 
         response.addHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(jwtUtil.loginSuccessJson(token));
+        response.getWriter().write(jwtService.loginSuccessJson(token));
     }
 
     private void validateRequestDetails(HttpServletRequest request) {

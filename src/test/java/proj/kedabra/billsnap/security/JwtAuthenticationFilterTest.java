@@ -53,7 +53,7 @@ class JwtAuthenticationFilterTest {
     private AuthenticationManager authenticationManager;
 
     @Mock
-    private JwtUtil jwtUtil;
+    private JwtService jwtService;
 
     @Mock
     private Validator validator;
@@ -73,7 +73,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        filter = new JwtAuthenticationFilter(authenticationManager, jwtUtil, validator, mapper);
+        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper);
     }
 
     @Test
@@ -173,8 +173,8 @@ class JwtAuthenticationFilterTest {
         final String jwtToken = "example_token";
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(UserFixture.getDefault(), VALID_PASSWORD);
 
-        when(jwtUtil.generateToken(any())).thenReturn(jwtToken);
-        when(jwtUtil.loginSuccessJson(any())).thenReturn(String.format("{\"token\":\"%s\"}", jwtToken));
+        when(jwtService.generateToken(any())).thenReturn(jwtToken);
+        when(jwtService.loginSuccessJson(any())).thenReturn(String.format("{\"token\":\"%s\"}", jwtToken));
 
         //When
         filter.successfulAuthentication(mockRequest, mockResponse, mock(FilterChain.class), token);

@@ -17,7 +17,7 @@ import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationFailureHandler;
 import proj.kedabra.billsnap.security.JwtAuthenticationFilter;
 import proj.kedabra.billsnap.security.JwtAuthenticationSuccessHandler;
-import proj.kedabra.billsnap.security.JwtUtil;
+import proj.kedabra.billsnap.security.JwtService;
 
 @Configuration
 @EnableWebSecurity
@@ -25,16 +25,16 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsServiceImpl userDetailsServiceImpl;
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     private final ObjectMapper mapper;
 
     private final Validator validator;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtUtil jwtUtil, ObjectMapper mapper, @Qualifier("getValidator") Validator validator) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtService jwtService, ObjectMapper mapper, @Qualifier("getValidator") Validator validator) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
         this.mapper = mapper;
         this.validator = validator;
     }
@@ -67,7 +67,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil, validator, mapper);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper);
         filter.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
         filter.setAuthenticationFailureHandler(new JwtAuthenticationFailureHandler(mapper));
 
