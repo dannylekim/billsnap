@@ -1,9 +1,11 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
+import java.security.Principal;
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,17 +47,17 @@ public class BillController {
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public BillResource createAccount(@ApiParam(required = true, name = "Bill Details", value = "Minimum bill details")
-                                      @RequestBody @Valid final BillCreationResource billCreationResource,
-                                      final UserDetails userDetails,
-                                      BindingResult bindingResult) {
+    public BillResource createBill(@ApiParam(required = true, name = "Bill Details", value = "Minimum bill details")
+                                   @RequestBody @Valid final BillCreationResource billCreationResource,
+                                   @AuthenticationPrincipal Principal principal,
+                                   BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
 
         final BillDTO billDTO = billMapper.toDTO(billCreationResource);
-        final BillDTO createdBill = billFacade.addPersonalBill(userDetails.getUsername(), billDTO);
+        final BillDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
         return billMapper.toResource(createdBill);
 
 
