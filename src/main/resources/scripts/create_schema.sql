@@ -74,7 +74,7 @@ create table if not exists bill
     category    varchar(20)    null,
     company     varchar(20)    null,
     occurrence  integer        null,
-    tip_percent numeric(6, 4)  null,
+    tip_percent numeric(7, 4)  null,
     tip_amount  numeric(14, 2) null,
     split_by    split_type   not null,
     location_id integer
@@ -94,7 +94,7 @@ create table if not exists tax
             references bill,
     "order"    integer        not null,
     amount     numeric(14, 2) null,
-    percentage numeric(6, 4)  null,
+    percentage numeric(7, 4)  null,
     constraint unique_orders_to_bill
         primary key (bill_id, "order"),
     constraint one_of_amount_or_percentage
