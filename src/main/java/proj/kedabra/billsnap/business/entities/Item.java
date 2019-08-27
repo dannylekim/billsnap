@@ -30,8 +30,8 @@ public class Item implements Serializable {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(generator = "ITEMS_id_seq")
-    @SequenceGenerator(name = "ITEMS_id_seq", sequenceName = "ITEMS_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "item_id_seq")
+    @SequenceGenerator(name = "item_id_seq", sequenceName = "item_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "name", length = 30, nullable = false)

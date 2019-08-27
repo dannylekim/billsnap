@@ -28,8 +28,8 @@ public class Group implements Serializable {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(generator = "GROUPS_id_seq")
-    @SequenceGenerator(name = "GROUPS_id_seq", sequenceName = "GROUPS_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "group_id_seq")
+    @SequenceGenerator(name = "group_id_seq", sequenceName = "group_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "name", length = 30, nullable = false)

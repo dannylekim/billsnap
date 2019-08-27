@@ -24,7 +24,9 @@ create function is_split_by_balance(bill_id integer) returns boolean
 as
 $$
 begin
-    select b.status = 'BALANCE' from "bill" b where b.id = bill_id;
+    RETURN EXISTS(
+            select b.status = 'BALANCE' from "bill" b where b.id = bill_id
+        );
 end;
 $$;
 

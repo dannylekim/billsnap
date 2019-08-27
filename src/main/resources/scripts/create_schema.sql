@@ -11,17 +11,17 @@ create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
 create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
-create sequence if not exists account_ID_SEQ start with 1 increment by 1;
+create sequence if not exists account_id_seq start with 1 increment by 1;
 
-create sequence if not exists BILLS_id_seq start with 1 increment by 1;
+create sequence if not exists bill_id_seq start with 1 increment by 1;
 
-create sequence if not exists ITEMS_ID_SEQ start with 1 increment by 1;
+create sequence if not exists item_id_seq start with 1 increment by 1;
 
-create sequence if not exists GROUPS_id_seq start with 1 increment by 1;
+create sequence if not exists group_id_seq start with 1 increment by 1;
 
-create sequence if not exists LOCATION_id_seq start with 1 increment by 1;
+create sequence if not exists location_id_seq start with 1 increment by 1;
 
-create sequence if not exists LOCATION_id_seq start with 1 increment by 1;
+create sequence if not exists location_id_seq start with 1 increment by 1;
 
 
 create table if not exists location

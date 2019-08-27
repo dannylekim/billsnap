@@ -20,6 +20,10 @@ import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
+import org.hibernate.annotations.Type;
+import org.hibernate.annotations.TypeDef;
+
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -30,14 +34,18 @@ import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 @Data
 @Entity
 @Table(name = "bill", schema = "public")
+@TypeDef(
+        name = "pgsql_enum",
+        typeClass = PostgreSQLEnumType.class
+)
 public class Bill implements Serializable {
 
     private static final long serialVersionUID = 5673217785097106248L;
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(generator = "BILLS_id_seq")
-    @SequenceGenerator(name = "BILLS_id_seq", sequenceName = "BILLS_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "bill_id_seq")
+    @SequenceGenerator(name = "bill_id_seq", sequenceName = "bill_id_seq", allocationSize = 1)
     private Long id;
 
     @Column(name = "name", length = 30)
@@ -53,6 +61,7 @@ public class Bill implements Serializable {
 
     @Column(name = "status", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
     private BillStatusEnum status;
 
     @Column(name = "created")
@@ -78,6 +87,7 @@ public class Bill implements Serializable {
 
     @Column(name = "split_by", nullable = false)
     @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
     private SplitByEnum splitBy;
 
     @OneToOne(fetch = FetchType.LAZY)
