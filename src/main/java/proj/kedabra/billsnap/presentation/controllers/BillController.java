@@ -16,11 +16,13 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.Authorization;
 
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.config.SwaggerConfiguration;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
@@ -39,7 +41,7 @@ public class BillController {
 
 
     @PostMapping("/bills")
-    @ApiOperation(value = "Add personal bill", notes = "Add a personal bill to a user account.")
+    @ApiOperation(value = "Add personal bill", notes = "Add a personal bill to a user account.", authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
             @ApiResponse(code = 201, response = BillResource.class, message = "Successfully added a bill!"),
             @ApiResponse(code = 400, response = ApiError.class, message = "Cannot create bill with wrong inputs."),
