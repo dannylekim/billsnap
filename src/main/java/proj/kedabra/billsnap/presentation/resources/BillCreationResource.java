@@ -26,7 +26,9 @@ public class BillCreationResource {
     @ApiModelProperty(name = "List of items that were on the bill", position = 3)
     private List<ItemResource> items;
 
+    @ApiModelProperty(name = "The tip amount. Only one of tipAmount or tipPercent is allowed", position = 4)
     private BigDecimal tipAmount;
 
-    private BigDecimal tipPercentage;
+    @ApiModelProperty(name = "The tip percent. Only one of tipAmount or tipPercent is allowed", position = 5)
+    private BigDecimal tipPercent;
 }

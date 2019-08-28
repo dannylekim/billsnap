@@ -18,6 +18,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
 
+import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
@@ -59,7 +60,7 @@ public class BillController {
         }
 
         final BillDTO billDTO = billMapper.toDTO(billCreationResource);
-        final BillDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
+        final BillCompleteDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
         return billMapper.toResource(createdBill);
 
 

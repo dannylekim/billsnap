@@ -90,5 +90,4 @@ class BillFacadeImplTest {
                 "Please make sure only either tip amount or tip percent is set.", illegalArgumentException.getMessage());
 
     }
-
 }

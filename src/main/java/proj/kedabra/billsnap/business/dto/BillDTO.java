@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 public class BillDTO {
 
-    private long id;
+    private Long id;
 
     private String name;
 

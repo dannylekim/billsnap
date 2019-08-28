@@ -17,8 +17,10 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
+import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
@@ -69,7 +71,7 @@ class BillFacadeImplIT {
         final String testEmail = "test@email.com";
 
         // When
-        final BillDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
 
         // Then
         final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
@@ -85,6 +87,14 @@ class BillFacadeImplIT {
         assertEquals(returnItemDTO.getName(), item.getName());
         assertEquals(returnItemDTO.getCost(), item.getCost());
         assertEquals(returnBillDTO.getName(), bill.getName());
+        assertEquals(returnBillDTO.getBalance(), item.getCost());
+        assertEquals(returnBillDTO.getId(), bill.getId());
+        assertEquals(returnBillDTO.getStatus(), bill.getStatus());
+        assertEquals(returnBillDTO.getCreated(), bill.getCreated());
+        assertEquals(returnBillDTO.getUpdated(), bill.getUpdated());
+        final Account account = bill.getAccounts().iterator().next().getAccount();
+        assertEquals(returnBillDTO.getCreator().getId(), account.getId());
+        assertEquals(returnBillDTO.getResponsible().getId(), account.getId());
     }
 
     @Test
