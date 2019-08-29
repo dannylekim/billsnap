@@ -11,6 +11,14 @@
     </springProfile>
 
 
+    <springProfile name="test">
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE"/>
+        </root>
+    </springProfile>
+
+
     <springProfile name="local-dev">
         <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
         <appender name="ROLLING-FILE"
