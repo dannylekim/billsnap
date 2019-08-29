@@ -52,8 +52,8 @@ public class BillController {
     @ResponseStatus(HttpStatus.CREATED)
     public BillResource createBill(@ApiParam(required = true, name = "Bill Details", value = "Minimum bill details")
                                    @RequestBody @Valid final BillCreationResource billCreationResource,
-                                   @AuthenticationPrincipal Principal principal,
-                                   BindingResult bindingResult) {
+                                   final BindingResult bindingResult,
+                                   @AuthenticationPrincipal final Principal principal) {
 
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());

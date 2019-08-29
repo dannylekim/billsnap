@@ -51,8 +51,8 @@ public class AccountController {
     @ResponseStatus(HttpStatus.CREATED)
     @ObfuscateArgs
     public AccountResource createAccount(@ApiParam(required = true, name = "Registration Details", value = "Minimum registration details")
-                                         @RequestBody @Valid AccountCreationResource accountCreationResource,
-                                         BindingResult bindingResult) {
+                                         @RequestBody @Valid final AccountCreationResource accountCreationResource,
+                                         final BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
@@ -75,7 +75,7 @@ public class AccountController {
     })
     @ResponseStatus(HttpStatus.OK)
     public void loginAccount(@ApiParam(required = true, name = "Login Details", value = "Valid login details")
-                             @RequestBody @Valid LoginResource loginResource){
+                             @RequestBody @Valid LoginResource loginResource) {
         throw new IllegalStateException("loginAccount() shouldn't be called from Controller: it is implemented by custom AuthenticationFilter.");
     }
 

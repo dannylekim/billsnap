@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.presentation.resources;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -12,7 +13,9 @@ import lombok.Data;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 @Data
-public class BillResource {
+public class BillResource implements Serializable {
+
+    private static final long serialVersionUID = 8297193114531722626L;
 
     @ApiModelProperty(name = "Id of the bill")
     private Long id;
