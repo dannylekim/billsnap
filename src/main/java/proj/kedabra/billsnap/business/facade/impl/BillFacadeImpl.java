@@ -1,7 +1,9 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -52,11 +54,23 @@ public class BillFacadeImpl implements BillFacade {
                 .orElseThrow(() -> new ResourceNotFoundException("Account does not exist"));
 
         final Bill bill = billService.createBillToAccount(billDTO, account);
+        return getBillCompleteDTO(bill);
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<BillCompleteDTO> getAllBillsByEmail(String email) {
+        final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
+                .orElseThrow(() -> new ResourceNotFoundException("Account does not exist"));
 
-        final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
+        return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
+
+    }
+
+    //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
+    private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
+        final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
         billCompleteDTO.setBalance(balance);
-
         return billCompleteDTO;
     }
 

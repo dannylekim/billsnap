@@ -11,9 +11,12 @@ public class UserFixture {
     private UserFixture() {}
 
     public static User getDefault() {
-        String email = "user@user.com";
+        return getDefaultWithEmailAndPassword("user@user.com", "somepass");
+    }
+
+    public static User getDefaultWithEmailAndPassword(final String email, final String password) {
         String role = "ROLE_USER";
         List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-        return new User(email, "somepass", authorities);
+        return new User(email, password, authorities);
     }
 }
