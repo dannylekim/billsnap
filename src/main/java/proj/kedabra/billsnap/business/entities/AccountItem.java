@@ -31,6 +31,6 @@ public class AccountItem implements Serializable {
     @MapsId("itemId")
     private Item item;
 
-    @Column(name = "percentage", precision = 4, scale = 4, nullable = false)
+    @Column(name = "percentage", precision = 7, scale = 4, nullable = false)
     private BigDecimal percentage;
 }

@@ -79,7 +79,7 @@ public class Bill implements Serializable {
     @Column(name = "occurrence")
     private Integer occurrence;
 
-    @Column(name = "tip_percent", precision = 6, scale = 4)
+    @Column(name = "tip_percent", precision = 7, scale = 4)
     private BigDecimal tipPercent;
 
     @Column(name = "tip_amount", precision = 14, scale = 2)
