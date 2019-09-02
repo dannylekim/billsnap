@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.business.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,10 +66,10 @@ public class Bill implements Serializable {
     private BillStatusEnum status;
 
     @Column(name = "created")
-    private ZonedDateTime created = ZonedDateTime.now();
+    private ZonedDateTime created = ZonedDateTime.now(ZoneId.systemDefault());
 
     @Column(name = "updated")
-    private ZonedDateTime updated = ZonedDateTime.now();
+    private ZonedDateTime updated = ZonedDateTime.now(ZoneId.systemDefault());
 
     @Column(name = "category", length = 20)
     private String category;

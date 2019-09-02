@@ -25,7 +25,6 @@ import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
-import proj.kedabra.billsnap.business.repository.ItemRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -45,9 +44,6 @@ class BillFacadeImplIT {
 
     @Autowired
     private BillRepository billRepository;
-
-    @Autowired
-    private ItemRepository itemRepository;
 
     @Test
     @DisplayName("Should return an exception if the account does not exist")

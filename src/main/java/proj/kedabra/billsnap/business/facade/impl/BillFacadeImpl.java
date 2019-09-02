@@ -2,7 +2,6 @@ package proj.kedabra.billsnap.business.facade.impl;
 
 import java.math.BigDecimal;
 import java.util.Optional;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -14,7 +13,6 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
-import proj.kedabra.billsnap.business.entities.Tax;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
@@ -66,29 +64,17 @@ public class BillFacadeImpl implements BillFacade {
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private BigDecimal calculateBalance(final Bill bill) {
         final BigDecimal subTotal = bill.getItems().stream().map(Item::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-        final Set<Tax> taxes = bill.getTaxes();
-        final BigDecimal flatTaxAmount = taxes.stream().map(Tax::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
 
 
-        BigDecimal taxPercentageAmount = BigDecimal.ZERO;
-        if (!taxes.isEmpty()) {
-            taxPercentageAmount = taxes
-                    .stream()
-                    .map(Tax::getPercentage)
-                    .map(taxPercent -> taxPercent.divide(PERCENTAGE_DIVISOR))
-                    .reduce(subTotal, (result, element) -> result.add(result.multiply(element)));
-        }
-
-        final BigDecimal total = subTotal.add(flatTaxAmount).add(taxPercentageAmount);
 
         final BigDecimal tipAmount = Optional.ofNullable(bill.getTipAmount()).orElse(BigDecimal.ZERO);
 
         final BigDecimal tipPercentAmount = Optional.ofNullable(bill.getTipPercent())
                 .map(tipPercent -> tipPercent.divide(PERCENTAGE_DIVISOR))
-                .map(total::multiply)
+                .map(subTotal::multiply)
                 .orElse(BigDecimal.ZERO);
 
-        return total.add(tipAmount).add(tipPercentAmount);
+        return subTotal.add(tipAmount).add(tipPercentAmount);
 
     }
 }

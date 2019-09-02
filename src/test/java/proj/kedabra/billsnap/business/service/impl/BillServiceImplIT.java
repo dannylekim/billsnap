@@ -29,7 +29,7 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @ActiveProfiles(SpringProfiles.TEST)
 @SpringBootTest
 @Transactional
-class BillServiceImplTest {
+class BillServiceImplIT {
 
     @Autowired
     private BillServiceImpl billService;
