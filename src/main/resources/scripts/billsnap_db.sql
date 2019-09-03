@@ -24,7 +24,9 @@ create function is_split_by_balance(bill_id integer) returns boolean
 as
 $$
 begin
-    select b.status = 'BALANCE' from "bill" b where b.id = bill_id;
+    RETURN EXISTS(
+            select b.status = 'BALANCE' from "bill" b where b.id = bill_id
+        );
 end;
 $$;
 
@@ -87,7 +89,7 @@ create table if not exists bill
     category    varchar(20),
     company     varchar(20),
     occurrence  integer,
-    tip_percent numeric(6, 4),
+    tip_percent numeric(7, 4),
     tip_amount  numeric(14, 2),
     split_by    split_type not null,
     location_id integer
@@ -107,7 +109,7 @@ create table if not exists tax
             references bill,
     "order"    integer not null,
     amount     numeric(14, 2),
-    percentage numeric(6, 4),
+    percentage numeric(7, 4),
     constraint unique_orders_to_bill
         primary key (bill_id, "order"),
     constraint one_of_amount_or_percentage
@@ -170,7 +172,7 @@ create table if not exists items_vs_accounts
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4) not null,
+    percentage numeric(7, 4) not null,
     constraint "ITEM_VS_USERS_pkey"
         primary key (item_id, account_id)
 );
@@ -183,7 +185,7 @@ create table if not exists bills_vs_accounts
     account_id integer not null
         constraint "BILLS_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4),
+    percentage numeric(7, 4),
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
     constraint not_null_if_balance

@@ -12,10 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 
 class UserDetailsServiceImplTest {

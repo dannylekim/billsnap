@@ -48,7 +48,7 @@ public class JwtService implements Serializable {
         this.jwtExpiration = jwtExpiration;
     }
 
-    String generateToken(User user) {
+    public String generateToken(User user) {
         List<String> roles = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -66,7 +66,7 @@ public class JwtService implements Serializable {
                 .compact();
     }
 
-    JwsHeader getJwtHeaders(String token) {
+    public JwsHeader getJwtHeaders(String token) {
         byte[] signingKey = jwtSecret.getBytes(UTF_8);
         return Jwts.parser()
                 .setSigningKey(signingKey)
@@ -74,11 +74,11 @@ public class JwtService implements Serializable {
                 .getHeader();
     }
 
-    String getJwtUsername(String token) {
+    public String getJwtUsername(String token) {
         return getJwtBody(token).getSubject();
     }
 
-    Collection<GrantedAuthority> getJwtAuthorities(String token) {
+    public Collection<GrantedAuthority> getJwtAuthorities(String token) {
         return ((List<?>) getJwtBody(token).get("roles"))
                 .stream()
                 .map(String.class::cast)

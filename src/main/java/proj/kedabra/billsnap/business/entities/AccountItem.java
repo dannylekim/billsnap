@@ -21,7 +21,7 @@ public class AccountItem implements Serializable {
     private static final long serialVersionUID = -7299388616155721671L;
 
     @EmbeddedId
-    private AccountItemId id;
+    private AccountItemId id = new AccountItemId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("accountId")
@@ -31,6 +31,6 @@ public class AccountItem implements Serializable {
     @MapsId("itemId")
     private Item item;
 
-    @Column(name = "percentage", precision = 4, scale = 4, nullable = false)
+    @Column(name = "percentage", precision = 7, scale = 4, nullable = false)
     private BigDecimal percentage;
 }

@@ -2,8 +2,8 @@ package proj.kedabra.billsnap.business.entities;
 
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -24,6 +24,8 @@ import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
@@ -81,11 +83,17 @@ public class Account implements Serializable {
     private Location location;
 
     @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<AccountGroup> groups = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<AccountGroup> groups = new HashSet<>();
 
     @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<AccountBill> bills = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<AccountBill> bills = new HashSet<>();
 
     @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
-    private List<AccountItem> items = new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<AccountItem> items = new HashSet<>();
 }
