@@ -107,7 +107,7 @@ class BillServiceImplIT {
     @DisplayName("Should return empty stream if no bills in account")
     void shouldReturnEmptyList() {
         //Given
-        //Account with 2 bills
+        //Account with 0 bills
         final Account account = accountRepository.getAccountByEmail("userdetails@service.com");
 
         //When
