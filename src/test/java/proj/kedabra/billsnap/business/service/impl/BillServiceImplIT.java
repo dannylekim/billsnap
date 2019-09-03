@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -85,6 +86,35 @@ class BillServiceImplIT {
 
         //Then
         assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));
+    }
+
+    @Test
+    @DisplayName("Should return all bills saved in database to account")
+    void shouldReturnAllBillsInDb() {
+        //Given
+        //Account with 2 bills
+        final Account account = accountRepository.getAccountByEmail("test@email.com");
+
+        //When
+        final Stream<Bill> allBillsByAccount = billService.getAllBillsByAccount(account);
+
+        //Then
+        assertEquals(2, allBillsByAccount.count());
+
+    }
+
+    @Test
+    @DisplayName("Should return empty stream if no bills in account")
+    void shouldReturnEmptyList() {
+        //Given
+        //Account with 0 bills
+        final Account account = accountRepository.getAccountByEmail("userdetails@service.com");
+
+        //When
+        final Stream<Bill> allBillsByAccount = billService.getAllBillsByAccount(account);
+
+        //Then
+        assertEquals(0, allBillsByAccount.count());
     }
 
 }

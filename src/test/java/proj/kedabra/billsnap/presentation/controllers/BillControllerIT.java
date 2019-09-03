@@ -3,12 +3,14 @@ package proj.kedabra.billsnap.presentation.controllers;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -87,6 +89,7 @@ class BillControllerIT {
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
+        assertNotNull(response.getId());
         assertEquals(billCreationResource.getName(), response.getName());
         assertEquals(billCreationResource.getCategory(), response.getCategory());
         assertEquals(billCreationResource.getCompany(), response.getCompany());
@@ -471,5 +474,76 @@ class BillControllerIT {
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(NUMBER_OUT_OF_BOUNDS_3_4, error.getErrors().get(0).getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return empty List if no bills")
+    void shouldReturnEmptyListOfResourceIfNoBills() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+
+        //When/Then
+        MvcResult result = mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        List response = mapper.readValue(content, new TypeReference<List<BillResource>>() {});
+        assertTrue(response.isEmpty());
+
+    }
+
+    @Test
+    @DisplayName("Should return list of 2 BillResources after adding 2 bills")
+    void shouldReturnListOf2Resources() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+
+        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        BillResource billOne = mapper.readValue(content, BillResource.class);
+
+        result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+
+        content = result.getResponse().getContentAsString();
+        BillResource billTwo = mapper.readValue(content, BillResource.class);
+
+
+        //When/Then
+        result = mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+
+        content = result.getResponse().getContentAsString();
+
+        List<BillResource> response = mapper.readValue(content, new TypeReference<List<BillResource>>() {});
+
+        verifyBillResources(billOne, response.get(0));
+        verifyBillResources(billTwo, response.get(1));
+
+
+    }
+    private void verifyBillResources(BillResource expectedBillResource, BillResource actualBillResource) {
+        assertEquals(expectedBillResource.getId(), actualBillResource.getId());
+        assertEquals(expectedBillResource.getName(), actualBillResource.getName());
+        assertEquals(expectedBillResource.getCategory(), actualBillResource.getCategory());
+        assertEquals(expectedBillResource.getCompany(), actualBillResource.getCompany());
+        assertEquals(expectedBillResource.getItems().size(), actualBillResource.getItems().size());
+        assertEquals(expectedBillResource.getCreator(), actualBillResource.getCreator());
+        assertEquals(expectedBillResource.getResponsible(), actualBillResource.getResponsible());
+        assertEquals(BillStatusEnum.OPEN, actualBillResource.getStatus());
+        assertEquals(0, expectedBillResource.getBalance().compareTo(actualBillResource.getBalance()));
+        assertNotNull(expectedBillResource.getCreated());
+        assertNotNull(expectedBillResource.getUpdated());
+        assertNotNull(expectedBillResource.getId());
     }
 }
