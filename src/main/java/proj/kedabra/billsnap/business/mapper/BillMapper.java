@@ -20,5 +20,4 @@ public interface BillMapper {
     BillDTO toDTO(BillCreationResource billCreationResource);
 
     BillResource toResource(BillCompleteDTO billDTO);
-
 }

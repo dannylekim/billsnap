@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -49,7 +50,7 @@ class BillServiceImplIT {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
 
         //When
-        final Bill bill = billService.createBillToAccount(billDTO, account);
+        final Bill bill = billService.createBillToAccount(billDTO, account, new ArrayList<>());
 
         //Then
         final Set<AccountBill> accounts = bill.getAccounts();
@@ -82,7 +83,7 @@ class BillServiceImplIT {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
 
         //When
-        final Bill bill = billService.createBillToAccount(billDTO, account);
+        final Bill bill = billService.createBillToAccount(billDTO, account, new ArrayList<>());
 
         //Then
         assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));

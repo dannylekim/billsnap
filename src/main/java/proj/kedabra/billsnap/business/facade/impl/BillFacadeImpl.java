@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.facade.BillFacade;
@@ -31,6 +33,9 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
+    private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
+
+    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "An account in the list of accounts does not exist";
 
     @Autowired
     public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper) {
@@ -51,16 +56,32 @@ public class BillFacadeImpl implements BillFacade {
         }
 
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException("Account does not exist"));
+                .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
 
-        final Bill bill = billService.createBillToAccount(billDTO, account);
+        List<Account> accountsList = new ArrayList<>();
+
+        if (!billDTO.getAccountsList().isEmpty()) {
+//            accountsList = billDTO.getAccountsList().stream().map(emailElement -> Optional.ofNullable(accountRepository.getAccountByEmail(emailElement))
+//                    .orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST))).collect(Collectors.toList());
+
+//            accountsList = Optional.ofNullable(accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()))
+//                    .orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST));
+
+            //getAccountsByEmailIn ignores bad cases... TODO
+            accountsList = (accountRepository.getAccountsByEmailIn(billDTO.getAccountsList())).stream()
+                    .map(acc -> Optional.ofNullable(acc).orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST)))
+                    .collect(Collectors.toList());
+        }
+
+        final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
+
         return getBillCompleteDTO(bill);
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public List<BillCompleteDTO> getAllBillsByEmail(String email) {
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException("Account does not exist"));
+                .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
 
         return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
 
@@ -70,7 +91,9 @@ public class BillFacadeImpl implements BillFacade {
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
+        final List<Account> accountList = bill.getAccounts().stream().map(AccountBill::getAccount).collect(Collectors.toList());
         billCompleteDTO.setBalance(balance);
+        billCompleteDTO.setAccountsList(accountList);
         return billCompleteDTO;
     }
 

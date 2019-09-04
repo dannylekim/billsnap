@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Bill createBillToAccount(BillDTO billDTO, Account account) {
+    public Bill createBillToAccount(BillDTO billDTO, Account account, List<Account> accountList) {
         final Bill bill = billMapper.toEntity(billDTO);
         bill.setStatus(BillStatusEnum.OPEN);
         bill.setResponsible(account);
@@ -47,12 +48,11 @@ public class BillServiceImpl implements BillService {
 
         bill.getItems().forEach(i -> mapItems(i, bill, account));
 
+        if (!accountList.isEmpty()) {
+            accountList.forEach(acc -> mapAccount(bill, acc, BigDecimal.ZERO));
+        }
 
-        AccountBill accountBill = new AccountBill();
-        accountBill.setBill(bill);
-        accountBill.setAccount(account);
-        accountBill.setPercentage(new BigDecimal(100));
-        bill.getAccounts().add(accountBill);
+        mapAccount(bill, account, new BigDecimal(100));
 
         return billRepository.save(bill);
     }
@@ -70,6 +70,14 @@ public class BillServiceImpl implements BillService {
         accountItem.setPercentage(new BigDecimal(100));
         accountItem.setItem(item);
         item.getAccounts().add(accountItem);
+    }
+
+    private void mapAccount(final Bill bill, final Account account, BigDecimal percentage) {
+        var accountBill = new AccountBill();
+        accountBill.setAccount(account);
+        accountBill.setBill(bill);
+        accountBill.setPercentage(percentage);
+        bill.getAccounts().add(accountBill);
     }
 
 }

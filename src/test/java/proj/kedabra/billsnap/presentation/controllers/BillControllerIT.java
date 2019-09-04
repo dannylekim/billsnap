@@ -10,6 +10,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
@@ -39,6 +41,7 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @AutoConfigureMockMvc
 @SuppressWarnings("squid:S00112")
 @AutoConfigureTestDatabase
+@Transactional
 class BillControllerIT {
 
     @Autowired
@@ -75,8 +78,8 @@ class BillControllerIT {
     private static final String NUMBER_OUT_OF_BOUNDS_3_4 = "numeric value out of bounds (<3 digits>.<4 digits> expected)";
 
     @Test
-    @DisplayName("Should return proper reply with 201 status")
-    void ShouldReturn201ForNormalCase() throws Exception {
+    @DisplayName("Should return proper reply with 201 status for POST /bill")
+    void ShouldReturn201ForNormalCaseAddBill() throws Exception {
         //Given
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();

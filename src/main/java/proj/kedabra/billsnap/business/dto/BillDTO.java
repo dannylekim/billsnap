@@ -19,6 +19,8 @@ public class BillDTO {
 
     private List<ItemDTO> items = new ArrayList<>();
 
+    private List<String> accountsList = new ArrayList<>();
+
     private BigDecimal tipAmount;
 
     private BigDecimal tipPercent;

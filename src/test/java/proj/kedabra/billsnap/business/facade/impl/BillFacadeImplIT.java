@@ -19,7 +19,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
-import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.entities.AccountBill;
@@ -61,6 +60,27 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should return exception if list of emails contains one or more emails that do not exist")
+    void ShouldReturnExceptionIfEmailInListOfEmailsDoesNotExist() {
+        //Given a bill creator with existing email, but billDTO containing non-existent email in array of emails
+        final var billDTO = BillDTOFixture.getDefault();
+        final String existentEmail = "userdetails@service.com";
+        final String anotherExistentEmail = "test@email.com";
+        billDTO.setAccountsList(List.of("nonexistent@email.com", anotherExistentEmail));
+
+        //When/Then
+        final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
+                () -> billFacade.addPersonalBill(existentEmail, billDTO));
+        assertEquals("An account in the list of accounts does not exist", resourceNotFoundException.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return exception if list of emails contains bill creator email")
+    void ShouldReturnExceptionIfBillCreatorIsInListOfEmails() {
+        //TODO
+    }
+
+    @Test
     @DisplayName("Should save bill in database")
     void shouldSaveBillToUserInDatabase() {
 
@@ -87,7 +107,7 @@ class BillFacadeImplIT {
         final String testEmail = "test@email.com";
 
         // When
-        final BillDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
 
         // Then
         final var account = accountRepository.getAccountByEmail(testEmail);
