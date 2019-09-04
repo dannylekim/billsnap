@@ -16,5 +16,5 @@ cache:
     - $HOME/.gradle/wrapper/
 
 after_success:
-  - gradle jacocoTestReport
+  - ./gradlew jacocoTestReport
   - bash <(curl -s https://codecov.io/bash)
