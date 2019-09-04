@@ -90,6 +90,14 @@ class BillServiceImplIT {
     }
 
     @Test
+    @DisplayName("Should save bill with non-empty accountsStringList in database")
+    void shouldSaveBillWithAccountsListInDatabase() {
+        //TODO
+    }
+
+
+
+    @Test
     @DisplayName("Should return all bills saved in database to account")
     void shouldReturnAllBillsInDb() {
         //Given

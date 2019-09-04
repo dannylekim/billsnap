@@ -111,6 +111,39 @@ class BillControllerIT {
         assertNotNull(response.getCreated());
         assertNotNull(response.getUpdated());
         assertNotNull(response.getId());
+        assertTrue(response.getAccountsEntityList().isEmpty());
+    }
+
+    @Test
+    @DisplayName("Should return proper reply with 201 for POST /bill with accountsStringList defined")
+    void ShouldReturn201NormalCaseAddBillWithAccountsList() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final String existentEmail = "test@email.com";
+        billCreationResource.setAccountsStringList(List.of(existentEmail));
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        BillResource response = mapper.readValue(content, BillResource.class);
+
+        assertNotNull(response.getId());
+        assertEquals(billCreationResource.getName(), response.getName());
+        assertEquals(billCreationResource.getCategory(), response.getCategory());
+        assertEquals(billCreationResource.getCompany(), response.getCompany());
+        assertEquals(billCreationResource.getItems().size(), response.getItems().size());
+        assertEquals(user.getUsername(), response.getCreator().getEmail());
+        assertEquals(user.getUsername(), response.getResponsible().getEmail());
+        assertEquals(BillStatusEnum.OPEN, response.getStatus());
+        assertEquals(-1, BigDecimal.valueOf(0).compareTo(response.getBalance()));
+        assertNotNull(response.getCreated());
+        assertNotNull(response.getUpdated());
+        assertNotNull(response.getId());
+        assertThat(response.getAccountsEntityList()).isNotEmpty();
     }
 
     @Test

@@ -107,6 +107,11 @@ class BillFacadeImplIT {
         verifyBillDTOToBill(returnBillDTO, bill);
     }
 
+    @Test
+    @DisplayName("Should save bill with non-empty accountsStringList in database")
+    void shouldSaveBillWithAccountsListInDatabase() {
+        //TODO
+    }
 
     @Test
     @DisplayName("Should save bill to user with 100$% in database")

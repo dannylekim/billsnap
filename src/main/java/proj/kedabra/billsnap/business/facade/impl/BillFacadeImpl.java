@@ -75,7 +75,11 @@ public class BillFacadeImpl implements BillFacade {
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
 
-        return getBillCompleteDTO(bill);
+        if(!billDTO.getAccountsStringList().isEmpty()) {
+            return getBillCompleteDTO(bill, accountsList);
+        } else {
+            return getBillCompleteDTO(bill);
+        }
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -91,9 +95,15 @@ public class BillFacadeImpl implements BillFacade {
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
-        final List<Account> accountList = bill.getAccounts().stream().map(AccountBill::getAccount).collect(Collectors.toList());
         billCompleteDTO.setBalance(balance);
-        billCompleteDTO.setAccountsEntityList(accountList);
+        return billCompleteDTO;
+    }
+
+    private BillCompleteDTO getBillCompleteDTO(Bill bill, List<Account> accounts){
+        final BigDecimal balance = calculateBalance(bill);
+        final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
+        billCompleteDTO.setBalance(balance);
+        billCompleteDTO.setAccountsEntityList(accounts);
         return billCompleteDTO;
     }
 
