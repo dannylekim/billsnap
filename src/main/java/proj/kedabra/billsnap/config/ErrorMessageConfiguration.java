@@ -5,9 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
-public class ErrorMessageConfiguration {
+public class ErrorMessageConfiguration implements WebMvcConfigurer {
 
 
     @Bean
@@ -25,6 +26,7 @@ public class ErrorMessageConfiguration {
      * @return validator bean that resolves message properties.
      */
     @Bean
+    @Override
     public LocalValidatorFactoryBean getValidator() {
         var localValidatorBean = new LocalValidatorFactoryBean();
         localValidatorBean.setValidationMessageSource(messageSource());
