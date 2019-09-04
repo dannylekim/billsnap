@@ -55,6 +55,9 @@ dependencies {
     runtime 'io.jsonwebtoken:jjwt-impl:0.10.5',
             'io.jsonwebtoken:jjwt-jackson:0.10.5'
 
+    //Sentry
+    compile 'io.sentry:sentry-logback:1.7.27'
+
     runtimeOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'com.h2database:h2'
     implementation 'org.postgresql:postgresql'
