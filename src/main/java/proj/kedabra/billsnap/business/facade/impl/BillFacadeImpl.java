@@ -37,12 +37,13 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "An account in the list of accounts does not exist";
 
+    private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
+
     @Autowired
     public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper) {
         this.accountRepository = accountRepository;
         this.billService = billService;
         this.billMapper = billMapper;
-
     }
 
     @Override
@@ -60,17 +61,16 @@ public class BillFacadeImpl implements BillFacade {
 
         List<Account> accountsList = new ArrayList<>();
 
-        if (!billDTO.getAccountsList().isEmpty()) {
-//            accountsList = billDTO.getAccountsList().stream().map(emailElement -> Optional.ofNullable(accountRepository.getAccountByEmail(emailElement))
-//                    .orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST))).collect(Collectors.toList());
+        if (!billDTO.getAccountsStringList().isEmpty()) {
+            if (billDTO.getAccountsStringList().contains(email)) {
+                throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
+            }
 
-//            accountsList = Optional.ofNullable(accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()))
-//                    .orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST));
+            accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsStringList());
 
-            //getAccountsByEmailIn ignores bad cases... TODO
-            accountsList = (accountRepository.getAccountsByEmailIn(billDTO.getAccountsList())).stream()
-                    .map(acc -> Optional.ofNullable(acc).orElseThrow(() -> new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST)))
-                    .collect(Collectors.toList());
+            if (billDTO.getAccountsStringList().size() != accountsList.size()) {
+                throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST);
+            }
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
@@ -93,7 +93,7 @@ public class BillFacadeImpl implements BillFacade {
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
         final List<Account> accountList = bill.getAccounts().stream().map(AccountBill::getAccount).collect(Collectors.toList());
         billCompleteDTO.setBalance(balance);
-        billCompleteDTO.setAccountsList(accountList);
+        billCompleteDTO.setAccountsEntityList(accountList);
         return billCompleteDTO;
     }
 
@@ -101,8 +101,6 @@ public class BillFacadeImpl implements BillFacade {
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private BigDecimal calculateBalance(final Bill bill) {
         final BigDecimal subTotal = bill.getItems().stream().map(Item::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-
 
         final BigDecimal tipAmount = Optional.ofNullable(bill.getTipAmount()).orElse(BigDecimal.ZERO);
 

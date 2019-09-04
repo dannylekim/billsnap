@@ -51,7 +51,7 @@ public class BillResource implements Serializable {
     private List<ItemResource> items;
 
     @ApiModelProperty(name = "List of accounts associated to the bill", position = 10)
-    private List<Account> accountsList;
+    private List<Account> accountsEntityList;
 
     @ApiModelProperty(name = "the total amount of the bill", position = 11)
     private BigDecimal balance;

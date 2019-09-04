@@ -17,7 +17,7 @@ public class BillCreationResourceFixture {
         resource.setCompany("");
         resource.setItems(List.of(ItemResourceFixture.getDefault()));
         resource.setTipAmount(BigDecimal.valueOf(5));
-        resource.setAccountsList(new ArrayList<>());
+        resource.setAccountsStringList(new ArrayList<>());
 
         return resource;
     }

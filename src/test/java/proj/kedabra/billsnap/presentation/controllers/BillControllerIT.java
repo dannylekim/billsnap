@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -31,6 +32,7 @@ import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.presentation.ApiSubError;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -65,6 +67,8 @@ class BillControllerIT {
 
     private static final String INVALID_INPUTS = "Invalid Inputs. Please fix the following errors";
 
+    private static final String WRONG_SIZE_0_TO_50 = "size must be between 0 and 50";
+
     private static final String WRONG_SIZE_0_TO_30 = "size must be between 0 and 30";
 
     private static final String WRONG_SIZE_0_TO_20 = "size must be between 0 and 20";
@@ -76,6 +80,9 @@ class BillControllerIT {
     private static final String NUMBER_OUT_OF_BOUNDS_12_2 = "numeric value out of bounds (<12 digits>.<2 digits> expected)";
 
     private static final String NUMBER_OUT_OF_BOUNDS_3_4 = "numeric value out of bounds (<3 digits>.<4 digits> expected)";
+
+    private static final String NOT_IN_EMAIL_FORMAT = "Must be in an email format. ex: test@email.com.";
+
 
     @Test
     @DisplayName("Should return proper reply with 201 status for POST /bill")
@@ -479,6 +486,90 @@ class BillControllerIT {
         assertEquals(NUMBER_OUT_OF_BOUNDS_3_4, error.getErrors().get(0).getMessage());
     }
 
+
+    @Test
+    @DisplayName("Should return exception if one or more emails in list is not in email format")
+    void ShouldReturnExceptionIfOneOrMoreEmailsIsNotEmailFormat() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final String existentEmail = "test@email.com";
+        final String invalidEmail = "nonexistentcom";
+        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
+    }
+
+    @Test
+    @DisplayName("Should return exception if one or more emails in list is blank")
+    void ShouldReturnExceptionIfOneOrMoreEmailsIsBlank() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final String existentEmail = "test@email.com";
+        final String invalidEmail = " ";
+        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(2);
+
+        final var errorList = error.getErrors().stream()
+                .map(ApiSubError::getMessage)
+                .filter(msg -> msg.equals(MUST_NOT_BE_BLANK)
+                        || msg.equals(NOT_IN_EMAIL_FORMAT))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertThat(errorList.size()).isEqualTo(error.getErrors().size());
+    }
+
+    @Test
+    @DisplayName("Should return exception if one or more emails in list is too long")
+    void ShouldReturnExceptionIfOneOrMoreEmailsIsTooLong() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final String existentEmail = "test@email.com";
+        final String invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
+        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+
+        //When/Then
+        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(2);
+
+        final var errorList = error.getErrors().stream()
+                .map(ApiSubError::getMessage)
+                .filter(msg -> msg.equals(WRONG_SIZE_0_TO_50)
+                        || msg.equals(NOT_IN_EMAIL_FORMAT))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertThat(errorList.size()).isEqualTo(error.getErrors().size());
+    }
+
     @Test
     @DisplayName("Should return empty List if no bills")
     void shouldReturnEmptyListOfResourceIfNoBills() throws Exception {
@@ -493,7 +584,8 @@ class BillControllerIT {
                 .andExpect(status().isCreated()).andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List response = mapper.readValue(content, new TypeReference<List<BillResource>>() {});
+        List response = mapper.readValue(content, new TypeReference<List<BillResource>>() {
+        });
         assertTrue(response.isEmpty());
 
     }
@@ -528,13 +620,13 @@ class BillControllerIT {
 
         content = result.getResponse().getContentAsString();
 
-        List<BillResource> response = mapper.readValue(content, new TypeReference<List<BillResource>>() {});
+        List<BillResource> response = mapper.readValue(content, new TypeReference<List<BillResource>>() {
+        });
 
         verifyBillResources(billOne, response.get(0));
         verifyBillResources(billTwo, response.get(1));
-
-
     }
+
     private void verifyBillResources(BillResource expectedBillResource, BillResource actualBillResource) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());

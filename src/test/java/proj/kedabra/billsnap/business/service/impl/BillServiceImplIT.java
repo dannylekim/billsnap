@@ -101,7 +101,6 @@ class BillServiceImplIT {
 
         //Then
         assertEquals(2, allBillsByAccount.count());
-
     }
 
     @Test

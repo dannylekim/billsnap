@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -29,6 +30,7 @@ import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
+
 
 @Tag("integration")
 @ActiveProfiles(SpringProfiles.TEST)
@@ -66,7 +68,7 @@ class BillFacadeImplIT {
         final var billDTO = BillDTOFixture.getDefault();
         final String existentEmail = "userdetails@service.com";
         final String anotherExistentEmail = "test@email.com";
-        billDTO.setAccountsList(List.of("nonexistent@email.com", anotherExistentEmail));
+        billDTO.setAccountsStringList(List.of("nonexistent@email.com", anotherExistentEmail));
 
         //When/Then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
@@ -77,7 +79,15 @@ class BillFacadeImplIT {
     @Test
     @DisplayName("Should return exception if list of emails contains bill creator email")
     void ShouldReturnExceptionIfBillCreatorIsInListOfEmails() {
-        //TODO
+        //Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String billCreator = "userdetails@service.com";
+        final String anotherExistentEmail = "test@email.com";
+        billDTO.setAccountsStringList(List.of(billCreator, anotherExistentEmail));
+
+        //When/Then
+        assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
+                .withMessage("List of emails cannot contain bill creator email");
     }
 
     @Test

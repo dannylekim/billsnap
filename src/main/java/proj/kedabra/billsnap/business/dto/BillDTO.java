@@ -19,7 +19,7 @@ public class BillDTO {
 
     private List<ItemDTO> items = new ArrayList<>();
 
-    private List<String> accountsList = new ArrayList<>();
+    private List<String> accountsStringList = new ArrayList<>();
 
     private BigDecimal tipAmount;
 

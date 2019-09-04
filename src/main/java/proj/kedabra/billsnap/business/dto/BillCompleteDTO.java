@@ -23,7 +23,7 @@ public class BillCompleteDTO {
 
     private List<ItemDTO> items = new ArrayList<>();
 
-    private List<Account> accountsList = new ArrayList<>();
+    private List<Account> accountsEntityList = new ArrayList<>();
 
     private BigDecimal tipAmount;
 
