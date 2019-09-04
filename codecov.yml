@@ -25,3 +25,8 @@ comment:
   behavior: default
   require_changes: no
 
+ignore:
+  - src/main/java/proj/kedabra/billsnap/config/.*
+  - src/main/java/proj/kedabra/billsnap/utils/enums/.*
+  - src/main/java/proj/kedabra/billsnap/BillsnapApplication.java
+
