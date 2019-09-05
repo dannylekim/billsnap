@@ -33,6 +33,7 @@ import proj.kedabra.billsnap.fixtures.ItemResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
+import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -93,9 +94,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
+        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
@@ -125,9 +124,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
+        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
@@ -157,9 +154,7 @@ class BillControllerIT {
         billCreationResource.setName("");
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -178,9 +173,7 @@ class BillControllerIT {
         billCreationResource.setName("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -199,9 +192,7 @@ class BillControllerIT {
         billCreationResource.setCategory("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -220,9 +211,7 @@ class BillControllerIT {
         billCreationResource.setCompany("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -243,9 +232,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -266,9 +253,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -289,9 +274,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -312,9 +295,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -335,9 +316,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -356,9 +335,7 @@ class BillControllerIT {
         billCreationResource.setItems(null);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -378,9 +355,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.TEN);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -399,9 +374,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -421,9 +394,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -443,9 +414,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -465,9 +434,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(-5));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -487,9 +454,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(1234.56));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -509,9 +474,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(20.12345));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -533,9 +496,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -556,9 +517,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -586,9 +545,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -632,16 +589,12 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var billCreationResource = BillCreationResourceFixture.getDefault();
 
-        MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
+        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
 
         String content = result.getResponse().getContentAsString();
         BillResource billOne = mapper.readValue(content, BillResource.class);
 
-        result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
+        result = performMvcPostRequest201Created(bearerToken, billCreationResource);
 
         content = result.getResponse().getContentAsString();
         BillResource billTwo = mapper.readValue(content, BillResource.class);
@@ -674,5 +627,17 @@ class BillControllerIT {
         assertNotNull(expectedBillResource.getCreated());
         assertNotNull(expectedBillResource.getUpdated());
         assertNotNull(expectedBillResource.getId());
+    }
+
+    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception{
+        return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().isCreated()).andReturn();
+    }
+
+    private MvcResult performMvcPostRequest4xxFailure(String bearerToken, BillCreationResource billCreationResource) throws Exception {
+        return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
     }
 }
