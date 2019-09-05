@@ -39,7 +39,7 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
 
-    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "An account in the list of accounts does not exist";
+    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist";
 
     private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
 
@@ -51,31 +51,24 @@ public class BillFacadeImpl implements BillFacade {
         this.accountMapper = accountMapper;
     }
 
+
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillCompleteDTO addPersonalBill(final String email, final BillDTO billDTO) {
-        final List<String> billDTOAccounts = billDTO.getAccountsList();
-        final List<Account> accountsList = new ArrayList<>();
 
-        //done in bill facade
-        if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
-            throw new IllegalArgumentException("Only one type of tipping is supported. " +
-                    "Please make sure only either tip amount or tip percent is set.");
-        }
+        validateBillDTO(email, billDTO);
 
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
+        final List<Account> accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()).collect(Collectors.toList());
+        final List<String> billDTOAccounts = billDTO.getAccountsList();
 
-        if (!billDTOAccounts.isEmpty()) {
-            if (billDTO.getAccountsList().contains(email)) {
-                throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
-            }
-
-            accountsList.addAll(accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()));
-
-            if (billDTOAccounts.size() != accountsList.size()) {
-                throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST);
-            }
+        if (billDTOAccounts.size() > accountsList.size()) {
+            final List<String> accountsStringList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
+            final List<String> nonExistentEmails = new ArrayList<>(billDTOAccounts);
+            nonExistentEmails.removeAll(accountsStringList);
+            throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST + ": " + nonExistentEmails.toString());
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
@@ -122,5 +115,15 @@ public class BillFacadeImpl implements BillFacade {
 
         return subTotal.add(tipAmount).add(tipPercentAmount);
 
+    }
+
+    private void validateBillDTO(String email, BillDTO billDTO) {
+        if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
+            throw new IllegalArgumentException("Only one type of tipping is supported. " +
+                    "Please make sure only either tip amount or tip percent is set.");
+        }
+        if (billDTO.getAccountsList().contains(email)) {
+            throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
+        }
     }
 }

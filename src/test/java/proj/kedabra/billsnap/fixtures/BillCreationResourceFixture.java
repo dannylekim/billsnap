@@ -6,7 +6,7 @@ import java.util.List;
 
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 
-public class BillCreationResourceFixture {
+public final class BillCreationResourceFixture {
 
     private BillCreationResourceFixture() { }
 

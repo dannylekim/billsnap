@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 
-public class BillDTOFixture {
+public final class BillDTOFixture {
 
     private BillDTOFixture() { }
 

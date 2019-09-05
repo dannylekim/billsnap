@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -70,17 +71,19 @@ class BillFacadeImplTest {
         //Given a bill creator with existing email, but billDTO containing non-existent email in array of emails
         final var billDTO = BillDTOFixture.getDefault();
         final String nonExistentEmail = "abc@123.ca";
+        final String nonExistentEmail2 = "lalala@email.com";
         final String existingEmail = "accountentity@test.com";
+        final String existingEmail2 = "existing2@email.com";
         final Account existingAccount = AccountEntityFixture.getDefaultAccount();
-        existingAccount.setEmail("existing2@email.com");
-        billDTO.setAccountsList(List.of("existing2@email.com", nonExistentEmail));
-        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(List.of(existingAccount));
+        existingAccount.setEmail(existingEmail2);
+        billDTO.setAccountsList(List.of(existingEmail2, nonExistentEmail, nonExistentEmail2));
+        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
         when(accountRepository.getAccountByEmail(existingEmail)).thenReturn(AccountEntityFixture.getDefaultAccount());
 
         //When/Then
-        final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
-                () -> billFacade.addPersonalBill(existingEmail, billDTO));
-        assertEquals("An account in the list of accounts does not exist", resourceNotFoundException.getMessage());
+
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billFacade.addPersonalBill(existingEmail, billDTO))
+                .withMessage("One or more accounts in the list of accounts does not exist: [%s, %s]", nonExistentEmail, nonExistentEmail2);
     }
 
     @Test

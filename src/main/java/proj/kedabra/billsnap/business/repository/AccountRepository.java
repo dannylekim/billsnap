@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.repository;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,6 @@ public interface AccountRepository extends CrudRepository<Account, Long> {
 
     Account getAccountByEmail(String email);
 
-    List<Account> getAccountsByEmailIn(List<String> emails);
+    Stream<Account> getAccountsByEmailIn(List<String> emails);
 
 }

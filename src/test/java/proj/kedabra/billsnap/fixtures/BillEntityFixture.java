@@ -12,7 +12,7 @@ import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
-public class BillEntityFixture {
+public final class BillEntityFixture {
     private BillEntityFixture() {}
 
     public static Bill getDefault() {

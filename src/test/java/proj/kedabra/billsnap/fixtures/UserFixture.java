@@ -6,7 +6,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 
-public class UserFixture {
+public final class UserFixture {
 
     private UserFixture() {}
 
@@ -15,8 +15,8 @@ public class UserFixture {
     }
 
     public static User getDefaultWithEmailAndPassword(final String email, final String password) {
-        String role = "ROLE_USER";
-        List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+        final String role = "ROLE_USER";
+        final List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
         return new User(email, password, authorities);
     }
 }

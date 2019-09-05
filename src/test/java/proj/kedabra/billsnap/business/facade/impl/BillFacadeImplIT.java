@@ -69,11 +69,12 @@ class BillFacadeImplIT {
         final var billDTO = BillDTOFixture.getDefault();
         final String existentEmail = "userdetails@service.com";
         final String anotherExistentEmail = "test@email.com";
-        billDTO.setAccountsList(List.of("nonexistent@email.com", anotherExistentEmail));
+        final String nonExistentEmail = "nonexistent@email.com";
+        billDTO.setAccountsList(List.of(nonExistentEmail, anotherExistentEmail));
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billFacade.addPersonalBill(existentEmail, billDTO))
-                .withMessage("An account in the list of accounts does not exist");
+                .withMessage("One or more accounts in the list of accounts does not exist: [%s]", nonExistentEmail);
     }
 
     @Test
