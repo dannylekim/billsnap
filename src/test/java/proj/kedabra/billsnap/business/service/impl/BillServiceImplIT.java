@@ -57,6 +57,7 @@ class BillServiceImplIT {
         //Then
         final Set<AccountBill> accounts = bill.getAccounts();
         assertEquals(1, accounts.size());
+
         final AccountBill accountBill = accounts.iterator().next();
         assertEquals(account, accountBill.getAccount());
         assertTrue(bill.getActive());
@@ -68,10 +69,12 @@ class BillServiceImplIT {
         assertEquals(billDTO.getItems().size(), bill.getItems().size());
         assertEquals(accountBill.getPercentage(), new BigDecimal(100));
         assertEquals(accountBill.getBill(), bill);
+
         final ItemDTO itemDTO = billDTO.getItems().get(0);
         final Item itemReturned = bill.getItems().iterator().next();
         assertEquals(itemDTO.getName(), itemReturned.getName());
         assertEquals(itemDTO.getCost(), itemReturned.getCost());
+
         final AccountItem accountItem = itemReturned.getAccounts().iterator().next();
         assertEquals(accountItem.getAccount(), account);
         assertEquals(accountItem.getPercentage(), new BigDecimal(100));

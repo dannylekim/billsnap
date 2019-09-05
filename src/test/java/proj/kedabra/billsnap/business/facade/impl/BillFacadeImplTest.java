@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -95,6 +96,19 @@ class BillFacadeImplTest {
         //When/Then
         assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
                 .withMessage("List of emails cannot contain bill creator email");
+    }
+
+    @Test
+    @DisplayName("Should return exception if email does not exist in GetAllBills")
+    void shouldThrowExceptionIfEmailDoesNotExistInGetAllBills() {
+        //Given
+        final String nonExistentEmail = "nonexistent@email.ca";
+        when(accountRepository.getAccountByEmail(any())).thenReturn(null);
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.getAllBillsByEmail(nonExistentEmail))
+                .withMessage("Account does not exist");
     }
 
     @Test

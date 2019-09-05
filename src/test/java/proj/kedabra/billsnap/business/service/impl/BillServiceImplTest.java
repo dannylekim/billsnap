@@ -1,7 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -56,11 +55,11 @@ class BillServiceImplTest {
     @DisplayName("Should return default bill")
     void ShouldReturnDefaultBill() {
         //Given
+        final var billDTO = BillDTOFixture.getDefault();
+
         when(accountRepository.getAccountByEmail(any())).thenReturn(AccountEntityFixture.getDefaultAccount());
         when(billMapper.toEntity(any())).thenReturn(BillEntityFixture.getMappedBillDTOFixture());
         when(billRepository.save(any(Bill.class))).thenAnswer(a -> a.getArguments()[0]);
-
-        final var billDTO = BillDTOFixture.getDefault();
 
         final Account account = accountRepository.getAccountByEmail("test@email.com");
 
@@ -69,25 +68,28 @@ class BillServiceImplTest {
 
         //Then
         final Set<AccountBill> accounts = bill.getAccounts();
-        assertEquals(1, accounts.size());
+        assertThat(accounts.size()).isEqualTo(1);
+
         final AccountBill accountBill = accounts.iterator().next();
-        assertEquals(account, accountBill.getAccount());
-        assertTrue(bill.getActive());
-        assertEquals(billDTO.getCategory(), bill.getCategory());
-        assertEquals(billDTO.getCompany(), bill.getCompany());
-        assertEquals(billDTO.getName(), bill.getName());
-        assertEquals(billDTO.getTipAmount(), bill.getTipAmount());
-        assertEquals(billDTO.getTipPercent(), bill.getTipPercent());
-        assertEquals(billDTO.getItems().size(), bill.getItems().size());
-        assertEquals(accountBill.getPercentage(), new BigDecimal(100));
-        assertEquals(accountBill.getBill(), bill);
+        assertThat(accountBill.getAccount()).isEqualTo(account);
+        assertThat(bill.getActive()).isTrue();
+        assertThat(bill.getCategory()).isEqualTo(billDTO.getCategory());
+        assertThat(bill.getCompany()).isEqualTo(billDTO.getCompany());
+        assertThat(bill.getName()).isEqualTo(billDTO.getName());
+        assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
+        assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
+        assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(new BigDecimal(100)).isEqualTo(accountBill.getPercentage());
+        assertThat(bill).isEqualTo(accountBill.getBill());
+
         final ItemDTO itemDTO = billDTO.getItems().get(0);
         final Item itemReturned = bill.getItems().iterator().next();
-        assertEquals(itemDTO.getName(), itemReturned.getName());
-        assertEquals(itemDTO.getCost(), itemReturned.getCost());
+        assertThat(itemReturned.getName()).isEqualTo(itemDTO.getName());
+        assertThat(itemReturned.getCost()).isEqualTo(itemDTO.getCost());
+
         final AccountItem accountItem = itemReturned.getAccounts().iterator().next();
-        assertEquals(accountItem.getAccount(), account);
-        assertEquals(accountItem.getPercentage(), new BigDecimal(100));
+        assertThat(account).isEqualTo(accountItem.getAccount());
+        assertThat(new BigDecimal(100)).isEqualTo(accountItem.getPercentage());
     }
 
     @Test
@@ -112,30 +114,34 @@ class BillServiceImplTest {
 
         //Then
         final Set<AccountBill> accounts = bill.getAccounts();
-        assertEquals(2, accounts.size());
+        assertThat(accounts).hasSize(2);
+
         final AccountBill creatorAccountBill = accounts.stream()
                 .filter(a -> a.getAccount().equals(account))
                 .iterator().next();
-        assertEquals(account, creatorAccountBill.getAccount());
-        assertTrue(bill.getActive());
-        assertEquals(billDTO.getCategory(), bill.getCategory());
-        assertEquals(billDTO.getCompany(), bill.getCompany());
-        assertEquals(billDTO.getName(), bill.getName());
-        assertEquals(billDTO.getTipAmount(), bill.getTipAmount());
-        assertEquals(billDTO.getTipPercent(), bill.getTipPercent());
-        assertEquals(billDTO.getItems().size(), bill.getItems().size());
-        assertEquals(creatorAccountBill.getPercentage(), new BigDecimal(100));
-        assertEquals(creatorAccountBill.getBill(), bill);
+        assertThat(creatorAccountBill.getAccount()).isEqualTo(account);
+        assertThat(bill.getActive()).isTrue();
+        assertThat(bill.getCategory()).isEqualTo(billDTO.getCategory());
+        assertThat(bill.getCompany()).isEqualTo(billDTO.getCompany());
+        assertThat(bill.getName()).isEqualTo(billDTO.getName());
+        assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
+        assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
+        assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(new BigDecimal(100)).isEqualTo(creatorAccountBill.getPercentage());
+        assertThat(bill).isEqualTo(creatorAccountBill.getBill());
+
         final AccountBill secondAccountBill = accounts.stream()
                 .filter(a -> !a.getAccount().equals(account))
                 .iterator().next();
-        assertEquals(someEmail, secondAccountBill.getAccount().getEmail());
+        assertThat(secondAccountBill.getAccount().getEmail()).isEqualTo(someEmail);
+
         final ItemDTO itemDTO = billDTO.getItems().get(0);
         final Item itemReturned = bill.getItems().iterator().next();
-        assertEquals(itemDTO.getName(), itemReturned.getName());
-        assertEquals(itemDTO.getCost(), itemReturned.getCost());
+        assertThat(itemReturned.getName()).isEqualTo(itemDTO.getName());
+        assertThat(itemReturned.getCost()).isEqualTo(itemDTO.getCost());
+
         final AccountItem accountItem = itemReturned.getAccounts().iterator().next();
-        assertEquals(accountItem.getAccount(), account);
-        assertEquals(accountItem.getPercentage(), new BigDecimal(100));
+        assertThat(account).isEqualTo(accountItem.getAccount());
+        assertThat(new BigDecimal(100)).isEqualTo(accountItem.getPercentage());
     }
 }
