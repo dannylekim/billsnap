@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -24,6 +25,7 @@ import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -90,11 +92,19 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should save bill with non-empty accountsStringList in database")
+    @DisplayName("Should save bill with non-empty accountsList in database")
     void shouldSaveBillWithAccountsListInDatabase() {
-        //TODO
-    }
+        //Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final Account account = accountRepository.getAccountByEmail("test@email.com");
+        final List<Account> accountsList = List.of(AccountEntityFixture.getDefaultAccount());
 
+        //When
+        final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
+
+        //Then
+        assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));
+    }
 
 
     @Test

@@ -111,18 +111,18 @@ class BillControllerIT {
         assertNotNull(response.getCreated());
         assertNotNull(response.getUpdated());
         assertNotNull(response.getId());
-        assertTrue(response.getAccountsEntityList().isEmpty());
+        assertTrue(response.getAccountsList().isEmpty());
     }
 
     @Test
-    @DisplayName("Should return proper reply with 201 for POST /bill with accountsStringList defined")
+    @DisplayName("Should return proper reply with 201 for POST /bill with accountsList defined")
     void ShouldReturn201NormalCaseAddBillWithAccountsList() throws Exception {
         //Given
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final String existentEmail = "test@email.com";
-        billCreationResource.setAccountsStringList(List.of(existentEmail));
+        billCreationResource.setAccountsList(List.of(existentEmail));
 
         //When/Then
         MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
@@ -143,7 +143,8 @@ class BillControllerIT {
         assertNotNull(response.getCreated());
         assertNotNull(response.getUpdated());
         assertNotNull(response.getId());
-        assertThat(response.getAccountsEntityList()).isNotEmpty();
+        assertThat(response.getAccountsList()).isNotEmpty();
+        assertThat(response.getAccountsList().get(0).getEmail()).isEqualTo(existentEmail);
     }
 
     @Test
@@ -529,7 +530,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final String existentEmail = "test@email.com";
         final String invalidEmail = "nonexistentcom";
-        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+        billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
         MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
@@ -552,7 +553,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final String existentEmail = "test@email.com";
         final String invalidEmail = " ";
-        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+        billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
         MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
@@ -582,7 +583,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final String existentEmail = "test@email.com";
         final String invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
-        billCreationResource.setAccountsStringList(List.of(existentEmail, invalidEmail));
+        billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
         MvcResult result = mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)

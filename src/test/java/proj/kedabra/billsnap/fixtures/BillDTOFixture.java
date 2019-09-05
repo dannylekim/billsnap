@@ -25,7 +25,7 @@ public class BillDTOFixture {
         items.add(itemDTO);
         billDTO.setItems(items);
 
-        billDTO.setAccountsStringList(new ArrayList<>());
+        billDTO.setAccountsList(new ArrayList<>());
 
         return billDTO;
     }

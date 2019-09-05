@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
@@ -31,17 +32,19 @@ class BillFacadeImplTest {
     private BillMapper billMapper;
 
     @Mock
+    private AccountMapper accountMapper;
+
+    @Mock
     private AccountRepository accountRepository;
 
     @Mock
     private BillService billService;
 
-
     @BeforeEach
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper);
+        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper);
 
     }
 
@@ -69,7 +72,7 @@ class BillFacadeImplTest {
         final String existingEmail = "accountentity@test.com";
         final Account existingAccount = AccountEntityFixture.getDefaultAccount();
         existingAccount.setEmail("existing2@email.com");
-        billDTO.setAccountsStringList(List.of("existing2@email.com", nonExistentEmail));
+        billDTO.setAccountsList(List.of("existing2@email.com", nonExistentEmail));
         when(accountRepository.getAccountsByEmailIn(any())).thenReturn(List.of(existingAccount));
         when(accountRepository.getAccountByEmail(existingEmail)).thenReturn(AccountEntityFixture.getDefaultAccount());
 
@@ -82,12 +85,11 @@ class BillFacadeImplTest {
     @Test
     @DisplayName("Should return exception if list of emails contains bill creator email")
     void ShouldReturnExceptionIfBillCreatorIsInListOfEmails() {
-        //TODO
         //Given
         final var billDTO = BillDTOFixture.getDefault();
         final String billCreator = "accountentity@test.com";
         final String existentEmail = "existent@email.com";
-        billDTO.setAccountsStringList(List.of(billCreator, existentEmail));
+        billDTO.setAccountsList(List.of(billCreator, existentEmail));
         when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
 
         //When/Then

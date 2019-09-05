@@ -42,7 +42,7 @@ public class BillCreationResource implements Serializable {
     private List<
             @NotBlank
             @Email(message = "{email.emailFormat}")
-            @Size(max = 50) String> accountsStringList;
+            @Size(max = 50) String> accountsList;
 
     @ApiModelProperty(name = "The tip amount. Only one of tipAmount or tipPercent is allowed", position = 5)
     @Digits(integer = 12, fraction = 2)

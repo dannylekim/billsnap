@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -68,12 +69,11 @@ class BillFacadeImplIT {
         final var billDTO = BillDTOFixture.getDefault();
         final String existentEmail = "userdetails@service.com";
         final String anotherExistentEmail = "test@email.com";
-        billDTO.setAccountsStringList(List.of("nonexistent@email.com", anotherExistentEmail));
+        billDTO.setAccountsList(List.of("nonexistent@email.com", anotherExistentEmail));
 
         //When/Then
-        final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
-                () -> billFacade.addPersonalBill(existentEmail, billDTO));
-        assertEquals("An account in the list of accounts does not exist", resourceNotFoundException.getMessage());
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billFacade.addPersonalBill(existentEmail, billDTO))
+                .withMessage("An account in the list of accounts does not exist");
     }
 
     @Test
@@ -83,7 +83,7 @@ class BillFacadeImplIT {
         final var billDTO = BillDTOFixture.getDefault();
         final String billCreator = "userdetails@service.com";
         final String anotherExistentEmail = "test@email.com";
-        billDTO.setAccountsStringList(List.of(billCreator, anotherExistentEmail));
+        billDTO.setAccountsList(List.of(billCreator, anotherExistentEmail));
 
         //When/Then
         assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
@@ -108,9 +108,20 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should save bill with non-empty accountsStringList in database")
+    @DisplayName("Should save bill with non-empty accountsList in database")
     void shouldSaveBillWithAccountsListInDatabase() {
-        //TODO
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String testEmail = "test@email.com";
+        final String existentEmail = "userdetails@service.com";
+        billDTO.setAccountsList(List.of(existentEmail));
+        // When
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+
+        // Then
+        final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
+
+        verifyBillDTOToBill(returnBillDTO, bill);
     }
 
     @Test

@@ -10,7 +10,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 @Data
@@ -51,7 +50,7 @@ public class BillResource implements Serializable {
     private List<ItemResource> items;
 
     @ApiModelProperty(name = "List of accounts associated to the bill", position = 10)
-    private List<Account> accountsEntityList;
+    private List<AccountResource> accountsList;
 
     @ApiModelProperty(name = "the total amount of the bill", position = 11)
     private BigDecimal balance;

@@ -11,13 +11,14 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.facade.BillFacade;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
@@ -31,6 +32,8 @@ public class BillFacadeImpl implements BillFacade {
 
     private final BillMapper billMapper;
 
+    private final AccountMapper accountMapper;
+
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
@@ -40,10 +43,11 @@ public class BillFacadeImpl implements BillFacade {
     private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
 
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper) {
         this.accountRepository = accountRepository;
         this.billService = billService;
         this.billMapper = billMapper;
+        this.accountMapper = accountMapper;
     }
 
     @Override
@@ -61,21 +65,21 @@ public class BillFacadeImpl implements BillFacade {
 
         List<Account> accountsList = new ArrayList<>();
 
-        if (!billDTO.getAccountsStringList().isEmpty()) {
-            if (billDTO.getAccountsStringList().contains(email)) {
+        if (!billDTO.getAccountsList().isEmpty()) {
+            if (billDTO.getAccountsList().contains(email)) {
                 throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
             }
 
-            accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsStringList());
+            accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsList());
 
-            if (billDTO.getAccountsStringList().size() != accountsList.size()) {
+            if (billDTO.getAccountsList().size() != accountsList.size()) {
                 throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST);
             }
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
 
-        if(!billDTO.getAccountsStringList().isEmpty()) {
+        if(!billDTO.getAccountsList().isEmpty()) {
             return getBillCompleteDTO(bill, accountsList);
         } else {
             return getBillCompleteDTO(bill);
@@ -103,7 +107,8 @@ public class BillFacadeImpl implements BillFacade {
         final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
         billCompleteDTO.setBalance(balance);
-        billCompleteDTO.setAccountsEntityList(accounts);
+        List<AccountDTO> accountsDTO = accounts.stream().map(accountMapper::toDTO).collect(Collectors.toList());
+        billCompleteDTO.setAccountsList(accountsDTO);
         return billCompleteDTO;
     }
 
