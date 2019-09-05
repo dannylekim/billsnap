@@ -66,8 +66,6 @@ public class BillController {
         final BillDTO billDTO = billMapper.toDTO(billCreationResource);
         final BillCompleteDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
         return billMapper.toResource(createdBill);
-
-
     }
 
     @GetMapping("/bills")

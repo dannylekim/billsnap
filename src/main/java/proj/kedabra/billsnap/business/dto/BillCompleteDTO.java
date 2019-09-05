@@ -2,15 +2,31 @@ package proj.kedabra.billsnap.business.dto;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 @Data
-@EqualsAndHashCode(callSuper = false)
-public class BillCompleteDTO extends BillDTO {
+public class BillCompleteDTO {
+
+    private Long id;
+
+    private String name;
+
+    private String category;
+
+    private String company;
+
+    private List<ItemDTO> items = new ArrayList<>();
+
+    private List<AccountDTO> accountsList = new ArrayList<>();
+
+    private BigDecimal tipAmount;
+
+    private BigDecimal tipPercent;
 
     private AccountDTO creator;
 

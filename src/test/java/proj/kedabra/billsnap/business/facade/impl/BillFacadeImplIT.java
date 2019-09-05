@@ -1,5 +1,7 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -19,7 +21,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
-import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.entities.AccountBill;
@@ -30,6 +31,7 @@ import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
+
 
 @Tag("integration")
 @ActiveProfiles(SpringProfiles.TEST)
@@ -61,6 +63,35 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should return exception if list of emails contains one or more emails that do not exist")
+    void ShouldReturnExceptionIfEmailInListOfEmailsDoesNotExist() {
+        //Given a bill creator with existing email, but billDTO containing non-existent email in array of emails
+        final var billDTO = BillDTOFixture.getDefault();
+        final String existentEmail = "userdetails@service.com";
+        final String anotherExistentEmail = "test@email.com";
+        final String nonExistentEmail = "nonexistent@email.com";
+        billDTO.setAccountsList(List.of(nonExistentEmail, anotherExistentEmail));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billFacade.addPersonalBill(existentEmail, billDTO))
+                .withMessage("One or more accounts in the list of accounts does not exist: [%s]", nonExistentEmail);
+    }
+
+    @Test
+    @DisplayName("Should return exception if list of emails contains bill creator email")
+    void ShouldReturnExceptionIfBillCreatorIsInListOfEmails() {
+        //Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String billCreator = "userdetails@service.com";
+        final String anotherExistentEmail = "test@email.com";
+        billDTO.setAccountsList(List.of(billCreator, anotherExistentEmail));
+
+        //When/Then
+        assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
+                .withMessage("List of emails cannot contain bill creator email");
+    }
+
+    @Test
     @DisplayName("Should save bill in database")
     void shouldSaveBillToUserInDatabase() {
 
@@ -77,6 +108,22 @@ class BillFacadeImplIT {
         verifyBillDTOToBill(returnBillDTO, bill);
     }
 
+    @Test
+    @DisplayName("Should save bill with non-empty accountsList in database")
+    void shouldSaveBillWithAccountsListInDatabase() {
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String testEmail = "test@email.com";
+        final String existentEmail = "userdetails@service.com";
+        billDTO.setAccountsList(List.of(existentEmail));
+        // When
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+
+        // Then
+        final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
+
+        verifyBillDTOToBill(returnBillDTO, bill);
+    }
 
     @Test
     @DisplayName("Should save bill to user with 100$% in database")
@@ -87,7 +134,7 @@ class BillFacadeImplIT {
         final String testEmail = "test@email.com";
 
         // When
-        final BillDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
 
         // Then
         final var account = accountRepository.getAccountByEmail(testEmail);
@@ -156,7 +203,7 @@ class BillFacadeImplIT {
         final List<ItemDTO> items = returnBillDTO.getItems();
         final Set<Item> billItems = bill.getItems();
         assertEquals(billItems.size(), items.size());
-
+        assertEquals(returnBillDTO.getAccountsList().size(), bill.getAccounts().size() - 1);
 
         if (!items.isEmpty()) {
             //for the time being we verify only 1 item. Should be generic when needed.
@@ -175,7 +222,9 @@ class BillFacadeImplIT {
         }
 
 
-        final Account account = bill.getAccounts().iterator().next().getAccount();
+        final Account account = bill.getAccounts().stream().map(AccountBill::getAccount)
+                .filter(acc -> acc.equals(bill.getCreator()))
+                .iterator().next();
         assertEquals(account.getId(), returnBillDTO.getCreator().getId());
         assertEquals(account.getId(), returnBillDTO.getResponsible().getId());
     }

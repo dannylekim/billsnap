@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -23,6 +25,7 @@ import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -49,11 +52,12 @@ class BillServiceImplIT {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
 
         //When
-        final Bill bill = billService.createBillToAccount(billDTO, account);
+        final Bill bill = billService.createBillToAccount(billDTO, account, new ArrayList<>());
 
         //Then
         final Set<AccountBill> accounts = bill.getAccounts();
         assertEquals(1, accounts.size());
+
         final AccountBill accountBill = accounts.iterator().next();
         assertEquals(account, accountBill.getAccount());
         assertTrue(bill.getActive());
@@ -65,10 +69,12 @@ class BillServiceImplIT {
         assertEquals(billDTO.getItems().size(), bill.getItems().size());
         assertEquals(accountBill.getPercentage(), new BigDecimal(100));
         assertEquals(accountBill.getBill(), bill);
+
         final ItemDTO itemDTO = billDTO.getItems().get(0);
         final Item itemReturned = bill.getItems().iterator().next();
         assertEquals(itemDTO.getName(), itemReturned.getName());
         assertEquals(itemDTO.getCost(), itemReturned.getCost());
+
         final AccountItem accountItem = itemReturned.getAccounts().iterator().next();
         assertEquals(accountItem.getAccount(), account);
         assertEquals(accountItem.getPercentage(), new BigDecimal(100));
@@ -82,11 +88,27 @@ class BillServiceImplIT {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
 
         //When
-        final Bill bill = billService.createBillToAccount(billDTO, account);
+        final Bill bill = billService.createBillToAccount(billDTO, account, new ArrayList<>());
 
         //Then
         assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));
     }
+
+    @Test
+    @DisplayName("Should save bill with non-empty accountsList in database")
+    void shouldSaveBillWithAccountsListInDatabase() {
+        //Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final Account account = accountRepository.getAccountByEmail("test@email.com");
+        final List<Account> accountsList = List.of(AccountEntityFixture.getDefaultAccount());
+
+        //When
+        final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
+
+        //Then
+        assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));
+    }
+
 
     @Test
     @DisplayName("Should return all bills saved in database to account")
@@ -100,7 +122,6 @@ class BillServiceImplIT {
 
         //Then
         assertEquals(2, allBillsByAccount.count());
-
     }
 
     @Test

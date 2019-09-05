@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import proj.kedabra.billsnap.presentation.resources.ItemResource;
 
-public class ItemResourceFixture {
+public final class ItemResourceFixture {
     private ItemResourceFixture() {}
 
     public static ItemResource getDefault() {
