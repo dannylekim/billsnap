@@ -3,10 +3,19 @@
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
     <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
 
+    <appender name="Sentry" class="io.sentry.logback.SentryAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
     <springProfile name="heroku">
         <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+        <!-- Configure the Sentry appender, overriding the logging threshold to the WARN level -->
+
         <root level="ERROR">
             <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="Sentry"/>
         </root>
     </springProfile>
 
@@ -57,6 +66,7 @@
 
         <root level="ERROR">
             <appender-ref ref="ROLLING-FILE"/>
+            <appender-ref ref="Sentry"/>
         </root>
     </springProfile>
 
