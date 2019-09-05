@@ -202,7 +202,7 @@ class BillFacadeImplIT {
         final List<ItemDTO> items = returnBillDTO.getItems();
         final Set<Item> billItems = bill.getItems();
         assertEquals(billItems.size(), items.size());
-
+        assertEquals(returnBillDTO.getAccountsList().size(), bill.getAccounts().size() - 1);
 
         if (!items.isEmpty()) {
             //for the time being we verify only 1 item. Should be generic when needed.
@@ -221,7 +221,9 @@ class BillFacadeImplIT {
         }
 
 
-        final Account account = bill.getAccounts().iterator().next().getAccount();
+        final Account account = bill.getAccounts().stream().map(AccountBill::getAccount)
+                .filter(acc -> acc.equals(bill.getCreator()))
+                .iterator().next();
         assertEquals(account.getId(), returnBillDTO.getCreator().getId());
         assertEquals(account.getId(), returnBillDTO.getResponsible().getId());
     }

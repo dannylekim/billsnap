@@ -15,6 +15,7 @@ import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.facade.BillFacade;
@@ -53,6 +54,8 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillCompleteDTO addPersonalBill(final String email, final BillDTO billDTO) {
+        final List<String> billDTOAccounts = billDTO.getAccountsList();
+        final List<Account> accountsList = new ArrayList<>();
 
         //done in bill facade
         if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
@@ -63,27 +66,21 @@ public class BillFacadeImpl implements BillFacade {
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
 
-        List<Account> accountsList = new ArrayList<>();
-
-        if (!billDTO.getAccountsList().isEmpty()) {
+        if (!billDTOAccounts.isEmpty()) {
             if (billDTO.getAccountsList().contains(email)) {
                 throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
             }
 
-            accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsList());
+            accountsList.addAll(accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()));
 
-            if (billDTO.getAccountsList().size() != accountsList.size()) {
+            if (billDTOAccounts.size() != accountsList.size()) {
                 throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST);
             }
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
 
-        if(!billDTO.getAccountsList().isEmpty()) {
-            return getBillCompleteDTO(bill, accountsList);
-        } else {
-            return getBillCompleteDTO(bill);
-        }
+        return getBillCompleteDTO(bill);
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -92,23 +89,22 @@ public class BillFacadeImpl implements BillFacade {
                 .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
 
         return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
-
     }
 
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
-        billCompleteDTO.setBalance(balance);
-        return billCompleteDTO;
-    }
 
-    private BillCompleteDTO getBillCompleteDTO(Bill bill, List<Account> accounts){
-        final BigDecimal balance = calculateBalance(bill);
-        final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
+        final List<Account> accountList = bill.getAccounts().stream()
+                .map(AccountBill::getAccount)
+                .filter(acc -> !acc.getEmail().equals(bill.getCreator().getEmail()))
+                .collect(Collectors.toList());
+        final List<AccountDTO> accountDTOList = accountList.stream().map(accountMapper::toDTO).collect(Collectors.toList());
+
         billCompleteDTO.setBalance(balance);
-        List<AccountDTO> accountsDTO = accounts.stream().map(accountMapper::toDTO).collect(Collectors.toList());
-        billCompleteDTO.setAccountsList(accountsDTO);
+        billCompleteDTO.setAccountsList(accountDTOList);
+
         return billCompleteDTO;
     }
 
