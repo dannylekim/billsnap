@@ -45,7 +45,7 @@ public class BillServiceImpl implements BillService {
         bill.setCreator(account);
         bill.setActive(true);
         bill.setSplitBy(SplitByEnum.ITEM);
-
+        
         bill.getItems().forEach(i -> mapItems(i, bill, account));
 
         if (!accountList.isEmpty()) {

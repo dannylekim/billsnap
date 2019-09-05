@@ -23,6 +23,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -84,7 +85,6 @@ class BillControllerIT {
 
     private static final String NOT_IN_EMAIL_FORMAT = "Must be in an email format. ex: test@email.com.";
 
-
     @Test
     @DisplayName("Should return proper reply with 201 status for POST /bill")
     void ShouldReturn201ForNormalCaseAddBill() throws Exception {
@@ -98,18 +98,7 @@ class BillControllerIT {
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
-        assertNotNull(response.getId());
-        assertEquals(billCreationResource.getName(), response.getName());
-        assertEquals(billCreationResource.getCategory(), response.getCategory());
-        assertEquals(billCreationResource.getCompany(), response.getCompany());
-        assertEquals(billCreationResource.getItems().size(), response.getItems().size());
-        assertEquals(user.getUsername(), response.getCreator().getEmail());
-        assertEquals(user.getUsername(), response.getResponsible().getEmail());
-        assertEquals(BillStatusEnum.OPEN, response.getStatus());
-        assertEquals(-1, BigDecimal.valueOf(0).compareTo(response.getBalance()));
-        assertNotNull(response.getCreated());
-        assertNotNull(response.getUpdated());
-        assertNotNull(response.getId());
+        verify201NormalCaseAddBill(user, billCreationResource, response);
         assertTrue(response.getAccountsList().isEmpty());
     }
 
@@ -128,18 +117,7 @@ class BillControllerIT {
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
-        assertNotNull(response.getId());
-        assertEquals(billCreationResource.getName(), response.getName());
-        assertEquals(billCreationResource.getCategory(), response.getCategory());
-        assertEquals(billCreationResource.getCompany(), response.getCompany());
-        assertEquals(billCreationResource.getItems().size(), response.getItems().size());
-        assertEquals(user.getUsername(), response.getCreator().getEmail());
-        assertEquals(user.getUsername(), response.getResponsible().getEmail());
-        assertEquals(BillStatusEnum.OPEN, response.getStatus());
-        assertEquals(-1, BigDecimal.valueOf(0).compareTo(response.getBalance()));
-        assertNotNull(response.getCreated());
-        assertNotNull(response.getUpdated());
-        assertNotNull(response.getId());
+        verify201NormalCaseAddBill(user, billCreationResource, response);
         assertThat(response.getAccountsList()).isNotEmpty();
         assertThat(response.getAccountsList().get(0).getEmail()).isEqualTo(existentEmail);
     }
@@ -627,6 +605,21 @@ class BillControllerIT {
         assertNotNull(expectedBillResource.getCreated());
         assertNotNull(expectedBillResource.getUpdated());
         assertNotNull(expectedBillResource.getId());
+    }
+
+    private void verify201NormalCaseAddBill(User user, BillCreationResource billCreationResource, BillResource response) {
+        assertNotNull(response.getId());
+        assertEquals(billCreationResource.getName(), response.getName());
+        assertEquals(billCreationResource.getCategory(), response.getCategory());
+        assertEquals(billCreationResource.getCompany(), response.getCompany());
+        assertEquals(billCreationResource.getItems().size(), response.getItems().size());
+        assertEquals(user.getUsername(), response.getCreator().getEmail());
+        assertEquals(user.getUsername(), response.getResponsible().getEmail());
+        assertEquals(BillStatusEnum.OPEN, response.getStatus());
+        assertEquals(-1, BigDecimal.valueOf(0).compareTo(response.getBalance()));
+        assertNotNull(response.getCreated());
+        assertNotNull(response.getUpdated());
+        assertNotNull(response.getId());
     }
 
     private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception{
