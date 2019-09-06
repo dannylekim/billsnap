@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -29,11 +30,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.fixtures.AssociateBillFixture;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
+import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.security.JwtService;
@@ -463,7 +466,7 @@ class BillControllerIT {
 
 
     @Test
-    @DisplayName("Should return exception if one or more emails in list is not in email format")
+    @DisplayName("Should return exception if one or more emails in accountsList is not in email format")
     void ShouldReturnExceptionIfOneOrMoreEmailsIsNotEmailFormat() throws Exception {
         //Given
         final var billCreationResource = BillCreationResourceFixture.getDefault();
@@ -484,7 +487,7 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return exception if one or more emails in list is blank")
+    @DisplayName("Should return exception if one or more emails in accountsList is blank")
     void ShouldReturnExceptionIfOneOrMoreEmailsIsBlank() throws Exception {
         //Given
         final var billCreationResource = BillCreationResourceFixture.getDefault();
@@ -512,7 +515,7 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return exception if one or more emails in list is too long")
+    @DisplayName("Should return exception if one or more emails in accountsList is too long")
     void ShouldReturnExceptionIfOneOrMoreEmailsIsTooLong() throws Exception {
         //Given
         final var billCreationResource = BillCreationResourceFixture.getDefault();
@@ -592,6 +595,229 @@ class BillControllerIT {
         verifyBillResources(billTwo, response.get(1));
     }
 
+    @Test
+    @DisplayName("Should return exception if null bill id is given for PUT /bills")
+    void shouldReturnExceptionIfNullBillIdGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.setId(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return exception if null itemsPerAccount is given for PUT /bills")
+    void shouldReturnExceptionIfNullItemsPerAccountGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.setItemsPerAccount(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return exception if null email in ItemAssociationResource is given for PUT /bills")
+    void shouldReturnExceptionIfNullEmailInItemAssociationResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).setEmail(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_BLANK);
+    }
+
+    @Test
+    @DisplayName("Should return exception if blank email in ItemAssociationResource is given for PUT /bills")
+    void shouldReturnExceptionIfBlankEmailInItemAssociationResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).setEmail(" ");
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(2);
+
+        final var errorList = error.getErrors().stream()
+                .map(ApiSubError::getMessage)
+                .filter(msg -> msg.equals(MUST_NOT_BE_BLANK)
+                        || msg.equals(NOT_IN_EMAIL_FORMAT))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertThat(errorList.size()).isEqualTo(error.getErrors().size());
+    }
+
+    @Test
+    @DisplayName("Should return exception if too long of an email in ItemAssociationResource is given for PUT /bills")
+    void shouldReturnExceptionIfTooLongEmailInItemAssociationResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).setEmail("toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com");
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(2);
+
+        final var errorList = error.getErrors().stream()
+                .map(ApiSubError::getMessage)
+                .filter(msg -> msg.equals(WRONG_SIZE_0_TO_50)
+                        || msg.equals(NOT_IN_EMAIL_FORMAT))
+                .collect(java.util.stream.Collectors.toList());
+
+        assertThat(errorList.size()).isEqualTo(error.getErrors().size());
+    }
+
+    @Test
+    @DisplayName("Should return exception if null items list in ItemAssociationResource is given for PUT /bills")
+    void shouldReturnExceptionIfNullItemsListInItemAssociationResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).setItems(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return exception if null itemId in ItemPercentageResource is given for PUT /bills")
+    void shouldReturnExceptionIfNullItemIdInItemPercentageResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setItemId(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return exception if null percentage in ItemPercentageResource is given for PUT /bills")
+    void shouldReturnExceptionIfNullPercentageInItemPercentageResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(null);
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return exception if over 3 integer percentage in ItemPercentageResource is given for PUT /bills")
+    void shouldReturnExceptionIfOver3IntegerPercentageInItemPercentageResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(1234.50));
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
+    }
+
+    @Test
+    @DisplayName("Should return exception if over 4 decimal percentage in ItemPercentageResource is given for PUT /bills")
+    void shouldReturnExceptionIfOver4DecimalPercentageInItemPercentageResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(50.12345));
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
+    }
+
+    @Test
+    @DisplayName("Should return exception if negative percentage in ItemPercentageResource is given for PUT /bills")
+    void shouldReturnExceptionIfNegativePercentageInItemPercentageResourceGivenPut() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(-50));
+
+        //When/Then
+        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
+    }
+
     private void verifyBillResources(BillResource expectedBillResource, BillResource actualBillResource) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
@@ -622,7 +848,7 @@ class BillControllerIT {
         assertNotNull(response.getId());
     }
 
-    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception{
+    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception {
         return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
                 .andExpect(status().isCreated()).andReturn();
@@ -631,6 +857,12 @@ class BillControllerIT {
     private MvcResult performMvcPostRequest4xxFailure(String bearerToken, BillCreationResource billCreationResource) throws Exception {
         return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
+    }
+
+    private MvcResult performMvcPutRequest4xxFailure(String bearerToken, AssociateBillResource associateBillResource) throws Exception {
+        return mockMvc.perform(put(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(associateBillResource)))
                 .andExpect(status().is4xxClientError()).andReturn();
     }
 }
