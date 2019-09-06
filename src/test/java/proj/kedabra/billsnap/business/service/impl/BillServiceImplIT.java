@@ -131,7 +131,7 @@ class BillServiceImplIT {
     void shouldReturnEmptyList() {
         //Given
         //Account with 0 bills
-        final Account account = accountRepository.getAccountByEmail("userdetails@service.com");
+        final Account account = accountRepository.getAccountByEmail("nobills@inthisemail.com");
 
         //When
         final Stream<Bill> allBillsByAccount = billService.getAllBillsByAccount(account);
