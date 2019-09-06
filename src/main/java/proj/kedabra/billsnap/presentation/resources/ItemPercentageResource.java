@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Range;
 
@@ -15,7 +16,7 @@ public class ItemPercentageResource implements Serializable {
 
     private static final long serialVersionUID = 2800827086143046648L;
 
-    @NotBlank
+    @NotNull
     private Long itemId;
 
     @NotBlank

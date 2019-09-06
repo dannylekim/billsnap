@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -15,7 +14,7 @@ public class AssociateBillResource implements Serializable {
 
     private static final long serialVersionUID = 6080802006414641448L;
 
-    @NotBlank
+    @NotNull
     @ApiModelProperty(name = "Bill id to modify")
     private Long id;
 

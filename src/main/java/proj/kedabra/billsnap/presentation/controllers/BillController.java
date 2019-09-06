@@ -49,7 +49,8 @@ public class BillController {
 
 
     @PostMapping("/bills")
-    @ApiOperation(value = "Add personal bill", notes = "Add a personal bill to a user account.", authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiOperation(value = "Add personal bill", notes = "Add a personal bill to a user account.",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
             @ApiResponse(code = 201, response = BillResource.class, message = "Successfully added a bill!"),
             @ApiResponse(code = 400, response = ApiError.class, message = "Cannot create bill with wrong inputs."),
@@ -72,7 +73,8 @@ public class BillController {
     }
 
     @GetMapping("/bills")
-    @ApiOperation(value = "Get all bills", notes = "Get all bills associated to an account", authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiOperation(value = "Get all bills", notes = "Get all bills associated to an account",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
             @ApiResponse(code = 201, response = BillResource.class, message = "Successfully retrieved all bills!"),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
@@ -87,7 +89,8 @@ public class BillController {
     }
 
     @PutMapping("/bills")
-    @ApiOperation(value = "Associate users/modify bill", notes = "Modify bill's users/items and user-item association", authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiOperation(value = "Associate users/modify bill", notes = "Modify bill's users/items and user-item association",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
             @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully modified bill!"),
             @ApiResponse(code = 400, response = ApiError.class, message = "Error modifying bill"),
