@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Range;
@@ -19,7 +18,7 @@ public class ItemPercentageResource implements Serializable {
     @NotNull
     private Long itemId;
 
-    @NotBlank
+    @NotNull
     @Digits(integer = 3, fraction = 4)
     @Range(message = "the number must be positive")
     private BigDecimal percentage;

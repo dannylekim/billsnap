@@ -8,6 +8,12 @@ INSERT INTO account VALUES (2000, 'userdetails@service.com', '$2a$04$IV55Yhr.ICv
 INSERT INTO account VALUES (3000, 'user@user.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK',
  'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
+INSERT INTO account VALUES (4000, 'nobills@inthisemail.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+ 'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+
+INSERT INTO account VALUES (5000, 'user@hasbills.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+ 'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+
 insert into bill
 values (1000, 'test', 1000, 1000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
@@ -17,8 +23,19 @@ values (1000, 1000, 100);
 
 insert into bill
 values (1001, 'test', 1000, 1000, 'RESOLVED', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM',
-        null,
-        1);
+        null, 1);
 
 INSERT INTO bills_vs_accounts
 values (1001, 1000, 100);
+
+INSERT INTO BILL
+VALUES (1002, 'multipleuserstest', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null, 1);
+
+insert into item
+values (1, 1002, 'sashimi', 20);
+
+insert into items_vs_accounts
+values (1, 5000, 100);
+
+insert into bills_vs_accounts
+values (1002, 5000, 100), (1002, 2000, 0);
