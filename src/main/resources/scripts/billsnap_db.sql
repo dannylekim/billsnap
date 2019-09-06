@@ -109,11 +109,11 @@ create table if not exists tax
     bill_id    integer not null
         constraint "TAX_bill_id_fkey"
             references bill,
-    "order"    integer not null,
+    tax_order  integer not null,
     amount     numeric(14, 2),
     percentage numeric(7, 4),
     constraint unique_orders_to_bill
-        primary key (bill_id, "order"),
+        primary key (bill_id, tax_order),
     constraint one_of_amount_or_percentage
         check ((amount IS NULL) <> (percentage IS NULL))
 );

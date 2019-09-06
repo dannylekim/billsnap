@@ -103,7 +103,7 @@ public class Bill implements Serializable {
     @EqualsAndHashCode.Exclude
     private Set<Item> items = new HashSet<>();
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Tax> taxes = new HashSet<>();
