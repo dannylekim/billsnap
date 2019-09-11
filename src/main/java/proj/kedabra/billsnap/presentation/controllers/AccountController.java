@@ -21,6 +21,8 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.presentation.resources.LoginResource;
+import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 
@@ -32,7 +34,7 @@ public class AccountController {
 
     private final AccountMapper mapper;
 
-    public AccountController(final AccountFacade accountFacade, AccountMapper mapper) {
+    public AccountController(final AccountFacade accountFacade, final AccountMapper mapper) {
         this.accountFacade = accountFacade;
         this.mapper = mapper;
     }
@@ -49,8 +51,8 @@ public class AccountController {
     @ResponseStatus(HttpStatus.CREATED)
     @ObfuscateArgs
     public AccountResource createAccount(@ApiParam(required = true, name = "Registration Details", value = "Minimum registration details")
-                                         @RequestBody @Valid AccountCreationResource accountCreationResource,
-                                         BindingResult bindingResult) {
+                                         @RequestBody @Valid final AccountCreationResource accountCreationResource,
+                                         final BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
@@ -63,5 +65,18 @@ public class AccountController {
 
     }
 
+    @PostMapping(path = "/login", consumes = "application/json")
+    @ApiOperation(value = "Login", notes = "Login to the application")
+    @ApiResponses({
+            @ApiResponse(code = 200, response = LoginResponseResource.class, message = "Successfully logged in."),
+            @ApiResponse(code = 400, response = ApiError.class, message = "Cannot login with invalid inputs."),
+            @ApiResponse(code = 401, response = ApiError.class, message = "Cannot login with incorrect credentials."),
+            @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public void loginAccount(@ApiParam(required = true, name = "Login Details", value = "Valid login details")
+                             @RequestBody @Valid LoginResource loginResource) {
+        throw new IllegalStateException("loginAccount() shouldn't be called from Controller: it is implemented by custom AuthenticationFilter.");
+    }
 
 }

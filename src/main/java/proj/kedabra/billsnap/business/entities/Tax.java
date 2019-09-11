@@ -34,7 +34,7 @@ public class Tax implements Serializable {
     @Column(name = "amount", precision = 14, scale = 2)
     private BigDecimal amount;
 
-    @Column(name = "percentage", precision = 6, scale = 4)
+    @Column(name = "percentage", precision = 7, scale = 4)
     private BigDecimal percentage;
 
 }

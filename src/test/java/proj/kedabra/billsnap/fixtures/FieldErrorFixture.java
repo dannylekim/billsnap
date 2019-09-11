@@ -1,12 +1,12 @@
-package proj.kedabra.billsnap;
+package proj.kedabra.billsnap.fixtures;
 
 import org.springframework.validation.FieldError;
 
-class FieldErrorFixture {
+public final class FieldErrorFixture {
 
     private FieldErrorFixture() {}
 
-    static FieldError getDefault(int uniqueIdentifier) {
+    public static FieldError getDefault(int uniqueIdentifier) {
         final var objectName = "objectName" + uniqueIdentifier;
         final var field = "field" + uniqueIdentifier;
         final var rejectedValue = "rejectedValue" + uniqueIdentifier;

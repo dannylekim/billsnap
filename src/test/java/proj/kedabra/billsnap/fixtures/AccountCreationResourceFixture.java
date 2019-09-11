@@ -2,16 +2,16 @@ package proj.kedabra.billsnap.fixtures;
 
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 
-public class AccountCreationResourceFixture {
+public final class AccountCreationResourceFixture {
 
-    private AccountCreationResourceFixture(){}
+    private AccountCreationResourceFixture() {}
 
-    public static AccountCreationResource getDefault(){
-        var resource = new AccountCreationResource();
+    public static AccountCreationResource getDefault() {
+        final var resource = new AccountCreationResource();
         resource.setEmail("test@email.com");
         resource.setFirstName("Naruto");
         resource.setLastName("Uchiha");
-        resource.setPassword("password");
+        resource.setPassword("Hidden@Vill4ge");
 
         return resource;
     }

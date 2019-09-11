@@ -11,11 +11,22 @@ create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
 create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
-create sequence if not exists account_ID_SEQ start with 1 increment by 1;
+create sequence if not exists account_id_seq start with 1 increment by 1;
+
+create sequence if not exists bill_id_seq start with 1 increment by 1;
+
+create sequence if not exists item_id_seq start with 1 increment by 1;
+
+create sequence if not exists group_id_seq start with 1 increment by 1;
+
+create sequence if not exists location_id_seq start with 1 increment by 1;
+
+create sequence if not exists location_id_seq start with 1 increment by 1;
+
 
 create table if not exists location
 (
-    id          int auto_increment primary key,
+    id          int primary key,
     name        varchar(50)  null,
     description varchar(100) null,
     address     varchar(50)  null,
@@ -49,23 +60,23 @@ create table if not exists account
 
 create table if not exists bill
 (
-    id          int auto_increment primary key,
+    id          int primary key,
     name        varchar(30)    null,
-    responsible integer     not null
+    responsible integer        not null
         constraint bill_responsible_id_fk
             references account,
-    creator     integer     not null
+    creator     integer        not null
         constraint bill_creator_id_fk
             references account,
-    status      varchar(15)    not null,
+    status      bill_status    not null,
     created     timestamp with time zone default current_timestamp,
     updated     timestamp with time zone default current_timestamp,
     category    varchar(20)    null,
     company     varchar(20)    null,
     occurrence  integer        null,
-    tip_percent numeric(6, 4)  null,
+    tip_percent numeric(7, 4)  null,
     tip_amount  numeric(14, 2) null,
-    split_by    split_type   not null,
+    split_by    split_type     not null,
     location_id integer
         constraint "BILLS_location_id_fkey"
             references location,
@@ -83,7 +94,7 @@ create table if not exists tax
             references bill,
     "order"    integer        not null,
     amount     numeric(14, 2) null,
-    percentage numeric(6, 4)  null,
+    percentage numeric(7, 4)  null,
     constraint unique_orders_to_bill
         primary key (bill_id, "order"),
     constraint one_of_amount_or_percentage
@@ -92,7 +103,7 @@ create table if not exists tax
 
 create table if not exists "group"
 (
-    id              int auto_increment primary key,
+    id              int primary key,
     name            varchar(30) not null,
     created         timestamp with time zone default current_timestamp,
     updated         timestamp with time zone default current_timestamp,
@@ -126,7 +137,7 @@ create table if not exists bills_vs_groups
 
 create table if not exists item
 (
-    id      int auto_increment primary key,
+    id      int primary key,
     bill_id integer        not null
         constraint "ITEMS_bill_id_fkey"
             references bill,
@@ -142,7 +153,7 @@ create table if not exists items_vs_accounts
     account_id integer       not null
         constraint "ITEM_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4) not null,
+    percentage numeric(7, 4) not null,
     constraint "ITEM_VS_USERS_pkey"
         primary key (item_id, account_id)
 );
@@ -155,7 +166,7 @@ create table if not exists bills_vs_accounts
     account_id integer       not null
         constraint "BILLS_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(4, 4) null,
+    percentage numeric(7, 4) null,
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
 

@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
+import proj.kedabra.billsnap.fixtures.FieldErrorFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
 
@@ -50,13 +51,13 @@ class BillSnapExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 500 and IllegaArgument")
+    @DisplayName("Should return ResponseEntity with error 500 and IllegalArgument")
     void shouldReturn400ForIllegalArgumentException() {
         //Given
         var ex = new IllegalArgumentException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleIllegaArgument(ex);
+        ApiError response = billSnapExceptionHandler.handleIllegalArgument(ex);
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
