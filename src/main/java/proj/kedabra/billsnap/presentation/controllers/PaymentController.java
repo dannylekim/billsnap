@@ -16,7 +16,6 @@ import proj.kedabra.billsnap.presentation.resources.PaymentsOwedRessource;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.security.Principal;
-import java.util.List;
 
 @RestController
 public class PaymentController {
@@ -33,7 +32,7 @@ public class PaymentController {
     @GetMapping("payments")
     @ApiOperation(value = "Get amounts", notes = "Get all amounts owed by account")
     @ApiResponses({
-            @ApiResponse(code = 201, response = PaymentsOwedRessource.class, message = "Successfully retrieved all amounts owed!"),
+            @ApiResponse(code = 200, response = PaymentsOwedRessource.class, message = "Successfully retrieved all amounts owed!"),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
