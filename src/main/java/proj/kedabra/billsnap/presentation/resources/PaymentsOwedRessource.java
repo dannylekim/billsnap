@@ -12,7 +12,7 @@ public class PaymentsOwedRessource implements Serializable {
 
     private static final long serialVersionUID = 8297193114531722626L;
 
-    @ApiModelProperty(name = "List of amount owed")
+    @ApiModelProperty(name = "Map of amount owed")
     private Map<String, BigDecimal> amountOwedMap;
 
 }
