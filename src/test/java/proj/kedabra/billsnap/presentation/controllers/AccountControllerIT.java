@@ -14,6 +14,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -55,6 +57,8 @@ class AccountControllerIT {
     private static final String INVALID_LENGTH_IN_PASSWORD = "size must be between 8 and 20";
 
     private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
+
+    private static Integer count = 0;
 
 
     @Test
@@ -374,12 +378,16 @@ class AccountControllerIT {
         assertEquals("This email already exists in the database.", error.getMessage());
     }
 
-    @Test
-    @DisplayName("Should return a proper reply with 201 status")
-    void shouldReturn201NormalCase() throws Exception {
+
+    @ParameterizedTest
+    @DisplayName("Should return a proper reply with 201 status using various symbols")
+    @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";"})
+    void shouldReturn201NormalCaseWithSymbols(String input) throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
-        creationResource.setEmail("successful@email.com");
+        creationResource.setEmail("successfulWithSymbol" + count + "@email.com");
+        count++;
+        creationResource.setPassword("Password123" + input);
 
         //When/Then
         MvcResult result = mockMvc.perform(post(ENDPOINT).content(mapper.writeValueAsBytes(creationResource)).contentType(MediaType.APPLICATION_JSON)).andExpect(status().is2xxSuccessful()).andReturn();
