@@ -381,7 +381,7 @@ class AccountControllerIT {
 
     @ParameterizedTest
     @DisplayName("Should return a proper reply with 201 status using various symbols")
-    @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";"})
+    @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";", "[" ,"]", "/", "\\"})
     void shouldReturn201NormalCaseWithSymbols(String input) throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
