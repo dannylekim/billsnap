@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
@@ -27,12 +28,15 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
 
     private final AccountRepository accountRepository;
+
+    private final BillRepository billRepository;
 
     private final BillService billService;
 
@@ -46,15 +50,20 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
 
-    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist";
+    private static final String BILL_DOES_NOT_EXIST = "Bill does not exist";
+
+    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist: ";
 
     private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
 
     private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
 
+    private static final String MUST_HAVE_ONLY_ONE_TYPE_OF_TIPPING = "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.";
+
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, ItemMapper itemMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, BillRepository billRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, ItemMapper itemMapper) {
         this.accountRepository = accountRepository;
+        this.billRepository = billRepository;
         this.billService = billService;
         this.billMapper = billMapper;
         this.accountMapper = accountMapper;
@@ -84,6 +93,19 @@ public class BillFacadeImpl implements BillFacade {
         return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
+        final Bill bill = Optional.ofNullable(billRepository.getBillById(associateBillDTO.getId()))
+                .orElseThrow(() -> new ResourceNotFoundException(BILL_DOES_NOT_EXIST));
+
+        verifyItemPercentagesAddUpToHundred(bill);
+
+        //map items in BillService here
+
+        return getBillSplitDTO(bill);
+    }
+
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
@@ -102,15 +124,12 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     private BillSplitDTO getBillSplitDTO(Bill bill) {
-        verifyItemPercentagesAddUpToHundred(bill);
-
         final BillSplitDTO billSplitDTO = billMapper.toBillSplitDTO(bill);
 
         mapAccountTotalCostIntoBillSplitDTO(bill, billSplitDTO);
 
         final BigDecimal totalTip = calculateTip(bill);
         final BigDecimal balance = calculateBalance(bill);
-
         billSplitDTO.setTotalTip(totalTip);
         billSplitDTO.setBalance(balance);
 
@@ -200,7 +219,7 @@ public class BillFacadeImpl implements BillFacade {
             final List<String> accountsStringList = repositoryAccountsList.stream().map(Account::getEmail).collect(Collectors.toList());
             final List<String> nonExistentEmails = new ArrayList<>(accountsList);
             nonExistentEmails.removeAll(accountsStringList);
-            throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST + ": " + nonExistentEmails.toString());
+            throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST + nonExistentEmails.toString());
         }
 
         return repositoryAccountsList;
@@ -208,8 +227,7 @@ public class BillFacadeImpl implements BillFacade {
 
     private void validateBillDTO(String email, BillDTO billDTO) {
         if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
-            throw new IllegalArgumentException("Only one type of tipping is supported. " +
-                    "Please make sure only either tip amount or tip percent is set.");
+            throw new IllegalArgumentException(MUST_HAVE_ONLY_ONE_TYPE_OF_TIPPING);
         }
         if (billDTO.getAccountsList().contains(email)) {
             throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
