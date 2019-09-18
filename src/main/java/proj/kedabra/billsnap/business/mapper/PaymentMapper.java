@@ -9,6 +9,6 @@ import proj.kedabra.billsnap.presentation.resources.PaymentOwedResource;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public interface PaymentMapper {
 
-    PaymentOwedResource toRessource(PaymentOwedDTO paymentOwedDTO);
+    PaymentOwedResource toResource(PaymentOwedDTO paymentOwedDTO);
 
 }

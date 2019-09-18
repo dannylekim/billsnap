@@ -41,6 +41,6 @@ public class PaymentController {
     @ResponseStatus(HttpStatus.OK)
     public PaymentOwedResource getAllAmountsOwed(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
         final PaymentOwedDTO paymentOwedDTO = paymentFacade.getAmountsOwed(principal.getName());
-        return paymentMapper.toRessource(paymentOwedDTO);
+        return paymentMapper.toResource(paymentOwedDTO);
     }
 }
