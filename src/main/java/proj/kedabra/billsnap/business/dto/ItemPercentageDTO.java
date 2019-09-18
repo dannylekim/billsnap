@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class ItemPercentageDTO {
 
-    private Long itemId;
+    private Long id;
 
     private BigDecimal percentage;
 }

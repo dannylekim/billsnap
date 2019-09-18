@@ -6,6 +6,7 @@ import org.mapstruct.ReportingPolicy;
 
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
@@ -15,9 +16,11 @@ public interface BillMapper {
 
     Bill toEntity(BillDTO billDTO);
 
-    BillCompleteDTO toDTO(Bill bill);
+    BillCompleteDTO toBillCompleteDTO(Bill bill);
 
-    BillDTO toDTO(BillCreationResource billCreationResource);
+    BillDTO toBillDTO(BillCreationResource billCreationResource);
 
     BillResource toResource(BillCompleteDTO billDTO);
+
+    BillSplitDTO toBillSplitDTO(Bill bill);
 }

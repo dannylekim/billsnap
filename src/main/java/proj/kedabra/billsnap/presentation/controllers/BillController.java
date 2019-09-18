@@ -67,7 +67,7 @@ public class BillController {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
 
-        final BillDTO billDTO = billMapper.toDTO(billCreationResource);
+        final BillDTO billDTO = billMapper.toBillDTO(billCreationResource);
         final BillCompleteDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
         return billMapper.toResource(createdBill);
     }

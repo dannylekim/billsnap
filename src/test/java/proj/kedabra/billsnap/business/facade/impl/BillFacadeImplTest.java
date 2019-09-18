@@ -21,6 +21,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -37,6 +38,9 @@ class BillFacadeImplTest {
     private AccountMapper accountMapper;
 
     @Mock
+    private ItemMapper itemMapper;
+
+    @Mock
     private AccountRepository accountRepository;
 
     @Mock
@@ -46,7 +50,7 @@ class BillFacadeImplTest {
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper);
+        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper, itemMapper);
 
     }
 
