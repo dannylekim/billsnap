@@ -8,11 +8,14 @@ import java.math.BigDecimal;
 import java.util.Map;
 
 @Data
-public class PaymentsOwedRessource implements Serializable {
+public class PaymentOwedResource implements Serializable {
 
     private static final long serialVersionUID = 8297193114531722626L;
 
-    @ApiModelProperty(name = "Map of amount owed")
-    private Map<String, BigDecimal> amountOwedMap;
+    @ApiModelProperty(name = "account email")
+    private String email;
+
+    @ApiModelProperty(name = "amount owed")
+    private BigDecimal amount;
 
 }

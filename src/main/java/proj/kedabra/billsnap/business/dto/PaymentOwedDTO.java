@@ -7,8 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class PaymentsOwedDTO {
+public class PaymentOwedDTO {
 
-    private Map<String, BigDecimal> amountsOwedList = new HashMap<>();
+    private String email;
+
+    private BigDecimal amount;
 
 }
