@@ -26,7 +26,6 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
@@ -50,9 +49,6 @@ class BillFacadeImplTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private BillRepository billRepository;
-
-    @Mock
     private BillService billService;
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
@@ -71,7 +67,7 @@ class BillFacadeImplTest {
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billRepository, billService, billMapper, accountMapper, itemMapper);
+        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper, itemMapper);
 
     }
 
@@ -178,7 +174,7 @@ class BillFacadeImplTest {
         //Given
         AssociateBillDTO associateBillDTO = AssociateBillDTOFixture.getDefault();
         associateBillDTO.setId(9001L);
-        when(billRepository.findById(any())).thenReturn(null);
+        when(billService.associateItemToAccountBill(any())).thenReturn(null);
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -209,7 +205,8 @@ class BillFacadeImplTest {
 
         item.setAccounts(Set.of(accountItem1, accountItem2));
 
-        when(billRepository.getBillById(any())).thenReturn(bill);
+        when(billService.associateItemToAccountBill(any())).thenReturn(bill);
+
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -220,6 +217,13 @@ class BillFacadeImplTest {
     @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
+        //Given
+
+
+        //When
+
+
+        //Then
 
     }
 

@@ -7,6 +7,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.entities.Account;
 import proj.kedabra.billsnap.business.entities.AccountBill;
@@ -56,6 +57,12 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Stream<Bill> getAllBillsByAccount(Account account) {
         return accountBillRepository.getAllByAccount(account).map(AccountBill::getBill);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill associateItemToAccountBill(AssociateBillDTO associateBillDTO) {
+        return null;
     }
 
     private void mapItems(final Item item, final Bill bill, final Account account) {

@@ -28,15 +28,12 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
 
     private final AccountRepository accountRepository;
-
-    private final BillRepository billRepository;
 
     private final BillService billService;
 
@@ -50,8 +47,6 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
 
-    private static final String BILL_DOES_NOT_EXIST = "Bill does not exist";
-
     private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist: ";
 
     private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
@@ -61,9 +56,8 @@ public class BillFacadeImpl implements BillFacade {
     private static final String MUST_HAVE_ONLY_ONE_TYPE_OF_TIPPING = "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.";
 
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, BillRepository billRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, ItemMapper itemMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, ItemMapper itemMapper) {
         this.accountRepository = accountRepository;
-        this.billRepository = billRepository;
         this.billService = billService;
         this.billMapper = billMapper;
         this.accountMapper = accountMapper;
@@ -96,12 +90,7 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
-        final Bill bill = Optional.ofNullable(billRepository.getBillById(associateBillDTO.getId()))
-                .orElseThrow(() -> new ResourceNotFoundException(BILL_DOES_NOT_EXIST));
-
-        verifyItemPercentagesAddUpToHundred(bill);
-
-        //map items in BillService here
+        final Bill bill = billService.associateItemToAccountBill(associateBillDTO);
 
         return getBillSplitDTO(bill);
     }
@@ -124,6 +113,8 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     private BillSplitDTO getBillSplitDTO(Bill bill) {
+        verifyItemPercentagesAddUpToHundred(bill);
+
         final BillSplitDTO billSplitDTO = billMapper.toBillSplitDTO(bill);
 
         mapAccountTotalCostIntoBillSplitDTO(bill, billSplitDTO);
