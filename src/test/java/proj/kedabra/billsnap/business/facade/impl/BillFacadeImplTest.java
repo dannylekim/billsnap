@@ -169,20 +169,6 @@ class BillFacadeImplTest {
     }
 
     @Test
-    @DisplayName("Should return exception if bill id does not reference existing bill")
-    void shouldThrowExceptionIfBillDoesNotExist() {
-        //Given
-        AssociateBillDTO associateBillDTO = AssociateBillDTOFixture.getDefault();
-        associateBillDTO.setId(9001L);
-        when(billService.associateItemToAccountBill(any())).thenReturn(null);
-
-        //When/Then
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO))
-                .withMessage(BILL_DOES_NOT_EXIST);
-    }
-
-    @Test
     @DisplayName("Should throw exception if bill items percentage split does not add up to hundred")
     void shouldThrowExceptionIfItemPercentagesDoNotAddToHundred() {
         //Given bill with 1 item {name: yogurt, cost: 4}
