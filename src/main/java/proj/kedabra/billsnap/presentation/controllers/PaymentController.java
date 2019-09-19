@@ -18,6 +18,8 @@ import proj.kedabra.billsnap.presentation.resources.PaymentOwedResource;
 import springfox.documentation.annotations.ApiIgnore;
 
 import java.security.Principal;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class PaymentController {
@@ -39,8 +41,8 @@ public class PaymentController {
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public PaymentOwedResource getAllAmountsOwed(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
-        final PaymentOwedDTO paymentOwedDTO = paymentFacade.getAmountsOwed(principal.getName());
-        return paymentMapper.toResource(paymentOwedDTO);
+    public List<PaymentOwedResource> getAllAmountsOwed(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
+        final List<PaymentOwedDTO> paymentOwedDTO = paymentFacade.getAmountsOwed(principal.getName());
+        return paymentOwedDTO.stream().map(paymentMapper::toResource).collect(Collectors.toList());
     }
 }
