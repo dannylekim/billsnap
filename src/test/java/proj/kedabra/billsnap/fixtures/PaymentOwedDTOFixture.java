@@ -13,10 +13,8 @@ public class PaymentOwedDTOFixture {
     public static PaymentOwedDTO getDefault() {
 
         final var paymentsOwedDTO = new PaymentOwedDTO();
-
-        final Map<String, BigDecimal> amountOwedMap = new HashMap<>();
-        amountOwedMap.put("abc@123.com", new BigDecimal("15000"));
-        paymentsOwedDTO.setAmountOwedList(amountOwedMap);
+        paymentsOwedDTO.setEmail("abc@123.com");
+        paymentsOwedDTO.setAmount(BigDecimal.valueOf(250));
 
         return paymentsOwedDTO;
     }

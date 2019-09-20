@@ -1,7 +1,9 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
@@ -64,10 +66,9 @@ public class BillServiceImpl implements BillService {
         return billRepository.getBillsByStatusAndAccounts_AccBill_Account(status, account);
     }
 
-    public PaymentOwedDTO calculateAmountOwed(Bill bill) {
+    public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
 
-        PaymentOwedDTO paymentOwedDTO = new PaymentOwedDTO();
-
+        // TODO implement calculateAmountOwed
         return null;
     }
 

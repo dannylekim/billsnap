@@ -12,6 +12,7 @@ import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 
@@ -28,10 +29,7 @@ public class PaymentFacadeImplTest {
     private AccountRepository accountRepository;
 
     @Mock
-    private BillRepository billRepository;
-
-    @Mock
-    private BillServiceImpl billServiceImpl;
+    private BillServiceImpl billService;
 
     @Test
     @DisplayName("Should return an exception if given an email that does not exist")
@@ -57,7 +55,7 @@ public class PaymentFacadeImplTest {
 
         //when
         when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
-//        when(billServiceImpl.getAllBillsByAccountAndStatus(account)).thenReturn(null);
+        when(billService.getBillsByStatusAndAccounts(BillStatusEnum.OPEN, account)).thenReturn(null);
 
         //Then
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
@@ -76,13 +74,13 @@ public class PaymentFacadeImplTest {
 
         //when
         when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
-//        when(billServiceImpl.getAllBillsByAccountAndStatus(account)).thenReturn(billStream);
+        when(billService.getBillsByStatusAndAccounts(BillStatusEnum.OPEN, account)).thenReturn(billStream);
 
         //then
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
         assertThat(listPaymentOwed.size()).isEqualTo(1);
-        assertThat(listPaymentOwed.get(0).email).isEqualTo(bill.creator.email);
-        assertThat(listPaymentOwed.get(0).amount).isEqualTo(bill.items.iterator().next().cost);
+        assertThat(listPaymentOwed.get(0).getEmail()).isEqualTo(bill.getCreator().getEmail());
+        assertThat(listPaymentOwed.get(0).getAmount()).isEqualTo(bill.getItems().iterator().next().getCost());
     }
 
 }
