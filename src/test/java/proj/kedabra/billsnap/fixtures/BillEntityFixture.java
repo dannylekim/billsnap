@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.entities.AccountBill;
+import proj.kedabra.billsnap.business.entities.AccountItem;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -53,6 +55,75 @@ public final class BillEntityFixture {
         item.setCost(BigDecimal.valueOf(300));
         items.add(item);
         bill.setItems(items);
+
+        return bill;
+    }
+
+    public static Bill getMappedBillSplitDTOFixture() {
+        final var bill = BillEntityFixture.getDefault();
+        final var item = bill.getItems().iterator().next();
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+
+        final var accountItem1 = new AccountItem();
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail("abc123@email.com");
+        accountItem1.setAccount(account1);
+        accountItem1.setItem(item);
+        accountItem1.setPercentage(accountPercentageSplit);
+        final var accountBill1 = new AccountBill();
+        accountBill1.setBill(bill);
+        accountBill1.setAccount(account1);
+        accountBill1.setPercentage(BigDecimal.ZERO);
+
+        final var accountItem2 = new AccountItem();
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail("hellomotto@cell.com");
+        accountItem2.setAccount(account2);
+        accountItem2.setItem(item);
+        accountItem2.setPercentage(accountPercentageSplit);
+        final var accountBill2 = new AccountBill();
+        accountBill2.setBill(bill);
+        accountBill2.setAccount(account2);
+        accountBill2.setPercentage(BigDecimal.ZERO);
+
+        item.setAccounts(Set.of(accountItem1, accountItem2));
+        bill.setCreator(account1);
+        bill.setResponsible(account1);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
+
+        return bill;
+    }
+
+    public static Bill getMappedBillSplitDTOFixtureGivenSplitPercentage(BigDecimal splitPercentage) {
+        final var bill = BillEntityFixture.getDefault();
+        final var item = bill.getItems().iterator().next();
+
+        final var accountItem1 = new AccountItem();
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail("abc123@email.com");
+        accountItem1.setAccount(account1);
+        accountItem1.setItem(item);
+        accountItem1.setPercentage(splitPercentage);
+        final var accountBill1 = new AccountBill();
+        accountBill1.setBill(bill);
+        accountBill1.setAccount(account1);
+        accountBill1.setPercentage(BigDecimal.ZERO);
+
+        final var accountItem2 = new AccountItem();
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail("hellomotto@cell.com");
+        accountItem2.setAccount(account2);
+        accountItem2.setItem(item);
+        accountItem2.setPercentage(splitPercentage);
+        final var accountBill2 = new AccountBill();
+        accountBill2.setBill(bill);
+        accountBill2.setAccount(account2);
+        accountBill2.setPercentage(BigDecimal.ZERO);
+
+        item.setAccounts(Set.of(accountItem1, accountItem2));
+        bill.setCreator(account1);
+        bill.setResponsible(account1);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
 
         return bill;
     }
