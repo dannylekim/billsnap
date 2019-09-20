@@ -19,14 +19,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
+import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.BillSplitDTO;
+import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
+import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.AccountItem;
+import proj.kedabra.billsnap.business.entities.Bill;
+import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
@@ -52,8 +59,6 @@ class BillFacadeImplTest {
     private BillService billService;
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
-
-    private static final String BILL_DOES_NOT_EXIST = "Bill does not exist";
 
     private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist: ";
 
@@ -193,25 +198,135 @@ class BillFacadeImplTest {
 
         when(billService.associateItemToAccountBill(any())).thenReturn(bill);
 
-
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(125)));
     }
 
-    @Test
-    @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
+    //    @Test
+//    @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
-        //Given
+        //Given bill with 1 item {name: yogurt, cost: 4}
+        final var dto = AssociateBillDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getDefault();
+        final var item = bill.getItems().iterator().next();
 
+        final var accountItem1 = new AccountItem();
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail("abc123@email.com");
+        accountItem1.setAccount(account1);
+        accountItem1.setItem(item);
+        accountItem1.setPercentage(BigDecimal.valueOf(50));
+        final AccountBill accountBill1 = new AccountBill();
+        accountBill1.setBill(bill);
+        accountBill1.setAccount(account1);
+        accountBill1.setPercentage(BigDecimal.ZERO);
+
+        final var accountItem2 = new AccountItem();
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail("hellomotto@cell.com");
+        accountItem2.setAccount(account2);
+        accountItem2.setItem(item);
+        accountItem2.setPercentage(BigDecimal.valueOf(50));
+        final AccountBill accountBill2 = new AccountBill();
+        accountBill2.setBill(bill);
+        accountBill2.setAccount(account2);
+        accountBill2.setPercentage(BigDecimal.ZERO);
+
+        item.setAccounts(Set.of(accountItem1, accountItem2));
+
+        bill.setCreator(account1);
+        bill.setResponsible(account1);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
+
+        when(billService.associateItemToAccountBill(any())).thenReturn(bill);
+
+        final var billSplitDTO = new BillSplitDTO();
+        billSplitDTO.setBalance(item.getCost().add(bill.getTipAmount()));
+        billSplitDTO.setTotalTip(bill.getTipAmount());
+        billSplitDTO.setCategory(bill.getCategory());
+        billSplitDTO.setCompany(bill.getCompany());
+        billSplitDTO.setCreated(bill.getCreated());
+        billSplitDTO.setId(bill.getId());
+        billSplitDTO.setName(bill.getName());
+        billSplitDTO.setSplitBy(bill.getSplitBy());
+        billSplitDTO.setStatus(bill.getStatus());
+        billSplitDTO.setUpdated(bill.getUpdated());
+
+        final AccountDTO accountDTO1 = new AccountDTO();
+        accountDTO1.setEmail(account1.getEmail());
+        accountDTO1.setId(account1.getId());
+        billSplitDTO.setCreator(accountDTO1);
+        billSplitDTO.setResponsible(accountDTO1);
+
+        final AccountDTO accountDTO2 = new AccountDTO();
+        accountDTO2.setEmail(account2.getEmail());
+        accountDTO2.setId(account2.getId());
+
+        final ItemAssociationSplitDTO itemAssociationSplitDTO1 = new ItemAssociationSplitDTO();
+        itemAssociationSplitDTO1.setAccount(accountDTO1);
+        itemAssociationSplitDTO1.setCost(BigDecimal.valueOf(2));
+        final ItemPercentageSplitDTO itemPercentageSplitDTO1 = new ItemPercentageSplitDTO();
+        itemPercentageSplitDTO1.setPercentage(accountItem1.getPercentage());
+        itemPercentageSplitDTO1.setCost(item.getCost());
+        itemPercentageSplitDTO1.setName(item.getName());
+        itemPercentageSplitDTO1.setId(item.getId());
+        itemAssociationSplitDTO1.setItems(List.of(itemPercentageSplitDTO1));
+
+        final ItemAssociationSplitDTO itemAssociationSplitDTO2 = new ItemAssociationSplitDTO();
+        itemAssociationSplitDTO2.setAccount(accountDTO1);
+        itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2));
+        final ItemPercentageSplitDTO itemPercentageSplitDTO2 = new ItemPercentageSplitDTO();
+        itemPercentageSplitDTO2.setPercentage(accountItem1.getPercentage());
+        itemPercentageSplitDTO2.setCost(item.getCost());
+        itemPercentageSplitDTO2.setName(item.getName());
+        itemPercentageSplitDTO2.setId(item.getId());
+        itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
+
+        billSplitDTO.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
+
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
 
         //When
-
+        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
 
         //Then
+        verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
 
     }
 
+    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
+        final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
+                .filter(acc -> acc.equals(bill.getCreator()))
+                .iterator().next();
+        assertEquals(billCreatorAccount.getId(), billSplitDTO.getCreator().getId());
+        assertEquals(billCreatorAccount.getId(), billSplitDTO.getResponsible().getId());
+        assertEquals(BillStatusEnum.OPEN, bill.getStatus());
+        assertEquals(bill.getId(), billSplitDTO.getId());
+        assertEquals(bill.getCategory(), billSplitDTO.getCategory());
+        assertEquals(bill.getCompany(), billSplitDTO.getCompany());
+
+        final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getItemsPerAccount();
+        final Set<AccountBill> accounts = bill.getAccounts();
+        assertEquals(accounts.size(), itemsPerAccount.size());
+
+        final Set<Item> billItems = bill.getItems();
+        if (!itemsPerAccount.get(0).getItems().isEmpty()) {
+            //for the time being we verify a bill with only 1 item. Should be generic when needed.
+            final Item item = billItems.iterator().next();
+            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
+            assertEquals(item.getName(), returnItemPercentageSplitDTO.getName());
+            assertEquals(item.getCost(), returnItemPercentageSplitDTO.getCost());
+            assertEquals(item.getCost(), billSplitDTO.getBalance());
+            assertEquals(bill.getName(), billSplitDTO.getName());
+            assertEquals(bill.getId(), billSplitDTO.getId());
+            assertEquals(bill.getStatus(), billSplitDTO.getStatus());
+            assertEquals(bill.getCreated(), billSplitDTO.getCreated());
+            assertEquals(bill.getUpdated(), billSplitDTO.getUpdated());
+        } else {
+            assertEquals(0, BigDecimal.ZERO.compareTo(billSplitDTO.getBalance()));
+        }
+    }
 
 }
