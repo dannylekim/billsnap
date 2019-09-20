@@ -8,6 +8,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,7 +59,7 @@ class AccountControllerIT {
 
     private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
 
-    private static Integer count = 0;
+    private static UUID uuidv4 = UUID.randomUUID();
 
 
     @Test
@@ -380,13 +381,13 @@ class AccountControllerIT {
 
 
     @ParameterizedTest
-    @DisplayName("Should return a proper reply with 201 status using various symbols")
-    @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";", "[" ,"]", "/", "\\"})
+    @DisplayName("Should return a proper reply with 201 status using various symbols, The following symbols do not work: <,>,{,}, -, _ ")
+    @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";", "[", "]", "/", "\\"})
     void shouldReturn201NormalCaseWithSymbols(String input) throws Exception {
         //Given
         var creationResource = AccountCreationResourceFixture.getDefault();
-        creationResource.setEmail("successfulWithSymbol" + count + "@email.com");
-        count++;
+        creationResource.setEmail(uuidv4 + "@email.com");
+        uuidv4 = UUID.randomUUID();
         creationResource.setPassword("Password123" + input);
 
         //When/Then
