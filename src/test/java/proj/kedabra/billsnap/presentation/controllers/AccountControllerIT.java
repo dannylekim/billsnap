@@ -59,7 +59,7 @@ class AccountControllerIT {
 
     private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
 
-    private static UUID uuidv4 = UUID.randomUUID();
+
 
 
     @Test
@@ -385,9 +385,9 @@ class AccountControllerIT {
     @ValueSource(strings = {"!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "+", "=", ".", ",", "|", "~", ";", "[", "]", "/", "\\"})
     void shouldReturn201NormalCaseWithSymbols(String input) throws Exception {
         //Given
+        UUID uuidv4 = UUID.randomUUID();
         var creationResource = AccountCreationResourceFixture.getDefault();
         creationResource.setEmail(uuidv4 + "@email.com");
-        uuidv4 = UUID.randomUUID();
         creationResource.setPassword("Password123" + input);
 
         //When/Then
