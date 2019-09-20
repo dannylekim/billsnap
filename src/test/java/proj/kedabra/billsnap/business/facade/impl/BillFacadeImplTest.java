@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -204,20 +205,21 @@ class BillFacadeImplTest {
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(125)));
     }
 
-    //    @Test
-//    @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
+    @Test
+    @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
         //Given bill with 1 item {name: yogurt, cost: 4}
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = BillEntityFixture.getDefault();
         final var item = bill.getItems().iterator().next();
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
 
         final var accountItem1 = new AccountItem();
         final var account1 = AccountEntityFixture.getDefaultAccount();
         account1.setEmail("abc123@email.com");
         accountItem1.setAccount(account1);
         accountItem1.setItem(item);
-        accountItem1.setPercentage(BigDecimal.valueOf(50));
+        accountItem1.setPercentage(accountPercentageSplit);
         final AccountBill accountBill1 = new AccountBill();
         accountBill1.setBill(bill);
         accountBill1.setAccount(account1);
@@ -228,19 +230,16 @@ class BillFacadeImplTest {
         account2.setEmail("hellomotto@cell.com");
         accountItem2.setAccount(account2);
         accountItem2.setItem(item);
-        accountItem2.setPercentage(BigDecimal.valueOf(50));
+        accountItem2.setPercentage(accountPercentageSplit);
         final AccountBill accountBill2 = new AccountBill();
         accountBill2.setBill(bill);
         accountBill2.setAccount(account2);
         accountBill2.setPercentage(BigDecimal.ZERO);
 
         item.setAccounts(Set.of(accountItem1, accountItem2));
-
         bill.setCreator(account1);
         bill.setResponsible(account1);
         bill.setAccounts(Set.of(accountBill1, accountBill2));
-
-        when(billService.associateItemToAccountBill(any())).thenReturn(bill);
 
         final var billSplitDTO = new BillSplitDTO();
         billSplitDTO.setBalance(item.getCost().add(bill.getTipAmount()));
@@ -275,7 +274,7 @@ class BillFacadeImplTest {
         itemAssociationSplitDTO1.setItems(List.of(itemPercentageSplitDTO1));
 
         final ItemAssociationSplitDTO itemAssociationSplitDTO2 = new ItemAssociationSplitDTO();
-        itemAssociationSplitDTO2.setAccount(accountDTO1);
+        itemAssociationSplitDTO2.setAccount(accountDTO2);
         itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2));
         final ItemPercentageSplitDTO itemPercentageSplitDTO2 = new ItemPercentageSplitDTO();
         itemPercentageSplitDTO2.setPercentage(accountItem1.getPercentage());
@@ -286,12 +285,34 @@ class BillFacadeImplTest {
 
         billSplitDTO.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
 
+        when(billService.associateItemToAccountBill(any())).thenReturn(bill);
         when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+        when(accountMapper.toDTO(any(Account.class))).thenAnswer(
+                a -> {
+                    Account acc = (Account) a.getArguments()[0];
+                    final AccountDTO accountDTO = new AccountDTO();
+                    accountDTO.setId(acc.getId());
+                    accountDTO.setEmail(acc.getEmail());
+                    return accountDTO;
+                }
+        );
 
         //When
         final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
 
         //Then
+        assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
 
     }
@@ -318,7 +339,6 @@ class BillFacadeImplTest {
             final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
             assertEquals(item.getName(), returnItemPercentageSplitDTO.getName());
             assertEquals(item.getCost(), returnItemPercentageSplitDTO.getCost());
-            assertEquals(item.getCost(), billSplitDTO.getBalance());
             assertEquals(bill.getName(), billSplitDTO.getName());
             assertEquals(bill.getId(), billSplitDTO.getId());
             assertEquals(bill.getStatus(), billSplitDTO.getStatus());
