@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.entities.Bill;
@@ -30,6 +32,14 @@ public class PaymentFacadeImplTest {
 
     @Mock
     private BillServiceImpl billService;
+
+    @BeforeEach
+    void setup() {
+
+        MockitoAnnotations.initMocks(this);
+        paymentFacadeImpl = new PaymentFacadeImpl(accountRepository, billService);
+
+    }
 
     @Test
     @DisplayName("Should return an exception if given an email that does not exist")

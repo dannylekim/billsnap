@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
@@ -24,6 +25,7 @@ public class PaymentFacadeImpl implements PaymentFacade {
 
     private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
 
+    @Autowired
     public PaymentFacadeImpl(final AccountRepository accountRepository, final BillServiceImpl billService) {
         this.accountRepository = accountRepository;
         this.billService = billService;
