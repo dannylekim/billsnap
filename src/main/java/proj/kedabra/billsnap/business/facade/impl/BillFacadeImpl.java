@@ -128,46 +128,51 @@ public class BillFacadeImpl implements BillFacade {
         return billSplitDTO;
     }
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private void mapAccountTotalCostIntoBillSplitDTO(Bill bill, BillSplitDTO billSplitDTO) {
-        final HashMap<Account, Pair> accountPairMap = new HashMap<>();
-        bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
-            Pair pair = new Pair(BigDecimal.ZERO, new ArrayList<>());
-            accountPairMap.put(account, pair);
-        });
-
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
+        final HashMap<Account, CostItemListPair> accountPairMap = new HashMap<>();
+        bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
+                    CostItemListPair costItemListPair = new CostItemListPair(BigDecimal.ZERO, new ArrayList<>());
+                    accountPairMap.put(account, costItemListPair);
+                });
 
         for (Item item : bill.getItems()) {
             BigDecimal itemPercentageSplitTotal = BigDecimal.ZERO;
 
             for (AccountItem accountItem : item.getAccounts()) {
-                final Account thisAccount = accountItem.getAccount();
-                final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
-                BigDecimal itemPercentage = accountItem.getPercentage();
-                itemPercentageSplitDTO.setPercentage(itemPercentage);
-                itemPercentageSplitTotal = itemPercentageSplitTotal.add(itemPercentage);
-
-                final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR));
-                final BigDecimal newAccountTotalCost = accountPairMap.get(thisAccount).getCost().add(itemCostForAccount);
-                accountPairMap.get(thisAccount).setCost(newAccountTotalCost);
-                accountPairMap.get(thisAccount).getItemList().add(itemPercentageSplitDTO);
+                BigDecimal accountItemPercentage = mapAccountItemIntoMapAndReturnAccountItemPercentage(item, accountItem, accountPairMap);
+                itemPercentageSplitTotal = itemPercentageSplitTotal.add(accountItemPercentage);
             }
-
             if (itemPercentageSplitTotal.compareTo(BigDecimal.valueOf(100)) != 0) {
                 throw new IllegalArgumentException(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), itemPercentageSplitTotal));
             }
         }
 
-        accountPairMap.forEach((account, pair) -> {
+        accountPairMap.forEach((account, costItemListPair) -> {
             final ItemAssociationSplitDTO itemSplitDTO = new ItemAssociationSplitDTO();
             itemSplitDTO.setAccount(accountMapper.toDTO(account));
-            itemSplitDTO.setCost(pair.getCost());
-            itemSplitDTO.setItems(pair.getItemList());
+            itemSplitDTO.setCost(costItemListPair.getCost());
+            itemSplitDTO.setItems(costItemListPair.getItemList());
             itemsPerAccount.add(itemSplitDTO);
         });
         billSplitDTO.setItemsPerAccount(itemsPerAccount);
 
+    }
+
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private BigDecimal mapAccountItemIntoMapAndReturnAccountItemPercentage(Item item, AccountItem accountItem,
+                                                                           HashMap<Account, CostItemListPair> accountPairMap) {
+        final Account thisAccount = accountItem.getAccount();
+        final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
+        BigDecimal itemPercentage = accountItem.getPercentage();
+        itemPercentageSplitDTO.setPercentage(itemPercentage);
+
+        final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR));
+        final BigDecimal newAccountTotalCost = accountPairMap.get(thisAccount).getCost().add(itemCostForAccount);
+        accountPairMap.get(thisAccount).setCost(newAccountTotalCost);
+        accountPairMap.get(thisAccount).getItemList().add(itemPercentageSplitDTO);
+
+        return itemPercentage;
     }
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
@@ -231,7 +236,7 @@ public class BillFacadeImpl implements BillFacade {
 
 @AllArgsConstructor
 @Data
-class Pair {
+class CostItemListPair {
 
     private BigDecimal cost;
 
