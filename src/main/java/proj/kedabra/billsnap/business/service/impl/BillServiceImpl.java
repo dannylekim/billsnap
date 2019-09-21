@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,13 +64,18 @@ public class BillServiceImpl implements BillService {
 
     @Transactional(rollbackFor = Exception.class)
     public Stream<Bill> getBillsByStatusAndAccounts(BillStatusEnum status, Account account) {
-        return billRepository.getBillsByStatusAndAccounts_AccBill_Account(status, account);
+        return billRepository.getBillsByStatusAndAccounts(status, account);
     }
 
     public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
 
         // TODO implement calculateAmountOwed
-        return null;
+        PaymentOwedDTO paymentOwedDTO = new PaymentOwedDTO();
+        paymentOwedDTO.setEmail("email@test.com");
+        paymentOwedDTO.setAmount(BigDecimal.valueOf(69));
+        final List<PaymentOwedDTO> list = new ArrayList<>();
+        list.add(paymentOwedDTO);
+        return list;
     }
 
     private void mapItems(final Item item, final Bill bill, final Account account) {

@@ -10,6 +10,6 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 public interface BillRepository extends CrudRepository<Bill, Long> {
 
-    Stream<Bill> getBillsByStatusAndAccounts_AccBill_Account(BillStatusEnum status, Account account);
+    Stream<Bill> getBillsByStatusAndAccounts(BillStatusEnum status, Account account);
 
 }

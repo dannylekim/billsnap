@@ -18,6 +18,8 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -64,8 +66,7 @@ public class PaymentFacadeImplTest {
         final var account = AccountEntityFixture.getDefaultAccount();
 
         //when
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
-        when(billService.getBillsByStatusAndAccounts(BillStatusEnum.OPEN, account)).thenReturn(null);
+        when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
         //Then
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
@@ -74,23 +75,26 @@ public class PaymentFacadeImplTest {
     }
 
     @Test
-    @DisplayName("Should return ...")
-    void shouldReturn() {
+    @DisplayName("Should return list of one account mapped to amount owed")
+    void shouldReturnListOfOneAccountMappedToAmountOwed() {
         //Given
         final String testEmail = "abc@123.ca";
         final var account = AccountEntityFixture.getDefaultAccount();
         final var bill = BillEntityFixture.getDefault();
-        final Stream<Bill> billStream = Stream.of(bill);
+        final var paymentOwed = new PaymentOwedDTO();
+        final var paymentsOwedList = new ArrayList<PaymentOwedDTO>();
+        paymentOwed.setEmail("owed@yomama.com");
+        paymentOwed.setAmount(BigDecimal.valueOf(69));
+        paymentsOwedList.add(paymentOwed);
 
         //when
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
-        when(billService.getBillsByStatusAndAccounts(BillStatusEnum.OPEN, account)).thenReturn(billStream);
+        when(billService.calculateAmountOwed(account)).thenReturn(paymentsOwedList);
 
         //then
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
         assertThat(listPaymentOwed.size()).isEqualTo(1);
-        assertThat(listPaymentOwed.get(0).getEmail()).isEqualTo(bill.getCreator().getEmail());
-        assertThat(listPaymentOwed.get(0).getAmount()).isEqualTo(bill.getItems().iterator().next().getCost());
+        assertThat(listPaymentOwed.get(0).getEmail()).isEqualTo("owed@yomama.com");
+        assertThat(listPaymentOwed.get(0).getAmount()).isEqualTo(BigDecimal.valueOf(69));
     }
 
 }
