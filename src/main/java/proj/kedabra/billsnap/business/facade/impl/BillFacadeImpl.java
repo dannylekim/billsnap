@@ -12,6 +12,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
@@ -59,7 +60,7 @@ public class BillFacadeImpl implements BillFacade {
     private static final String MUST_HAVE_ONLY_ONE_TYPE_OF_TIPPING = "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.";
 
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, ItemMapper itemMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, final ItemMapper itemMapper) {
         this.accountRepository = accountRepository;
         this.billService = billService;
         this.billMapper = billMapper;
@@ -139,17 +140,20 @@ public class BillFacadeImpl implements BillFacade {
 
         for (Item item : bill.getItems()) {
             BigDecimal itemPercentageSplitTotal = BigDecimal.ZERO;
+
             for (AccountItem accountItem : item.getAccounts()) {
                 final Account thisAccount = accountItem.getAccount();
                 final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
                 BigDecimal itemPercentage = accountItem.getPercentage();
                 itemPercentageSplitDTO.setPercentage(itemPercentage);
                 itemPercentageSplitTotal = itemPercentageSplitTotal.add(itemPercentage);
+
                 final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR));
                 final BigDecimal newAccountTotalCost = accountPairMap.get(thisAccount).getCost().add(itemCostForAccount);
                 accountPairMap.get(thisAccount).setCost(newAccountTotalCost);
                 accountPairMap.get(thisAccount).getItemList().add(itemPercentageSplitDTO);
             }
+
             if (itemPercentageSplitTotal.compareTo(BigDecimal.valueOf(100)) != 0) {
                 throw new IllegalArgumentException(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), itemPercentageSplitTotal));
             }
@@ -225,15 +229,11 @@ public class BillFacadeImpl implements BillFacade {
 
 }
 
+@AllArgsConstructor
 @Data
 class Pair {
 
     private BigDecimal cost;
 
     private List<ItemPercentageSplitDTO> itemList;
-
-    Pair(BigDecimal cost, List<ItemPercentageSplitDTO> itemList) {
-        this.cost = cost;
-        this.itemList = itemList;
-    }
 }
