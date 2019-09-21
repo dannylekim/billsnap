@@ -11,7 +11,9 @@ import proj.kedabra.billsnap.business.entities.AccountBill;
 import proj.kedabra.billsnap.business.entities.AccountItem;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
+import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
 public final class BillEntityFixture {
@@ -67,6 +69,11 @@ public final class BillEntityFixture {
         final var accountItem1 = new AccountItem();
         final var account1 = AccountEntityFixture.getDefaultAccount();
         account1.setEmail("abc123@email.com");
+        account1.setId(1234L);
+        account1.setMiddleName("middlename");
+        account1.setGender(GenderEnum.MALE);
+        account1.setPhoneNumber("123456789");
+        account1.setStatus(AccountStatusEnum.REGISTERED);
         accountItem1.setAccount(account1);
         accountItem1.setItem(item);
         accountItem1.setPercentage(accountPercentageSplit);
@@ -78,6 +85,11 @@ public final class BillEntityFixture {
         final var accountItem2 = new AccountItem();
         final var account2 = AccountEntityFixture.getDefaultAccount();
         account2.setEmail("hellomotto@cell.com");
+        account2.setId(1357L);
+        account2.setMiddleName("middlename");
+        account2.setGender(GenderEnum.MALE);
+        account2.setPhoneNumber("123456789");
+        account2.setStatus(AccountStatusEnum.REGISTERED);
         accountItem2.setAccount(account2);
         accountItem2.setItem(item);
         accountItem2.setPercentage(accountPercentageSplit);
@@ -90,6 +102,7 @@ public final class BillEntityFixture {
         bill.setCreator(account1);
         bill.setResponsible(account1);
         bill.setAccounts(Set.of(accountBill1, accountBill2));
+        bill.setStatus(BillStatusEnum.OPEN);
 
         return bill;
     }
@@ -101,6 +114,10 @@ public final class BillEntityFixture {
         final var accountItem1 = new AccountItem();
         final var account1 = AccountEntityFixture.getDefaultAccount();
         account1.setEmail("abc123@email.com");
+        account1.setMiddleName("middlename");
+        account1.setGender(GenderEnum.MALE);
+        account1.setPhoneNumber("123456789");
+        account1.setStatus(AccountStatusEnum.REGISTERED);
         accountItem1.setAccount(account1);
         accountItem1.setItem(item);
         accountItem1.setPercentage(splitPercentage);
@@ -112,6 +129,11 @@ public final class BillEntityFixture {
         final var accountItem2 = new AccountItem();
         final var account2 = AccountEntityFixture.getDefaultAccount();
         account2.setEmail("hellomotto@cell.com");
+        account2.setId(1357L);
+        account2.setMiddleName("middlename");
+        account2.setGender(GenderEnum.MALE);
+        account2.setPhoneNumber("123456789");
+        account2.setStatus(AccountStatusEnum.REGISTERED);
         accountItem2.setAccount(account2);
         accountItem2.setItem(item);
         accountItem2.setPercentage(splitPercentage);
@@ -124,6 +146,7 @@ public final class BillEntityFixture {
         bill.setCreator(account1);
         bill.setResponsible(account1);
         bill.setAccounts(Set.of(accountBill1, accountBill2));
+        bill.setStatus(BillStatusEnum.OPEN);
 
         return bill;
     }

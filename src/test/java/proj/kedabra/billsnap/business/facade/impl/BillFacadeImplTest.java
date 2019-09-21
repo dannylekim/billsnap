@@ -250,7 +250,7 @@ class BillFacadeImplTest {
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
         assertEquals(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR)),
                 returnBillSplitDTO.getItemsPerAccount().get(0).getCost());
-        assertEquals(bill.getTipAmount(), billSplitDTO.getTotalTip());
+        assertEquals(bill.getTipAmount(), returnBillSplitDTO.getTotalTip());
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
