@@ -3,25 +3,20 @@ package proj.kedabra.billsnap.business.facade.impl;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
-import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
-import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.mockito.Mockito.when;
 
@@ -66,6 +61,7 @@ public class PaymentFacadeImplTest {
         final var account = AccountEntityFixture.getDefaultAccount();
 
         //when
+        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
         //Then
@@ -80,7 +76,6 @@ public class PaymentFacadeImplTest {
         //Given
         final String testEmail = "abc@123.ca";
         final var account = AccountEntityFixture.getDefaultAccount();
-        final var bill = BillEntityFixture.getDefault();
         final var paymentOwed = new PaymentOwedDTO();
         final var paymentsOwedList = new ArrayList<PaymentOwedDTO>();
         paymentOwed.setEmail("owed@yomama.com");
@@ -88,6 +83,7 @@ public class PaymentFacadeImplTest {
         paymentsOwedList.add(paymentOwed);
 
         //when
+        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(paymentsOwedList);
 
         //then
