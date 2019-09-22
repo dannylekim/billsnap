@@ -5,16 +5,11 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
-import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
-
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 public class PaymentFacadeImpl implements PaymentFacade {
