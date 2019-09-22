@@ -22,6 +22,7 @@ import proj.kedabra.billsnap.business.entities.AccountItem;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -43,12 +44,15 @@ class BillServiceImplTest {
     @Mock
     private AccountRepository accountRepository;
 
+    @Mock
+    private PaymentMapper paymentMapper;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper);
     }
 
     @Test
