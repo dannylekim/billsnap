@@ -16,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.model.entities.Account;
 import proj.kedabra.billsnap.model.entities.AccountBill;
 import proj.kedabra.billsnap.model.entities.AccountItem;
@@ -39,6 +40,9 @@ class BillServiceImplTest {
     private AccountBillRepository accountBillRepository;
 
     @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
     private BillMapper billMapper;
 
     @Mock
@@ -52,7 +56,7 @@ class BillServiceImplTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository);
     }
 
     @Test

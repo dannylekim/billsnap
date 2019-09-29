@@ -8,6 +8,7 @@ import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
@@ -26,15 +27,23 @@ public class BillServiceImpl implements BillService {
 
     private final AccountBillRepository accountBillRepository;
 
+    private final PaymentRepository paymentRepository;
+
     private final BillMapper billMapper;
 
     private final PaymentMapper paymentMapper;
 
-    public BillServiceImpl(final BillRepository billRepository, final BillMapper billMapper, final AccountBillRepository accountBillRepository, final PaymentMapper paymentMapper) {
+    public BillServiceImpl(
+            final BillRepository        billRepository,
+            final BillMapper            billMapper,
+            final AccountBillRepository accountBillRepository,
+            final PaymentMapper         paymentMapper,
+            final PaymentRepository     paymentRepository ) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
+        this.paymentRepository = paymentRepository;
     }
 
 
@@ -63,7 +72,7 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
-        return billRepository.getAllAmountOwedByStatusAndAccount(status, account);
+        return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
     }
 
     @Transactional(rollbackFor = Exception.class)
