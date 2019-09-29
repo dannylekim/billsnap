@@ -149,7 +149,7 @@ class BillServiceImplIT {
     void shouldReturnCorrectSummationAmountOfOwedPerEmail() {
         //Given
         var account = AccountEntityFixture.getDefaultAccount();
-        account.setId(1000l);
+        account.setId(4000l);
 
         //When
         final List<PaymentOwed> paymentOwedList = billService.getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).collect(Collectors.toList());
