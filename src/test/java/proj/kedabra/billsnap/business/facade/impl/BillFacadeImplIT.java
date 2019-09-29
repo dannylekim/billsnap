@@ -244,35 +244,36 @@ class BillFacadeImplIT {
 
         //Then
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
-        assertEquals(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR)),
-                returnBillSplitDTO.getItemsPerAccount().get(0).getCost());
-        assertEquals(bill.getTipAmount(), billSplitDTO.getTotalTip());
+
+        assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
+        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getCost())
+                .isEqualTo(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR)));
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();
-        assertEquals(billCreatorAccount.getId(), billSplitDTO.getCreator().getId());
-        assertEquals(billCreatorAccount.getId(), billSplitDTO.getResponsible().getId());
-        assertEquals(BillStatusEnum.OPEN, bill.getStatus());
-        assertEquals(bill.getId(), billSplitDTO.getId());
-        assertEquals(bill.getCategory(), billSplitDTO.getCategory());
-        assertEquals(bill.getCompany(), billSplitDTO.getCompany());
+        assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.OPEN);
+        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
+        assertThat(billSplitDTO.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(billSplitDTO.getCompany()).isEqualTo(bill.getCompany());
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getItemsPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
-        assertEquals(accounts.size(), itemsPerAccount.size());
+        assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
         //for the time being we verify a bill with only 1 item. Should be generic when needed.
         final Item item = bill.getItems().iterator().next();
         final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
-        assertEquals(item.getName(), returnItemPercentageSplitDTO.getName());
-        assertEquals(item.getCost(), returnItemPercentageSplitDTO.getCost());
-        assertEquals(item.getCost().add(bill.getTipAmount()), billSplitDTO.getBalance());
-        assertEquals(bill.getName(), billSplitDTO.getName());
-        assertEquals(bill.getId(), billSplitDTO.getId());
-        assertEquals(bill.getStatus(), billSplitDTO.getStatus());
+        assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
+        assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
+        assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
+        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
+        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
         assertThat(billSplitDTO.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
         assertThat(billSplitDTO.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
 

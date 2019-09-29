@@ -7,16 +7,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
-import proj.kedabra.billsnap.business.entities.AccountItem;
 import proj.kedabra.billsnap.business.entities.Bill;
 import proj.kedabra.billsnap.business.entities.Item;
-import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
-import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
 public final class BillEntityFixture {
+
     private BillEntityFixture() {}
 
     public static Bill getDefault() {
@@ -40,11 +37,12 @@ public final class BillEntityFixture {
         bill.setTipAmount(BigDecimal.TEN);
         bill.setTipPercent(BigDecimal.ZERO);
         bill.setItems(Stream.of(item).collect(Collectors.toSet()));
+        bill.setId(5000L);
 
         return bill;
     }
 
-    public static Bill getMappedBillDTOFixture () {
+    public static Bill getMappedBillDTOFixture() {
         final var bill = new Bill();
         bill.setName("Monthly Rent");
         bill.setCategory("Rent");
@@ -66,34 +64,24 @@ public final class BillEntityFixture {
         final var item = bill.getItems().iterator().next();
         final var accountPercentageSplit = BigDecimal.valueOf(50);
 
-        final var accountItem1 = new AccountItem();
         final var account1 = AccountEntityFixture.getDefaultAccount();
-        account1.setEmail("abc123@email.com");
-        account1.setId(1234L);
-        account1.setMiddleName("middlename");
-        account1.setGender(GenderEnum.MALE);
-        account1.setPhoneNumber("123456789");
-        account1.setStatus(AccountStatusEnum.REGISTERED);
+        final var accountItem1 = AccountItemEntityFixture.getDefault();
         accountItem1.setAccount(account1);
         accountItem1.setItem(item);
         accountItem1.setPercentage(accountPercentageSplit);
-        final var accountBill1 = new AccountBill();
+        final var accountBill1 = AccountBillEntityFixture.getDefault();
         accountBill1.setBill(bill);
         accountBill1.setAccount(account1);
         accountBill1.setPercentage(BigDecimal.ZERO);
 
-        final var accountItem2 = new AccountItem();
         final var account2 = AccountEntityFixture.getDefaultAccount();
         account2.setEmail("hellomotto@cell.com");
         account2.setId(1357L);
-        account2.setMiddleName("middlename");
-        account2.setGender(GenderEnum.MALE);
-        account2.setPhoneNumber("123456789");
-        account2.setStatus(AccountStatusEnum.REGISTERED);
+        final var accountItem2 = AccountItemEntityFixture.getDefault();
         accountItem2.setAccount(account2);
         accountItem2.setItem(item);
         accountItem2.setPercentage(accountPercentageSplit);
-        final var accountBill2 = new AccountBill();
+        final var accountBill2 = AccountBillEntityFixture.getDefault();
         accountBill2.setBill(bill);
         accountBill2.setAccount(account2);
         accountBill2.setPercentage(BigDecimal.ZERO);
@@ -111,33 +99,25 @@ public final class BillEntityFixture {
         final var bill = BillEntityFixture.getDefault();
         final var item = bill.getItems().iterator().next();
 
-        final var accountItem1 = new AccountItem();
+        final var accountItem1 = AccountItemEntityFixture.getDefault();
         final var account1 = AccountEntityFixture.getDefaultAccount();
-        account1.setEmail("abc123@email.com");
-        account1.setMiddleName("middlename");
-        account1.setGender(GenderEnum.MALE);
-        account1.setPhoneNumber("123456789");
-        account1.setStatus(AccountStatusEnum.REGISTERED);
+
         accountItem1.setAccount(account1);
         accountItem1.setItem(item);
         accountItem1.setPercentage(splitPercentage);
-        final var accountBill1 = new AccountBill();
+        final var accountBill1 = AccountBillEntityFixture.getDefault();
         accountBill1.setBill(bill);
         accountBill1.setAccount(account1);
         accountBill1.setPercentage(BigDecimal.ZERO);
 
-        final var accountItem2 = new AccountItem();
+        final var accountItem2 = AccountItemEntityFixture.getDefault();
         final var account2 = AccountEntityFixture.getDefaultAccount();
         account2.setEmail("hellomotto@cell.com");
         account2.setId(1357L);
-        account2.setMiddleName("middlename");
-        account2.setGender(GenderEnum.MALE);
-        account2.setPhoneNumber("123456789");
-        account2.setStatus(AccountStatusEnum.REGISTERED);
         accountItem2.setAccount(account2);
         accountItem2.setItem(item);
         accountItem2.setPercentage(splitPercentage);
-        final var accountBill2 = new AccountBill();
+        final var accountBill2 = AccountBillEntityFixture.getDefault();
         accountBill2.setBill(bill);
         accountBill2.setAccount(account2);
         accountBill2.setPercentage(BigDecimal.ZERO);

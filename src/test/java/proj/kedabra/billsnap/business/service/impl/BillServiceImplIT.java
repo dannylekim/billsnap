@@ -102,7 +102,9 @@ class BillServiceImplIT {
         //Given
         final var billDTO = BillDTOFixture.getDefault();
         final Account account = accountRepository.getAccountByEmail("test@email.com");
-        final List<Account> accountsList = List.of(AccountEntityFixture.getDefaultAccount());
+        final Account defaultAccount = AccountEntityFixture.getDefaultAccount();
+        defaultAccount.setId(null);
+        final List<Account> accountsList = List.of(defaultAccount);
 
         //When
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
