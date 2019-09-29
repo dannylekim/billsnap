@@ -5,7 +5,7 @@ import java.time.LocalDate;
 
 import lombok.Data;
 
-import proj.kedabra.billsnap.business.entities.Location;
+import proj.kedabra.billsnap.model.entities.Location;
 
 @Data
 public class AccountDTO implements Serializable {

@@ -6,9 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import org.springframework.data.repository.query.Param;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.IPaymentOwed;
+import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.model.entities.Bill;
+import proj.kedabra.billsnap.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 public interface BillRepository extends CrudRepository<Bill, Long> {
@@ -23,5 +23,5 @@ public interface BillRepository extends CrudRepository<Bill, Long> {
             "AND b.status = :#{#status.toString()} " +
             "GROUP BY account.email",
             nativeQuery = true)
-    Stream<IPaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
+    Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
 }

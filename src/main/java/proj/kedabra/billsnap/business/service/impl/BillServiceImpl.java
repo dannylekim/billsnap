@@ -1,16 +1,9 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.entities.*;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
@@ -18,6 +11,13 @@ import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
+import proj.kedabra.billsnap.model.entities.*;
+import proj.kedabra.billsnap.model.projections.PaymentOwed;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -62,7 +62,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Stream<IPaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
+    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
         return billRepository.getAllAmountOwedByStatusAndAccount(status, account);
     }
 

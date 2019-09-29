@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
-import proj.kedabra.billsnap.business.entities.Location;
+import proj.kedabra.billsnap.model.entities.Location;
 
 @Data
 public class AccountResource implements Serializable {

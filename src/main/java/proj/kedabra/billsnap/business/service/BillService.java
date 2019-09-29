@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import proj.kedabra.billsnap.business.dto.BillDTO;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.IPaymentOwed;
+import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.model.entities.Bill;
+import proj.kedabra.billsnap.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 
 public interface BillService {
@@ -15,6 +15,6 @@ public interface BillService {
 
     Stream<Bill> getAllBillsByAccount(Account account);
 
-    Stream<IPaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
+    Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
 
 }

@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountDTOFixture;

@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.business.entities;
+package proj.kedabra.billsnap.model.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
