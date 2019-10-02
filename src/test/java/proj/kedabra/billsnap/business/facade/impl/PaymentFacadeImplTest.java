@@ -43,11 +43,9 @@ public class PaymentFacadeImplTest {
     void shouldReturnExceptionIfEmailDoesNotExist() {
         //Given
         final String testEmail = "abc@123.ca";
-
-        //when
         when(accountRepository.getAccountByEmail(testEmail)).thenReturn(null);
 
-        //then
+        //when//then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
                 () -> paymentFacadeImpl.getAmountsOwed(testEmail));
         assertThat(resourceNotFoundException.getMessage()).isEqualTo("Account does not exist");
@@ -59,13 +57,13 @@ public class PaymentFacadeImplTest {
         //Given
         final String testEmail = "abc@123.ca";
         final var account = AccountEntityFixture.getDefaultAccount();
-
-        //when
         when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
-        //Then
+        //when
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
+
+        //Then
         assertThat(listPaymentOwed.size()).isEqualTo(0);
 
     }
@@ -81,13 +79,13 @@ public class PaymentFacadeImplTest {
         paymentOwed.setEmail("owed@yomama.com");
         paymentOwed.setAmount(BigDecimal.valueOf(69));
         paymentsOwedList.add(paymentOwed);
-
-        //when
         when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(paymentsOwedList);
 
-        //then
+        //when
         List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
+
+        //then
         assertThat(listPaymentOwed.size()).isEqualTo(1);
         assertThat(listPaymentOwed.get(0).getEmail()).isEqualTo("owed@yomama.com");
         assertThat(listPaymentOwed.get(0).getAmount()).isEqualTo(BigDecimal.valueOf(69));
