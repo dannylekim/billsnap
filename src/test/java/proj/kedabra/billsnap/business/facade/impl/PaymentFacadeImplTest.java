@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -48,7 +49,9 @@ public class PaymentFacadeImplTest {
         //when//then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
                 () -> paymentFacadeImpl.getAmountsOwed(testEmail));
-        assertThat(resourceNotFoundException.getMessage()).isEqualTo("Account does not exist");
+        assertThatExceptionOfType(ReflectiveOperationException.class)
+                .isThrownBy( () -> paymentFacadeImpl.getAmountsOwed(testEmail))
+                .withMessage("Account does not exist");
     }
 
     @Test
