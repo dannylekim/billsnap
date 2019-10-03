@@ -6,7 +6,7 @@ import java.util.stream.Stream;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Account;
 
 @Repository
 public interface AccountRepository extends CrudRepository<Account, Long> {

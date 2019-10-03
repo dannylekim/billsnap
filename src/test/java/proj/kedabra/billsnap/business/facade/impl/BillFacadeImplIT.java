@@ -22,10 +22,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
-import proj.kedabra.billsnap.model.entities.Account;
-import proj.kedabra.billsnap.model.entities.AccountBill;
-import proj.kedabra.billsnap.model.entities.Bill;
-import proj.kedabra.billsnap.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;

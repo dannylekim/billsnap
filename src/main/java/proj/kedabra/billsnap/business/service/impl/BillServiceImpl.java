@@ -12,8 +12,8 @@ import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
-import proj.kedabra.billsnap.model.entities.*;
-import proj.kedabra.billsnap.model.projections.PaymentOwed;
+import proj.kedabra.billsnap.business.model.entities.*;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 
 import java.math.BigDecimal;
 import java.util.List;

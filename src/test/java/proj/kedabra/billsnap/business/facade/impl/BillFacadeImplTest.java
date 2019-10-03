@@ -18,7 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;

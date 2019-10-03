@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.model.entities;
+package proj.kedabra.billsnap.business.model.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -15,21 +15,21 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "items_vs_accounts", schema = "public")
-public class AccountItem implements Serializable {
+@Table(name = "bills_vs_accounts", schema = "public")
+public class AccountBill implements Serializable {
 
-    private static final long serialVersionUID = -7299388616155721671L;
+    private static final long serialVersionUID = 7692602917199916186L;
 
     @EmbeddedId
-    private AccountItemId id = new AccountItemId();
+    private AccountBillId id = new AccountBillId();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("accountId")
     private Account account;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("itemId")
-    private Item item;
+    @MapsId("billId")
+    private Bill bill;
 
     @Column(name = "percentage", precision = 7, scale = 4, nullable = false)
     private BigDecimal percentage;

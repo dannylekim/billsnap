@@ -5,7 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;

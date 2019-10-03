@@ -6,7 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.AccountService;

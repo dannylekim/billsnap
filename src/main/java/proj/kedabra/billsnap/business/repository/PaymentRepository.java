@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
-import proj.kedabra.billsnap.model.entities.Account;
-import proj.kedabra.billsnap.model.entities.Bill;
-import proj.kedabra.billsnap.model.projections.PaymentOwed;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 
 import java.util.stream.Stream;
 

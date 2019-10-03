@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.model.projections;
+package proj.kedabra.billsnap.business.model.projections;
 
 import java.math.BigDecimal;
 

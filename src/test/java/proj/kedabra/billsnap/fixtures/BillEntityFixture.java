@@ -6,9 +6,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import proj.kedabra.billsnap.model.entities.Account;
-import proj.kedabra.billsnap.model.entities.Bill;
-import proj.kedabra.billsnap.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
