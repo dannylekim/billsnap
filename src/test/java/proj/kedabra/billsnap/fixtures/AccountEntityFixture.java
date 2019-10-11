@@ -1,6 +1,6 @@
 package proj.kedabra.billsnap.fixtures;
 
-import proj.kedabra.billsnap.business.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Account;
 
 public final class AccountEntityFixture {
     private AccountEntityFixture(){}

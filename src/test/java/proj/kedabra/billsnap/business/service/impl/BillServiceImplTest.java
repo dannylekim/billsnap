@@ -16,12 +16,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
-import proj.kedabra.billsnap.business.entities.AccountItem;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.Item;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.AccountItem;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -38,17 +40,23 @@ class BillServiceImplTest {
     private AccountBillRepository accountBillRepository;
 
     @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
     private BillMapper billMapper;
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private PaymentMapper paymentMapper;
 
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository);
     }
 
     @Test
