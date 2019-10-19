@@ -141,17 +141,12 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     private void mapAllBillAccountItemsIntoHashMap(Bill bill, HashMap<Account, CostItemsPair> accountPairMap) {
-        final var percentageWrapper = new Object(){ BigDecimal percentage = BigDecimal.ZERO; };
-
         bill.getItems().forEach(item -> {
-            percentageWrapper.percentage = BigDecimal.ZERO;
+            final BigDecimal percentageSum = item.getAccounts().stream()
+                    .peek(accountItem -> mapAccountItemIntoHashMap(item, accountItem, accountPairMap))
+                    .map(AccountItem::getPercentage).reduce(BigDecimal.ZERO, BigDecimal::add);
 
-            item.getAccounts().forEach(accountItem -> {
-                mapAccountItemIntoHashMap(item, accountItem, accountPairMap);
-                percentageWrapper.percentage = percentageWrapper.percentage.add(accountItem.getPercentage());
-            });
-
-            verifyItemPercentageSum(item, percentageWrapper.percentage);
+            verifyItemPercentageSum(item, percentageSum);
         });
     }
 
