@@ -22,7 +22,7 @@ public class AccountCreationResource implements Serializable {
     private String email;
 
     @Size(max = 20, min = 8)
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&+=]).*$", message = "Password must contain an upper and lower case, a number, and a symbol.")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[().,/?|'\"`~!@#$%^&+={};:<>*\\[\\]\\\\]).*$", message = "Password must contain an upper and lower case, a number, and a symbol.")
     @ApiModelProperty(name = "Desired password of the user. Min size of 8. Max size of 20. Must contain a number, an upper and lower case, as well as a symbol. Required", position = 1)
     private String password;
 

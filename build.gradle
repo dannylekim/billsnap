@@ -36,7 +36,7 @@ dependencies {
     implementation 'io.springfox:springfox-swagger-ui:2.9.2'
     implementation 'io.springfox:springfox-swagger2:2.9.2'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
-    
+
     // Lombok
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -67,6 +67,7 @@ dependencies {
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testCompile("org.junit.jupiter:junit-jupiter-params:5.4.2")
     errorprone("com.google.errorprone:error_prone_core:2.3.3")
     compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: '2.1.6.RELEASE'
 }
