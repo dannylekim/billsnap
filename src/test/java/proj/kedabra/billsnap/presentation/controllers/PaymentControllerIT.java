@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.business.service.impl;
+package proj.kedabra.billsnap.presentation.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
@@ -22,7 +22,6 @@ import proj.kedabra.billsnap.presentation.resources.PaymentOwedResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Tag("integration")
