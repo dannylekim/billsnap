@@ -61,7 +61,7 @@ public class PaymentFacadeImplTest {
         when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
         //when
-        List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
+        final List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
 
         //Then
         assertThat(listPaymentOwed.size()).isEqualTo(0);
@@ -83,7 +83,7 @@ public class PaymentFacadeImplTest {
         when(billService.calculateAmountOwed(account)).thenReturn(paymentsOwedList);
 
         //when
-        List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
+        final List<PaymentOwedDTO> listPaymentOwed = paymentFacadeImpl.getAmountsOwed(testEmail);
 
         //then
         assertThat(listPaymentOwed.size()).isEqualTo(1);

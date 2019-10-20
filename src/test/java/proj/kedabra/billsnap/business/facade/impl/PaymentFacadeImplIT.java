@@ -45,7 +45,7 @@ public class PaymentFacadeImplIT {
         final String email = "paymentowed@test.com";
 
         //When
-        List<PaymentOwedDTO> paymentOwedList = paymentFacade.getAmountsOwed(email);
+        final List<PaymentOwedDTO> paymentOwedList = paymentFacade.getAmountsOwed(email);
 
         //Then
         assertThat(paymentOwedList.size()).isEqualTo(2);
