@@ -8,4 +8,7 @@ public interface PaymentOwed {
 
     BigDecimal getAmount();
 
+    void setEmail(String email);
+
+    void setAmount(BigDecimal amount);
 }
