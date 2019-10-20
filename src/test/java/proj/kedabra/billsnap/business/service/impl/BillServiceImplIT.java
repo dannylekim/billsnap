@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -7,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.DisplayName;
@@ -19,15 +21,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
-import proj.kedabra.billsnap.business.entities.AccountItem;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.Item;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.AccountItem;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -139,5 +143,23 @@ class BillServiceImplIT {
         //Then
         assertEquals(0, allBillsByAccount.count());
     }
+
+    @Test
+    @DisplayName("Should return correct summation amount of amount owed per email")
+    void shouldReturnCorrectSummationAmountOfOwedPerEmail() {
+        //Given
+        var account = AccountEntityFixture.getDefaultAccount();
+        account.setId(4000L);
+
+        //When
+        final List<PaymentOwed> paymentOwedList = billService.getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).collect(Collectors.toList());
+
+        //Then
+        assertThat(paymentOwedList.get(0).getEmail()).isEqualTo("user@user.com");
+        assertThat(paymentOwedList.get(0).getAmount()).isEqualTo("133.00");
+        assertThat(paymentOwedList.get(1).getEmail()).isEqualTo("userdetails@service.com");
+        assertThat(paymentOwedList.get(1).getAmount()).isEqualTo("489.00");
+    }
+
 
 }

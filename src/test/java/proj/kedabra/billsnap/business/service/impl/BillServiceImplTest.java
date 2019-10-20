@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,18 +17,24 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
-import proj.kedabra.billsnap.business.entities.AccountItem;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.Item;
+import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.AccountItem;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
+import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 
 class BillServiceImplTest {
 
@@ -38,17 +45,23 @@ class BillServiceImplTest {
     private AccountBillRepository accountBillRepository;
 
     @Mock
+    private PaymentRepository paymentRepository;
+
+    @Mock
     private BillMapper billMapper;
 
     @Mock
     private AccountRepository accountRepository;
+
+    @Mock
+    private PaymentMapper paymentMapper;
 
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository);
     }
 
     @Test
@@ -143,5 +156,31 @@ class BillServiceImplTest {
         final AccountItem accountItem = itemReturned.getAccounts().iterator().next();
         assertThat(account).isEqualTo(accountItem.getAccount());
         assertThat(new BigDecimal(100)).isEqualTo(accountItem.getPercentage());
+    }
+
+    @Test
+    @DisplayName("Should return list of payment owed with mapping")
+    void shouldReturnListOfPaymentOwedWithMapping() {
+        //Given
+        final var account = AccountEntityFixture.getDefaultAccount();
+        final var paymentOwed = PaymentOwedProjectionFixture.getDefault();
+        final List<PaymentOwed> paymentOwedList = new ArrayList<>();
+        paymentOwedList.add(paymentOwed);
+        final Stream<PaymentOwed> paymentOwedStream = paymentOwedList.stream();
+
+        final var paymentOwedDTO = new PaymentOwedDTO();
+        paymentOwedDTO.setEmail(paymentOwed.getEmail());
+        paymentOwedDTO.setAmount(paymentOwed.getAmount());
+
+        when(paymentRepository.getAllAmountOwedByStatusAndAccount(any(BillStatusEnum.class), any(Account.class))).thenReturn(paymentOwedStream);
+        when(paymentMapper.toDTO(any(PaymentOwed.class))).thenReturn(paymentOwedDTO);
+
+        //When
+        final List<PaymentOwedDTO> result = billService.calculateAmountOwed(account);
+
+        //Then
+        assertThat(result.size()).isEqualTo(1);
+        assertThat(result.get(0).getEmail()).isEqualTo(paymentOwed.getEmail());
+        assertThat(result.get(0).getAmount()).isEqualTo(paymentOwed.getAmount());
     }
 }

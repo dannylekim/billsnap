@@ -1,24 +1,24 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import proj.kedabra.billsnap.business.dto.BillDTO;
-import proj.kedabra.billsnap.business.entities.Account;
-import proj.kedabra.billsnap.business.entities.AccountBill;
-import proj.kedabra.billsnap.business.entities.AccountItem;
-import proj.kedabra.billsnap.business.entities.Bill;
-import proj.kedabra.billsnap.business.entities.Item;
+import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
+import proj.kedabra.billsnap.business.model.entities.*;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
+
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -27,12 +27,23 @@ public class BillServiceImpl implements BillService {
 
     private final AccountBillRepository accountBillRepository;
 
+    private final PaymentRepository paymentRepository;
+
     private final BillMapper billMapper;
 
-    public BillServiceImpl(final BillRepository billRepository, final BillMapper billMapper, final AccountBillRepository accountBillRepository) {
+    private final PaymentMapper paymentMapper;
+
+    public BillServiceImpl(
+            final BillRepository        billRepository,
+            final BillMapper            billMapper,
+            final AccountBillRepository accountBillRepository,
+            final PaymentMapper         paymentMapper,
+            final PaymentRepository     paymentRepository ) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
+        this.paymentMapper = paymentMapper;
+        this.paymentRepository = paymentRepository;
     }
 
 
@@ -56,6 +67,17 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Stream<Bill> getAllBillsByAccount(Account account) {
         return accountBillRepository.getAllByAccount(account).map(AccountBill::getBill);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
+        return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
+        return getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
     private void mapItems(final Item item, final Bill bill, final Account account) {

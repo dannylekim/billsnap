@@ -1,4 +1,4 @@
-package proj.kedabra.billsnap.business.entities;
+package proj.kedabra.billsnap.business.model.entities;
 
 import java.io.Serializable;
 
