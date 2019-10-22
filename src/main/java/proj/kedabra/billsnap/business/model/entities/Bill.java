@@ -6,6 +6,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TimeZone;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -66,10 +67,10 @@ public class Bill implements Serializable {
     private BillStatusEnum status;
 
     @Column(name = "created")
-    private ZonedDateTime created = ZonedDateTime.now(ZoneId.systemDefault());
+    private ZonedDateTime created = ZonedDateTime.now(TimeZone.getTimeZone("EST").toZoneId());
 
     @Column(name = "updated")
-    private ZonedDateTime updated = ZonedDateTime.now(ZoneId.systemDefault());
+    private ZonedDateTime updated = ZonedDateTime.now(TimeZone.getTimeZone("EST").toZoneId());
 
     @Column(name = "category", length = 20)
     private String category;
