@@ -39,11 +39,11 @@ public class BillResource implements Serializable {
     private String category;
 
     @ApiModelProperty(name = "Time that the bill is created", position = 7)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss Z")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss z")
     private ZonedDateTime created;
 
     @ApiModelProperty(name = "Time that the bill is updated", position = 8)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss Z")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss z")
     private ZonedDateTime updated;
 
     @ApiModelProperty(name = "List of items that were on the bill", position = 9)
