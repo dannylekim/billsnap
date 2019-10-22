@@ -67,10 +67,10 @@ public class Bill implements Serializable {
     private BillStatusEnum status;
 
     @Column(name = "created")
-    private ZonedDateTime created = ZonedDateTime.now(TimeZone.getTimeZone("EST").toZoneId());
+    private ZonedDateTime created = ZonedDateTime.now(ZoneId.systemDefault());
 
     @Column(name = "updated")
-    private ZonedDateTime updated = ZonedDateTime.now(TimeZone.getTimeZone("EST").toZoneId());
+    private ZonedDateTime updated = ZonedDateTime.now(ZoneId.systemDefault());
 
     @Column(name = "category", length = 20)
     private String category;
