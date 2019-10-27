@@ -112,4 +112,9 @@ public class Bill implements Serializable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<AccountBill> accounts = new HashSet<>();
+
+    @OneToMany(mappedBy = "bill", orphanRemoval = true, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Notification> notifications = new HashSet<>();
 }
