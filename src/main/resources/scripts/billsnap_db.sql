@@ -10,6 +10,8 @@ create type group_role as enum ('ADMIN', 'MEMBER');
 
 create type gender as enum ('MALE', 'FEMALE', 'OTHER');
 
+create type invitation_status as enum('ACCEPTED', 'DECLINED', 'PENDING');
+
 create function count_not_nulls(p_array anyarray) returns bigint
     immutable
     language sql
@@ -191,6 +193,7 @@ create table if not exists bills_vs_accounts
     constraint not_null_if_balance
         check ((is_split_by_balance(bill_id) AND (percentage IS NOT NULL)) OR
                ((NOT is_split_by_balance(bill_id)) AND (percentage IS NULL)))
+    status      invitation_status not null,
 );
 
 

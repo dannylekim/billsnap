@@ -21,9 +21,9 @@ INSERT INTO bill (id, name, responsible, creator, status, created, updated, cate
 INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent, tip_amount, split_by, location_id, active)
           VALUES (1002, 'test', 1000, 1000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null, 1);
 
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage) VALUES (1001, 1000, 100);
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage) VALUES (1000, 1000, 100);
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage) VALUES (1002, 4000, 100);
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status) VALUES (1001, 1000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status) VALUES (1000, 1000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status) VALUES (1002, 4000, 100, 'ACCEPTED');
 
 INSERT INTO item (id, bill_id, name, cost) VALUES (1000, 1002, 'potatoes', 69.00);
 INSERT INTO item (id, bill_id, name, cost) VALUES (1001, 1002, 'Northern Lights Canabis Indica', 420.00);
