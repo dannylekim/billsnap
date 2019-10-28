@@ -23,6 +23,7 @@ create sequence if not exists location_id_seq start with 1 increment by 1;
 
 create sequence if not exists location_id_seq start with 1 increment by 1;
 
+create sequence if not exists notification_id_seq with 1 increment by 1;
 
 create table if not exists location
 (
