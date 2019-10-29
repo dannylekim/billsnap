@@ -11,6 +11,7 @@ import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.business.model.entities.*;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
@@ -94,6 +95,7 @@ public class BillServiceImpl implements BillService {
         accountBill.setAccount(account);
         accountBill.setBill(bill);
         accountBill.setPercentage(percentage);
+        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
         bill.getAccounts().add(accountBill);
     }
 
