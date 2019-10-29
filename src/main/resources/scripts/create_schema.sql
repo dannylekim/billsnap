@@ -171,5 +171,5 @@ create table if not exists bills_vs_accounts
     percentage numeric(7, 4) null,
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
-    status      invitation_status not null,
+    status      invitation_status not null
 );
