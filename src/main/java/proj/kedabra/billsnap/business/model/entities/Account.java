@@ -96,4 +96,9 @@ public class Account implements Serializable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<AccountItem> items = new HashSet<>();
+
+    @OneToMany(mappedBy = "account", orphanRemoval = true, cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Notification> notifications = new HashSet<>();
 }

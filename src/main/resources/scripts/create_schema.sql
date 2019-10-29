@@ -25,6 +25,7 @@ create sequence if not exists location_id_seq start with 1 increment by 1;
 
 create sequence if not exists location_id_seq start with 1 increment by 1;
 
+create sequence if not exists notification_id_seq start with 1 increment by 1;
 
 create table if not exists location
 (
@@ -172,4 +173,19 @@ create table if not exists bills_vs_accounts
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
     status      invitation_status not null
+
+);
+
+create table if not exists notifications
+(
+    id          serial         not null
+        constraint "NOTIFICATION_pkey"
+            primary key,
+    bill_id     integer        not null
+        constraint "Notification_bill_id_fkey"
+            references bill,
+    account_id integer     not null
+        constraint "NOTIFICATION_user_id_fkey"
+            references account,
+    time_sent  timestamp with time zone default current_timestamp
 );

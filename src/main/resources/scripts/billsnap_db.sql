@@ -196,5 +196,17 @@ create table if not exists bills_vs_accounts
     status      invitation_status not null
 );
 
-
+create table if not exists notifications
+(
+    id          serial         not null
+        constraint "NOTIFICATION_pkey"
+            primary key,
+    bill_id     integer        not null
+        constraint "Notification_bill_id_fkey"
+            references bill,
+    account_id integer     not null
+        constraint "NOTIFICATION_user_id_fkey"
+            references account,
+    time_sent  timestamp with time zone default clock_timestamp()
+);
 
