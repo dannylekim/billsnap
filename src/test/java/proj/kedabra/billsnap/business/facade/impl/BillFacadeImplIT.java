@@ -126,8 +126,8 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should save bill to user with 100$% in database")
-    void shouldSaveBill100ToUserInDatabase() {
+    @DisplayName("Should save bill to user with null in database")
+    void shouldSaveBillNullToUserInDatabase() {
 
         // Given
         final var billDTO = BillDTOFixture.getDefault();
@@ -144,7 +144,7 @@ class BillFacadeImplIT {
 
         assertEquals(1, accounts.size());
         final AccountBill accountBill = accounts.iterator().next();
-        assertEquals(BigDecimal.valueOf(100), accountBill.getPercentage());
+        assertEquals(null, accountBill.getPercentage());
         assertEquals(account, accountBill.getAccount());
 
 
