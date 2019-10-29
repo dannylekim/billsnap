@@ -3,6 +3,8 @@ package proj.kedabra.billsnap.business.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -92,7 +94,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
-        assertThat(new BigDecimal(100)).isEqualTo(accountBill.getPercentage());
+        assertThat(accountBill.getPercentage()).isNull();
         assertThat(bill).isEqualTo(accountBill.getBill());
 
         final ItemDTO itemDTO = billDTO.getItems().get(0);
@@ -140,7 +142,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
-        assertThat(new BigDecimal(100)).isEqualTo(creatorAccountBill.getPercentage());
+        assertThat(creatorAccountBill.getPercentage()).isNull();
         assertThat(bill).isEqualTo(creatorAccountBill.getBill());
 
         final AccountBill secondAccountBill = accounts.stream()

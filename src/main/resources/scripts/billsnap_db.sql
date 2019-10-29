@@ -19,13 +19,13 @@ SELECT COUNT(x)
 from unnest($1) as x
 $$;
 
-create function is_split_by_balance(bill_id integer) returns boolean
+create or replace function is_split_by_balance(bill_id integer) returns boolean
     language plpgsql
 as
 $$
 begin
     RETURN EXISTS(
-            select b.status = 'BALANCE' from "bill" b where b.id = bill_id
+            select 1 from "bill" b where b.id = bill_id AND b.split_by = 'BALANCE'
         );
 end;
 $$;
