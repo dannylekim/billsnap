@@ -204,6 +204,6 @@ create table if not exists notifications
     account_id integer     not null
         constraint "NOTIFICATION_user_id_fkey"
             references account,
-    time_sent  timestamp with time zone default clock_timestamp(),
+    time_sent  timestamp with time zone default clock_timestamp()
 );
 
