@@ -74,7 +74,7 @@ class BillServiceImplIT {
         assertEquals(billDTO.getTipAmount(), bill.getTipAmount());
         assertEquals(billDTO.getTipPercent(), bill.getTipPercent());
         assertEquals(billDTO.getItems().size(), bill.getItems().size());
-        assertEquals(accountBill.getPercentage(), new BigDecimal(100));
+        assertEquals(accountBill.getPercentage(), null);
         assertEquals(accountBill.getStatus(), InvitationStatusEnum.ACCEPTED);
         assertEquals(accountBill.getBill(), bill);
 
