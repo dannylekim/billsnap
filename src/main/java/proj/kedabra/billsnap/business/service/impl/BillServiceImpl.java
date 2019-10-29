@@ -57,8 +57,8 @@ public class BillServiceImpl implements BillService {
         bill.setActive(true);
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.getItems().forEach(i -> mapItems(i, bill, account));
-        accountList.forEach(acc -> mapAccount(bill, acc, BigDecimal.ZERO));
-        mapAccount(bill, account, new BigDecimal(100));
+        accountList.forEach(acc -> mapAccount(bill, acc, null));
+        mapAccount(bill, account, null);
 
         return billRepository.save(bill);
     }
