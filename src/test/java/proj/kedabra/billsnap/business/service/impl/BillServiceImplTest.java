@@ -33,6 +33,7 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
@@ -95,6 +96,8 @@ class BillServiceImplTest {
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
         assertThat(accountBill.getPercentage()).isNull();
+        assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
+
         assertThat(bill).isEqualTo(accountBill.getBill());
 
         final ItemDTO itemDTO = billDTO.getItems().get(0);
@@ -143,6 +146,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
         assertThat(creatorAccountBill.getPercentage()).isNull();
+        assertThat(creatorAccountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
         assertThat(bill).isEqualTo(creatorAccountBill.getBill());
 
         final AccountBill secondAccountBill = accounts.stream()
