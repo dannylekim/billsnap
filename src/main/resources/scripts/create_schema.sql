@@ -11,6 +11,8 @@ create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
 create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
+create type if not exists invitation_status as enum('ACCEPTED', 'DECLINED', 'PENDING');
+
 create sequence if not exists account_id_seq start with 1 increment by 1;
 
 create sequence if not exists bill_id_seq start with 1 increment by 1;
@@ -170,6 +172,7 @@ create table if not exists bills_vs_accounts
     percentage numeric(7, 4) null,
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
+    status      invitation_status not null
 
 );
 

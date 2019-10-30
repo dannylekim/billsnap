@@ -29,6 +29,7 @@ import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
@@ -74,6 +75,7 @@ class BillServiceImplIT {
         assertEquals(billDTO.getTipPercent(), bill.getTipPercent());
         assertEquals(billDTO.getItems().size(), bill.getItems().size());
         assertEquals(accountBill.getPercentage(), null);
+        assertEquals(accountBill.getStatus(), InvitationStatusEnum.ACCEPTED);
         assertEquals(accountBill.getBill(), bill);
 
         final ItemDTO itemDTO = billDTO.getItems().get(0);
