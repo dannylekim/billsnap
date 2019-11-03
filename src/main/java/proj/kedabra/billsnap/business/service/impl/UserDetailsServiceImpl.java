@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
@@ -26,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email){
         Optional<Account> optionalUser = Optional.ofNullable(accountRepository.getAccountByEmail(email));
         return toUserDetails(optionalUser.orElseThrow(
-                () -> new UsernameNotFoundException(String.format("No user found with email '%s'.", email))));
+                () -> new UsernameNotFoundException(ErrorMessageEnum.NO_USER_FOUND_WITH_EMAIL.getMessage(email))));
     }
 
     private UserDetails toUserDetails(Account user) {

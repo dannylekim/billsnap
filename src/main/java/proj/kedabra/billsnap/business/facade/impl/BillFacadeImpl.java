@@ -63,7 +63,7 @@ public class BillFacadeImpl implements BillFacade {
             final List<String> accountsStringList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
             final List<String> nonExistentEmails = new ArrayList<>(billDTOAccounts);
             nonExistentEmails.removeAll(accountsStringList);
-            throw new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage() + ": " + nonExistentEmails.toString());
+            throw new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
