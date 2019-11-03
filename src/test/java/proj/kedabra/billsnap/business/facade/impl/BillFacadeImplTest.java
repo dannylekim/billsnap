@@ -18,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -84,7 +84,7 @@ class BillFacadeImplTest {
         //When/Then
 
         assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billFacade.addPersonalBill(existingEmail, billDTO))
-                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(), nonExistentEmail, nonExistentEmail2);
+                .withMessage("One or more accounts in the list of accounts does not exist: [%s, %s]", nonExistentEmail, nonExistentEmail2);
     }
 
     @Test

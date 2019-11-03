@@ -2,7 +2,7 @@ package proj.kedabra.billsnap.utils;
 
 //import static org.junit.jupiter.api.Assertions.*;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +17,7 @@ class ErrorMessageEnumTest {
         var errorMessages = ErrorMessageEnum.NO_USER_FOUND_WITH_EMAIL.getMessage(param1);
 
         //then
-        assertThat(errorMessages).isEqualTo("No user found with email: something@something.com");
+        assertThat(errorMessages).isEqualTo("No user found with email 'something@something.com'");
 
 
     }
