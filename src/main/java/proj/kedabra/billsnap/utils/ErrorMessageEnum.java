@@ -5,17 +5,26 @@ public enum ErrorMessageEnum {
     //====================================================================================================
     MULTIPLE_TIP_METHOD("Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set."),
     ACCOUNT_DOES_NOT_EXIST("Account does not exist"),
-    LIST_ACCOUNT_DOES_NOT_EXIST("One or more accounts in the list of accounts does not exist: %s"),
+    LIST_ACCOUNT_DOES_NOT_EXIST("One or more accounts in the list of accounts does not exist: {}"),
     LIST_CANNOT_CONTAIN_BILL_CREATOR("List of emails cannot contain bill creator email"),
-    NO_USER_FOUND_WITH_EMAIL("No user found with email '%s'"),
-    EMAIL_ALREADY_EXISTS("This email already exists in the database.");
+    NO_USER_FOUND_WITH_EMAIL("No user found with email '{}'"),
+    EMAIL_ALREADY_EXISTS("This email already exists in the database."),
+
+    //=========================================TESTING ONLY===============================================
+    TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
 
 
     private final String message;
 
     public String getMessage(final String... parameters) {
-        final var allParams = String.join(", ", parameters);
-        return String.format(this.message, allParams);
+
+        String resolvedMessage = this.message;
+
+        for (String param : parameters) {
+            resolvedMessage = resolvedMessage.replaceFirst("\\{}", param);
+        }
+
+        return resolvedMessage;
     }
 
     ErrorMessageEnum(final String errorMessage) {
