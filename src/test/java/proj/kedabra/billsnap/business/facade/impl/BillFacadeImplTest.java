@@ -18,13 +18,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class BillFacadeImplTest {
 
@@ -61,7 +62,7 @@ class BillFacadeImplTest {
         // When/Then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
                 () -> billFacade.addPersonalBill(testEmail, billDTO));
-        assertEquals("Account does not exist", resourceNotFoundException.getMessage());
+        assertEquals(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage(), resourceNotFoundException.getMessage());
 
     }
 
@@ -98,7 +99,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
-                .withMessage("List of emails cannot contain bill creator email");
+                .withMessage(ErrorMessageEnum.LIST_CANNOT_CONTAIN_BILL_CREATOR.getMessage());
     }
 
     @Test
@@ -111,7 +112,7 @@ class BillFacadeImplTest {
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> billFacade.getAllBillsByEmail(nonExistentEmail))
-                .withMessage("Account does not exist");
+                .withMessage(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage());
     }
 
     @Test
@@ -127,8 +128,7 @@ class BillFacadeImplTest {
         final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
                 () -> billFacade.addPersonalBill(testEmail, billDTO));
 
-        assertEquals("Only one type of tipping is supported. " +
-                "Please make sure only either tip amount or tip percent is set.", illegalArgumentException.getMessage());
+        assertEquals(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage(), illegalArgumentException.getMessage());
     }
 
     @Test
@@ -144,8 +144,7 @@ class BillFacadeImplTest {
         final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class,
                 () -> billFacade.addPersonalBill(testEmail, billDTO));
 
-        assertEquals("Only one type of tipping is supported. " +
-                "Please make sure only either tip amount or tip percent is set.", illegalArgumentException.getMessage());
+        assertEquals(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage(), illegalArgumentException.getMessage());
 
     }
 }
