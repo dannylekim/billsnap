@@ -14,15 +14,16 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.facade.BillFacade;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
+import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
-import proj.kedabra.billsnap.business.facade.BillFacade;
-import proj.kedabra.billsnap.business.mapper.AccountMapper;
-import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
@@ -37,11 +38,6 @@ public class BillFacadeImpl implements BillFacade {
 
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
-    private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
-
-    private static final String LIST_ACCOUNT_DOES_NOT_EXIST = "One or more accounts in the list of accounts does not exist";
-
-    private static final String LIST_CANNOT_CONTAIN_BILL_CREATOR = "List of emails cannot contain bill creator email";
 
     @Autowired
     public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper) {
@@ -52,7 +48,6 @@ public class BillFacadeImpl implements BillFacade {
     }
 
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillCompleteDTO addPersonalBill(final String email, final BillDTO billDTO) {
@@ -60,7 +55,7 @@ public class BillFacadeImpl implements BillFacade {
         validateBillDTO(email, billDTO);
 
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
         final List<Account> accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()).collect(Collectors.toList());
         final List<String> billDTOAccounts = billDTO.getAccountsList();
 
@@ -68,7 +63,7 @@ public class BillFacadeImpl implements BillFacade {
             final List<String> accountsStringList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
             final List<String> nonExistentEmails = new ArrayList<>(billDTOAccounts);
             nonExistentEmails.removeAll(accountsStringList);
-            throw new ResourceNotFoundException(LIST_ACCOUNT_DOES_NOT_EXIST + ": " + nonExistentEmails.toString());
+            throw new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
         }
 
         final Bill bill = billService.createBillToAccount(billDTO, account, accountsList);
@@ -79,7 +74,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public List<BillCompleteDTO> getAllBillsByEmail(String email) {
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
     }
@@ -119,11 +114,10 @@ public class BillFacadeImpl implements BillFacade {
 
     private void validateBillDTO(String email, BillDTO billDTO) {
         if ((billDTO.getTipAmount() == null) == (billDTO.getTipPercent() == null)) {
-            throw new IllegalArgumentException("Only one type of tipping is supported. " +
-                    "Please make sure only either tip amount or tip percent is set.");
+            throw new IllegalArgumentException(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
         }
         if (billDTO.getAccountsList().contains(email)) {
-            throw new IllegalArgumentException(LIST_CANNOT_CONTAIN_BILL_CREATOR);
+            throw new IllegalArgumentException(ErrorMessageEnum.LIST_CANNOT_CONTAIN_BILL_CREATOR.getMessage());
         }
     }
 }

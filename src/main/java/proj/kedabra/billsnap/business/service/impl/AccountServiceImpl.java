@@ -6,11 +6,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 @Service
@@ -35,7 +36,7 @@ public class AccountServiceImpl implements AccountService {
     public AccountDTO registerAccount(final AccountDTO accountDTO) {
 
         if (accountRepository.existsAccountByEmail(accountDTO.getEmail())) {
-            throw new IllegalArgumentException("This email already exists in the database.");
+            throw new IllegalArgumentException(ErrorMessageEnum.EMAIL_ALREADY_EXISTS.getMessage());
         }
 
         Account newAccount = mapper.toEntity(accountDTO);

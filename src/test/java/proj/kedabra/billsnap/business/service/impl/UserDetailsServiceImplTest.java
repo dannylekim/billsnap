@@ -37,7 +37,7 @@ class UserDetailsServiceImplTest {
 
         //When /Then
         UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(nonExistentEmail));
-        assertEquals(String.format("No user found with email '%s'.", nonExistentEmail), ex.getMessage());
+        assertEquals(String.format("No user found with email '%s'", nonExistentEmail), ex.getMessage());
     }
 
     @Test

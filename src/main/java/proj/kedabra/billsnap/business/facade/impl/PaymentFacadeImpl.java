@@ -1,15 +1,18 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
-import java.util.List;
-import java.util.Optional;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class PaymentFacadeImpl implements PaymentFacade {
@@ -18,7 +21,6 @@ public class PaymentFacadeImpl implements PaymentFacade {
 
     private final BillServiceImpl billService;
 
-    private static final String ACCOUNT_DOES_NOT_EXIST = "Account does not exist";
 
     @Autowired
     public PaymentFacadeImpl(final AccountRepository accountRepository, final BillServiceImpl billService) {
@@ -29,7 +31,7 @@ public class PaymentFacadeImpl implements PaymentFacade {
     @Override
     public List<PaymentOwedDTO> getAmountsOwed(String email) {
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
-                .orElseThrow(() -> new ResourceNotFoundException(ACCOUNT_DOES_NOT_EXIST));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         return billService.calculateAmountOwed(account);
     }
