@@ -12,12 +12,14 @@ class ErrorMessageEnumTest {
     void ShouldReturnErrorMessageContainingAllParameters() {
         //given
         final var param1 = "something@something.com";
+        final var param2 = "otherthing@other.com";
+
 
         //when
-        var errorMessages = ErrorMessageEnum.NO_USER_FOUND_WITH_EMAIL.getMessage(param1);
+        var errorMessages = ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(param1, param2);
 
         //then
-        assertThat(errorMessages).isEqualTo("No user found with email 'something@something.com'");
+        assertThat(errorMessages).isEqualTo("One or more accounts in the list of accounts does not exist: something@something.com, otherthing@other.com");
 
 
     }
@@ -25,7 +27,7 @@ class ErrorMessageEnumTest {
     @Test
     void ShouldReturnErrorMessageWithoutAnyParameters() {
         //given /when
-        var errorMessages = ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage();
+        final var errorMessages = ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage();
 
         //then
         assertThat(errorMessages).isEqualTo("Account does not exist");

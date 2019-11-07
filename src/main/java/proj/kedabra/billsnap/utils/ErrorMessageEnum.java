@@ -11,12 +11,11 @@ public enum ErrorMessageEnum {
     EMAIL_ALREADY_EXISTS("This email already exists in the database.");
 
 
-
-
     private final String message;
 
-    public String getMessage(final Object... parameters) {
-        return String.format(this.message, parameters);
+    public String getMessage(final String... parameters) {
+        final var allParams = String.join(", ", parameters);
+        return String.format(this.message, allParams);
     }
 
     ErrorMessageEnum(final String errorMessage) {
