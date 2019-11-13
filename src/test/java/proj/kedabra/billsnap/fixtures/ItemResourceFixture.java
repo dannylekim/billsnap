@@ -2,13 +2,13 @@ package proj.kedabra.billsnap.fixtures;
 
 import java.math.BigDecimal;
 
-import proj.kedabra.billsnap.presentation.resources.ItemResource;
+import proj.kedabra.billsnap.presentation.resources.ItemCreationResource;
 
 public final class ItemResourceFixture {
     private ItemResourceFixture() {}
 
-    public static ItemResource getDefault() {
-        final ItemResource resource = new ItemResource();
+    public static ItemCreationResource getDefault() {
+        final ItemCreationResource resource = new ItemCreationResource();
         resource.setName("sashimi");
         resource.setCost(BigDecimal.valueOf(25));
 
