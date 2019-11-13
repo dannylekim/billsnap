@@ -3,24 +3,21 @@ package proj.kedabra.billsnap.presentation.resources;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
-import org.hibernate.validator.constraints.Range;
-
+import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 @Data
 public class ItemResource implements Serializable {
 
-    private static final long serialVersionUID = 7201751679337910110L;
+    private static final long serialVersionUID = -7613044043746246657L;
 
-    @NotBlank
-    @Size(max = 30)
+    @ApiModelProperty(name = "Id of the item")
+    private Long id;
+
+    @ApiModelProperty(name = "Name of the item", position = 1)
     private String name;
 
-    @Digits(integer = 12, fraction = 2)
-    @Range(message = "the number must be positive")
+    @ApiModelProperty(name = "Cost of the item", position = 2)
     private BigDecimal cost;
+
 }
