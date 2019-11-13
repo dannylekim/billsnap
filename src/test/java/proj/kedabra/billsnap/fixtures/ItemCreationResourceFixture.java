@@ -4,8 +4,8 @@ import java.math.BigDecimal;
 
 import proj.kedabra.billsnap.presentation.resources.ItemCreationResource;
 
-public final class ItemResourceFixture {
-    private ItemResourceFixture() {}
+public final class ItemCreationResourceFixture {
+    private ItemCreationResourceFixture() {}
 
     public static ItemCreationResource getDefault() {
         final ItemCreationResource resource = new ItemCreationResource();
