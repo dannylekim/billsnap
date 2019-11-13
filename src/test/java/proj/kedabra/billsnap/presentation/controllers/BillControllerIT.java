@@ -30,7 +30,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
-import proj.kedabra.billsnap.fixtures.ItemResourceFixture;
+import proj.kedabra.billsnap.fixtures.ItemCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -205,7 +205,7 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var item = ItemResourceFixture.getDefault();
+        final var item = ItemCreationResourceFixture.getDefault();
         item.setName("");
         billCreationResource.setItems(List.of(item));
 
@@ -226,7 +226,7 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var item = ItemResourceFixture.getDefault();
+        final var item = ItemCreationResourceFixture.getDefault();
         item.setName("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
         billCreationResource.setItems(List.of(item));
 
@@ -247,7 +247,7 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var item = ItemResourceFixture.getDefault();
+        final var item = ItemCreationResourceFixture.getDefault();
         item.setCost(BigDecimal.valueOf(-5));
         billCreationResource.setItems(List.of(item));
 
@@ -268,7 +268,7 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var item = ItemResourceFixture.getDefault();
+        final var item = ItemCreationResourceFixture.getDefault();
         item.setCost(BigDecimal.valueOf(1234567898765.75));
         billCreationResource.setItems(List.of(item));
 
@@ -289,7 +289,7 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var item = ItemResourceFixture.getDefault();
+        final var item = ItemCreationResourceFixture.getDefault();
         item.setCost(BigDecimal.valueOf(12.345));
         billCreationResource.setItems(List.of(item));
 

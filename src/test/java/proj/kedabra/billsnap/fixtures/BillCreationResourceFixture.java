@@ -15,7 +15,7 @@ public final class BillCreationResourceFixture {
         resource.setName("sushi restaurant");
         resource.setCategory("");
         resource.setCompany("");
-        resource.setItems(List.of(ItemResourceFixture.getDefault()));
+        resource.setItems(List.of(ItemCreationResourceFixture.getDefault()));
         resource.setTipAmount(BigDecimal.valueOf(5));
         resource.setAccountsList(new ArrayList<>());
 

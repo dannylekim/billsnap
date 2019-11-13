@@ -36,7 +36,7 @@ public class BillCreationResource implements Serializable {
 
     @NotNull
     @ApiModelProperty(name = "List of items that were on the bill", position = 3)
-    private List<@Valid ItemResource> items;
+    private List<@Valid ItemCreationResource> items;
 
     @ApiModelProperty(name = "List of accounts to associate to the bill", position = 4)
     private List<
