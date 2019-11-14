@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
@@ -119,7 +120,8 @@ class BillControllerIT {
 
         verify201NormalCaseAddBill(user, billCreationResource, response);
         assertThat(response.getAccountsList()).isNotEmpty();
-        assertThat(response.getAccountsList().get(0).getEmail()).isEqualTo(existentEmail);
+        assertThat(response.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
+        assertThat(response.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
     }
 
     @Test
@@ -622,7 +624,7 @@ class BillControllerIT {
         assertNotNull(response.getId());
     }
 
-    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception{
+    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception {
         return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
                 .andExpect(status().isCreated()).andReturn();

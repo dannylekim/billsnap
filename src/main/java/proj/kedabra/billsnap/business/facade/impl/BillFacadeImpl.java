@@ -11,19 +11,18 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
-import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
+import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
@@ -84,14 +83,16 @@ public class BillFacadeImpl implements BillFacade {
         final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toDTO(bill);
 
-        final List<Account> accountList = bill.getAccounts().stream()
-                .map(AccountBill::getAccount)
-                .filter(acc -> !acc.getEmail().equals(bill.getCreator().getEmail()))
-                .collect(Collectors.toList());
-        final List<AccountDTO> accountDTOList = accountList.stream().map(accountMapper::toDTO).collect(Collectors.toList());
+        final List<AccountStatusPair> accountStatusList = new ArrayList<>();
+        bill.getAccounts().stream()
+                .filter(accBill -> !accBill.getAccount().getEmail().equals(bill.getCreator().getEmail()))
+                .forEach(accountBill -> {
+                    var pair = new AccountStatusPair(accountMapper.toDTO(accountBill.getAccount()), accountBill.getStatus());
+                    accountStatusList.add(pair);
+                });
 
         billCompleteDTO.setBalance(balance);
-        billCompleteDTO.setAccountsList(accountDTOList);
+        billCompleteDTO.setAccountsList(accountStatusList);
 
         return billCompleteDTO;
     }

@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.utils.tuples.AccountStatusCompletePair;
 
 @Data
 public class BillResource implements Serializable {
@@ -50,7 +51,7 @@ public class BillResource implements Serializable {
     private List<ItemResource> items;
 
     @ApiModelProperty(name = "List of accounts associated to the bill", position = 10)
-    private List<AccountResource> accountsList;
+    private List<AccountStatusCompletePair> accountsList;
 
     @ApiModelProperty(name = "the total amount of the bill", position = 11)
     private BigDecimal balance;
