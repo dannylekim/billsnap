@@ -21,17 +21,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
-import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
-import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -159,6 +159,20 @@ class BillServiceImplIT {
         assertThat(paymentOwedList.get(0).getAmount()).isEqualTo("133.00");
         assertThat(paymentOwedList.get(1).getEmail()).isEqualTo("userdetails@service.com");
         assertThat(paymentOwedList.get(1).getAmount()).isEqualTo("489.00");
+    }
+
+    @Test
+    @DisplayName("Should return empty array for payments owed to oneself")
+    void shouldReturnEmptyListIfSoleResponsible() {
+        //Given
+        var account = AccountEntityFixture.getDefaultAccount();
+        account.setId(5000L);
+
+        //When
+        final List<PaymentOwed> paymentOwedList = billService.getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).collect(Collectors.toList());
+
+        //Then
+        assertThat(paymentOwedList.size()).isEqualTo(0);
     }
 
 
