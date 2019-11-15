@@ -1,12 +1,11 @@
-package proj.kedabra.billsnap.utils.tuples;
+package proj.kedabra.billsnap.presentation.resources;
 
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
-import proj.kedabra.billsnap.presentation.resources.AccountResource;
 
 @Data
-public class AccountStatusCompletePair {
+public class AccountStatusResource {
 
     private AccountResource account;
 
