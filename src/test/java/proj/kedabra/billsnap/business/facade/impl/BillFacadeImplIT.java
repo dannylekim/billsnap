@@ -2,7 +2,9 @@ package proj.kedabra.billsnap.business.facade.impl;
 
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
@@ -10,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -29,6 +32,7 @@ import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -123,11 +127,14 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
 
         verifyBillDTOToBill(returnBillDTO, bill);
+        assertThat(returnBillDTO.getAccountsList()).isNotEmpty();
+        AssertionsForClassTypes.assertThat(returnBillDTO.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
+        assertThat(returnBillDTO.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
     }
 
     @Test
-    @DisplayName("Should save bill to user with null in database")
-    void shouldSaveBillNullToUserInDatabase() {
+    @DisplayName("Should save bill to user with null AccountBill percentage in database")
+    void shouldSaveBillNullPercentageToUserInDatabase() {
 
         // Given
         final var billDTO = BillDTOFixture.getDefault();
@@ -144,7 +151,7 @@ class BillFacadeImplIT {
 
         assertEquals(1, accounts.size());
         final AccountBill accountBill = accounts.iterator().next();
-        assertEquals(null, accountBill.getPercentage());
+        assertNull(accountBill.getPercentage());
         assertEquals(account, accountBill.getAccount());
 
 
