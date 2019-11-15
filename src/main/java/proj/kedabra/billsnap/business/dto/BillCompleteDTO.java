@@ -8,6 +8,7 @@ import java.util.List;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
 
 @Data
 public class BillCompleteDTO {
@@ -22,7 +23,7 @@ public class BillCompleteDTO {
 
     private List<ItemDTO> items = new ArrayList<>();
 
-    private List<AccountDTO> accountsList = new ArrayList<>();
+    private List<AccountStatusPair> accountsList = new ArrayList<>();
 
     private BigDecimal tipAmount;
 

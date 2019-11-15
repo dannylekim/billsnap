@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,13 +20,21 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
+import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
+import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
+import proj.kedabra.billsnap.fixtures.BillCompleteDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class BillFacadeImplTest {
@@ -146,5 +156,38 @@ class BillFacadeImplTest {
 
         assertEquals(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage(), illegalArgumentException.getMessage());
 
+    }
+
+    @Test
+    @DisplayName("Should return list of AccountStatusPair's if inputted accountsList is not null")
+    void shouldContainAccountStatusPairIfAccountsListNotNull() {
+        //Given
+        final Account billCreatorAccount = AccountEntityFixture.getDefaultAccount();
+        final String billCreator = "billcreator@email.com";
+        billCreatorAccount.setEmail(billCreator);
+        final Account existingAccount = AccountEntityFixture.getDefaultAccount();
+        final Bill mappedBillFixture = BillEntityFixture.getMappedBillDTOFixture();
+        final BillDTO billDTO = BillDTOFixture.getDefault();
+        billDTO.setAccountsList(List.of(existingAccount.getEmail()));
+        final AccountBill accountBill = new AccountBill();
+        accountBill.setAccount(existingAccount);
+        accountBill.setBill(mappedBillFixture);
+        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+        mappedBillFixture.setAccounts(Set.of(accountBill));
+        mappedBillFixture.setCreator(billCreatorAccount);
+
+        when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
+        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
+        when(billService.createBillToAccount(any(), any(), any())).thenReturn(mappedBillFixture);
+        when(billMapper.toDTO(any(Bill.class))).thenReturn(BillCompleteDTOFixture.getDefault());
+        when(accountMapper.toDTO(any(Account.class))).thenReturn(AccountDTOFixture.getCreationDTO());
+
+        //When
+        final BillCompleteDTO billCompleteDTO = billFacade.addPersonalBill(billCreator, billDTO);
+
+        //Then
+        assertThat(billCompleteDTO.getAccountsList()).isNotEmpty();
+        assertThat(billCompleteDTO.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(AccountDTOFixture.getCreationDTO().getEmail());
+        assertThat(billCompleteDTO.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
     }
 }
