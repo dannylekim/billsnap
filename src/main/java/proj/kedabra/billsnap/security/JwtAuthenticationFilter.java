@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationServiceException;
@@ -91,7 +92,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     private void validateRequestDetails(HttpServletRequest request) {
-        if (!request.getMethod().equals("POST")) {
+        if (!request.getMethod().equals(HttpMethod.POST.name()) || !request.getMethod().equals(HttpMethod.OPTIONS.name())) {
             log.warn("Error at Login POST method check.", new AuthenticationServiceException("Incorrect login request method."));
             throw new AuthenticationServiceException("Incorrect login request method.");
         }
