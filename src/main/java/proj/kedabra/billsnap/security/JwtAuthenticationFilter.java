@@ -92,15 +92,18 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     }
 
     private void validateRequestDetails(HttpServletRequest request) {
-        if (!request.getMethod().equals(HttpMethod.POST.name()) && !request.getMethod().equals(HttpMethod.OPTIONS.name())) {
+        if (!request.getMethod().equals(HttpMethod.POST.name())) {
+            //TODO ErrorMessageEnum
+            log.warn("Error at Login POST method check.", new AuthenticationServiceException("Incorrect login request method."));
             final var ex = new AuthenticationServiceException("Incorrect login request method.");
-            log.warn("Error at Login POST method check.", ex);
             throw ex;
         }
-        if (request.getContentType() == null || !request.getContentType().equals(MediaType.APPLICATION_JSON_VALUE)) {
-            final var ex = new AuthenticationServiceException("Login request input is not JSON content-type.");
-            log.warn("Error at Login request content-type check.", ex);
-            throw ex;
+      
+        final var contentType = request.getContentType();
+        if (contentType == null || !contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
+           log.warn("Error at Login request content-type check.", new AuthenticationServiceException("Login request input is not JSON content-type."));
+           final var ex = new AuthenticationServiceException("Login request input is not JSON content-type."); 
+           throw ex;
         }
     }
 }
