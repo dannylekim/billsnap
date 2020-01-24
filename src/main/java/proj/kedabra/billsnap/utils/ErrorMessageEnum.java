@@ -9,6 +9,14 @@ public enum ErrorMessageEnum {
     LIST_CANNOT_CONTAIN_BILL_CREATOR("List of emails cannot contain bill creator email"),
     NO_USER_FOUND_WITH_EMAIL("No user found with email '{}'"),
     EMAIL_ALREADY_EXISTS("This email already exists in the database."),
+    INCORRECT_LOGIN_METHOD("Incorrect login request method."),
+    MEDIA_TYPE_NOT_JSON("Login request input is not JSON content-type."),
+    INVALID_LOGIN_INPUTS("Invalid Login Inputs. Please fix the following errors"),
+    UNAUTHORIZED_ACCESS("Access is unauthorized!"),
+    WRONG_REQ_METHOD("Incorrect login request method."),
+    BAD_CREDENTIALS("Username or password is incorrect."),
+    INTERNAL_SERVER_ERROR("Server error has occurred, please try again later."),
+
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

@@ -192,8 +192,8 @@ create table if not exists bills_vs_accounts
         primary key (bill_id, account_id),
     constraint not_null_if_balance
         check ((is_split_by_balance(bill_id) AND (percentage IS NOT NULL)) OR
-               ((NOT is_split_by_balance(bill_id)) AND (percentage IS NULL)))
-    status      invitation_status not null
+               ((NOT is_split_by_balance(bill_id)) AND (percentage IS NULL))),
+    status     invitation_status not null
 );
 
 create table if not exists notifications

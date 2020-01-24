@@ -25,6 +25,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -42,6 +43,7 @@ import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.fixtures.LoginResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class JwtAuthenticationFilterTest {
 
@@ -57,12 +59,6 @@ class JwtAuthenticationFilterTest {
 
     @Mock
     private Validator validator;
-
-    private final String INVALID_INPUTS = "Invalid Login Inputs. Please fix the following errors";
-
-    private final String WRONG_REQ_METHOD = "Incorrect login request method.";
-
-    private final String NOT_JSON_CONTENT = "Login request input is not JSON content-type.";
 
     private final String MUST_NOT_BE_BLANK = "must not be blank";
 
@@ -81,12 +77,12 @@ class JwtAuthenticationFilterTest {
     void ShouldThrowExceptionWhenRequestHasIncorrectMethod() {
         //Given
         MockHttpServletRequest mockRequest = populateMockRequest();
-        mockRequest.setMethod("PUT");
+        mockRequest.setMethod(HttpMethod.PUT.name());
         HttpServletResponse resp = mock(HttpServletResponse.class);
 
         //When/Then
         AuthenticationServiceException ex = assertThrows(AuthenticationServiceException.class, () -> filter.attemptAuthentication(mockRequest, resp));
-        assertEquals(WRONG_REQ_METHOD, ex.getMessage());
+        assertEquals(ErrorMessageEnum.WRONG_REQ_METHOD.getMessage(), ex.getMessage());
     }
 
     @Test
@@ -99,7 +95,7 @@ class JwtAuthenticationFilterTest {
 
         //When/Then
         AuthenticationServiceException ex = assertThrows(AuthenticationServiceException.class, () -> filter.attemptAuthentication(mockRequest, resp));
-        assertEquals(NOT_JSON_CONTENT, ex.getMessage());
+        assertEquals(ErrorMessageEnum.MEDIA_TYPE_NOT_JSON.getMessage(), ex.getMessage());
     }
 
     @Test
@@ -112,7 +108,7 @@ class JwtAuthenticationFilterTest {
 
         //When/Then
         AuthenticationServiceException ex = assertThrows(AuthenticationServiceException.class, () -> filter.attemptAuthentication(mockRequest, resp));
-        assertEquals(NOT_JSON_CONTENT, ex.getMessage());
+        assertEquals(ErrorMessageEnum.MEDIA_TYPE_NOT_JSON.getMessage(), ex.getMessage());
     }
 
     @Test
@@ -126,7 +122,7 @@ class JwtAuthenticationFilterTest {
         loginResource.setEmail("");
         mockRequest.setContent(mapper.writeValueAsBytes(loginResource));
 
-        BeanPropertyBindingResult errors = new BeanPropertyBindingResult(LoginResource.class, "Login Resource");
+        BeanPropertyBindingResult errors = new BeanPropertyBindingResult(LoginResource.class, LoginResource.class.getSimpleName());
         errors.addError(new FieldError("BlankError", "username", "", false, new String[0], new Object[0], MUST_NOT_BE_BLANK));
 
         doAnswer(invocation -> {
@@ -138,7 +134,7 @@ class JwtAuthenticationFilterTest {
         //When/Then
         LoginValidationException ex = assertThrows(LoginValidationException.class, () -> filter.attemptAuthentication(mockRequest, resp));
         assertNotEquals(0, ex.getErrorsList().size());
-        assertEquals(INVALID_INPUTS, ex.getMessage());
+        assertEquals(ErrorMessageEnum.INVALID_LOGIN_INPUTS.getMessage(), ex.getMessage());
     }
 
     @Test
@@ -223,7 +219,7 @@ class JwtAuthenticationFilterTest {
         HttpServletRequest req = mock(HttpServletRequest.class);
         HttpServletResponse resp = mock(HttpServletResponse.class);
 
-        when(req.getMethod()).thenReturn("POST");
+        when(req.getMethod()).thenReturn(HttpMethod.POST.name());
         when(req.getContentType()).thenReturn(MediaType.APPLICATION_JSON_VALUE);
         when(req.getReader()).thenThrow(IOException.class);
 
@@ -234,7 +230,7 @@ class JwtAuthenticationFilterTest {
     private MockHttpServletRequest populateMockRequest() {
         MockHttpServletRequest request = new MockHttpServletRequest();
         request.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        request.setMethod("POST");
+        request.setMethod(HttpMethod.POST.name());
         return request;
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
 
 import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -23,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException {
-        ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Access is unauthorized!");
+        ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ErrorMessageEnum.UNAUTHORIZED_ACCESS.getMessage());
         response.setStatus(apiError.getStatus().value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         response.getWriter().write(mapper.writeValueAsString(apiError));

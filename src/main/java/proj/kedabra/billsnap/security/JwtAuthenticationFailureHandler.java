@@ -15,6 +15,7 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 public class JwtAuthenticationFailureHandler implements AuthenticationFailureHandler {
 
@@ -34,10 +35,10 @@ public class JwtAuthenticationFailureHandler implements AuthenticationFailureHan
             ApiError apiError = new ApiError(HttpStatus.FORBIDDEN, exception.getMessage());
             writeToHttpResponse(apiError, response);
         } else if (exception instanceof BadCredentialsException) {
-            ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, "Username or password is incorrect.");
+            ApiError apiError = new ApiError(HttpStatus.UNAUTHORIZED, ErrorMessageEnum.BAD_CREDENTIALS.getMessage());
             writeToHttpResponse(apiError, response);
         } else {
-            ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, "Server error has occurred, please try again later.");
+            ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, ErrorMessageEnum.INTERNAL_SERVER_ERROR.getMessage());
             writeToHttpResponse(apiError, response);
         }
     }
