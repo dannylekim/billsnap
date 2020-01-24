@@ -28,6 +28,7 @@ import org.springframework.validation.ObjectError;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class JwtAuthenticationFailureHandlerTest {
 
@@ -35,15 +36,7 @@ class JwtAuthenticationFailureHandlerTest {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
-    private final String INVALID_INPUTS = "Invalid Login Inputs. Please fix the following errors";
-
     private final String MUST_NOT_BE_BLANK = "must not be blank";
-
-    private final String WRONG_REQ_METHOD = "Incorrect login request method.";
-
-    private final String BAD_CREDENTIALS = "Username or password is incorrect.";
-
-    private final String SERVER_ERROR = "Server error has occurred, please try again later.";
 
     @BeforeEach
     void setUp() {
@@ -67,7 +60,7 @@ class JwtAuthenticationFailureHandlerTest {
         ApiError error = convertContentToApiError(mockResponse.getContentAsString());
 
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(INVALID_INPUTS, error.getMessage());
+        assertEquals(ErrorMessageEnum.INVALID_LOGIN_INPUTS.getMessage(), error.getMessage());
         assertEquals(1, error.getErrors().size());
         assertEquals(MUST_NOT_BE_BLANK, error.getErrors().get(0).getMessage());
         assertEquals("", error.getErrors().get(0).getRejectedValue());
@@ -81,7 +74,7 @@ class JwtAuthenticationFailureHandlerTest {
         //Given
         HttpServletRequest req = mock(HttpServletRequest.class);
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
-        AuthenticationServiceException ex = new AuthenticationServiceException(WRONG_REQ_METHOD);
+        AuthenticationServiceException ex = new AuthenticationServiceException(ErrorMessageEnum.WRONG_REQ_METHOD.getMessage());
 
         //When
         failureHandler.onAuthenticationFailure(req, mockResponse, ex);
@@ -90,7 +83,7 @@ class JwtAuthenticationFailureHandlerTest {
         ApiError error = convertContentToApiError(mockResponse.getContentAsString());
 
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(WRONG_REQ_METHOD, error.getMessage());
+        assertEquals(ErrorMessageEnum.WRONG_REQ_METHOD.getMessage(), error.getMessage());
         assertEquals(0, error.getErrors().size());
         assertEquals(HttpServletResponse.SC_FORBIDDEN, mockResponse.getStatus());
     }
@@ -110,7 +103,7 @@ class JwtAuthenticationFailureHandlerTest {
         ApiError error = convertContentToApiError(mockResponse.getContentAsString());
 
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(BAD_CREDENTIALS, error.getMessage());
+        assertEquals(ErrorMessageEnum.BAD_CREDENTIALS.getMessage(), error.getMessage());
         assertEquals(0, error.getErrors().size());
         assertEquals(HttpServletResponse.SC_UNAUTHORIZED, mockResponse.getStatus());
     }
@@ -130,7 +123,7 @@ class JwtAuthenticationFailureHandlerTest {
         ApiError error = convertContentToApiError(mockResponse.getContentAsString());
 
         assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(SERVER_ERROR, error.getMessage());
+        assertEquals(ErrorMessageEnum.INTERNAL_SERVER_ERROR.getMessage(), error.getMessage());
         assertEquals(0, error.getErrors().size());
         assertEquals(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, mockResponse.getStatus());
     }
