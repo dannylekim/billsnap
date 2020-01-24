@@ -11,7 +11,7 @@ public interface BillFacade {
 
     BillCompleteDTO addPersonalBill(String email, BillDTO billDTO);
 
-    List<BillCompleteDTO> getAllBillsByEmail(String email);
+    List<BillSplitDTO> getAllBillsByEmail(String email);
 
     BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO);
 }
