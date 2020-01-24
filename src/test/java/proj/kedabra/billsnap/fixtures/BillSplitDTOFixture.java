@@ -57,7 +57,7 @@ public class BillSplitDTOFixture {
         itemPercentageSplitDTO1.setPercentage(accountItem1.getPercentage());
         itemPercentageSplitDTO1.setCost(item.getCost());
         itemPercentageSplitDTO1.setName(item.getName());
-        itemPercentageSplitDTO1.setId(item.getId());
+        itemPercentageSplitDTO1.setItemId(item.getId());
         itemAssociationSplitDTO1.setItems(List.of(itemPercentageSplitDTO1));
 
         final var itemAssociationSplitDTO2 = ItemAssociationSplitDTOFixture.getDefault();
@@ -67,7 +67,7 @@ public class BillSplitDTOFixture {
         itemPercentageSplitDTO2.setPercentage(accountItem2.getPercentage());
         itemPercentageSplitDTO2.setCost(item.getCost());
         itemPercentageSplitDTO2.setName(item.getName());
-        itemPercentageSplitDTO2.setId(item.getId());
+        itemPercentageSplitDTO2.setItemId(item.getId());
         itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
 
         billSplitDTO.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));

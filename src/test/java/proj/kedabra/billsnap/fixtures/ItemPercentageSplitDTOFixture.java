@@ -10,7 +10,7 @@ public class ItemPercentageSplitDTOFixture {
 
     public static ItemPercentageSplitDTO getDefault() {
         final ItemPercentageSplitDTO itemPercentageSplitDTO = new ItemPercentageSplitDTO();
-        itemPercentageSplitDTO.setId(25L);
+        itemPercentageSplitDTO.setItemId(25L);
         itemPercentageSplitDTO.setPercentage(BigDecimal.valueOf(20));
         itemPercentageSplitDTO.setName("pudding");
         itemPercentageSplitDTO.setCost(BigDecimal.valueOf(5));

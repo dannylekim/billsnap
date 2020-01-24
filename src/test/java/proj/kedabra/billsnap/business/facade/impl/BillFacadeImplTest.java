@@ -226,7 +226,7 @@ class BillFacadeImplTest {
                 i -> {
                     Item itemInput = (Item) i.getArguments()[0];
                     final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
-                    itemDTO.setId(itemInput.getId());
+                    itemDTO.setItemId(itemInput.getId());
                     itemDTO.setName(itemInput.getName());
                     itemDTO.setCost(itemInput.getCost());
                     itemDTO.setPercentage(accountPercentageSplit);
@@ -257,7 +257,7 @@ class BillFacadeImplTest {
                 i -> {
                     Item itemInput = (Item) i.getArguments()[0];
                     final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
-                    itemDTO.setId(itemInput.getId());
+                    itemDTO.setItemId(itemInput.getId());
                     itemDTO.setName(itemInput.getName());
                     itemDTO.setCost(itemInput.getCost());
                     itemDTO.setPercentage(accountPercentageSplit);
