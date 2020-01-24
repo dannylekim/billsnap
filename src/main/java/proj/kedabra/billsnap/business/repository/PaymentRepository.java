@@ -26,4 +26,5 @@ public interface PaymentRepository extends CrudRepository<Bill, Long> {
             nativeQuery = true)
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
 
+
 }
