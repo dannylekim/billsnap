@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 
+import proj.kedabra.billsnap.business.dto.PaymentDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.dto.RemainingAmountDTO;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
@@ -34,5 +36,13 @@ public class PaymentFacadeImpl implements PaymentFacade {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         return billService.calculateAmountOwed(account);
+    }
+
+    @Override
+    public RemainingAmountDTO payBill(PaymentDTO payment) {
+        //get amount owe to bill
+        //
+
+        return null;
     }
 }
