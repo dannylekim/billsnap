@@ -33,6 +33,7 @@ import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -100,7 +101,7 @@ public class BillServiceImpl implements BillService {
         final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException("No bill with that id exists"));
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAccountsInBill(bill, items);
-        verifyExistenceofItemsInBill(bill, items);
+        verifyExistenceOfItemsInBill(bill, items);
         removeReferencedAccountItems(bill, items);
         addNewAssociations(bill, items);
         return bill;
@@ -131,7 +132,7 @@ public class BillServiceImpl implements BillService {
         bill.getItems().stream().filter(i -> list.contains(i.getId())).map(Item::getAccounts).forEach(Set::clear);
     }
 
-    private void verifyExistenceofItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
+    private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
 
         final Set<Item> billItems = bill.getItems();
         final Set<Long> billItemsId = billItems.stream().map(Item::getId).collect(HashSet::new, HashSet::add, HashSet::addAll);
@@ -144,7 +145,7 @@ public class BillServiceImpl implements BillService {
                 .toArray(Long[]::new);
 
         if (nonExistentListIds.length > 0) {
-            throw new IllegalArgumentException(String.format("Not all items exists: %s", Arrays.toString(nonExistentListIds)));
+            throw new IllegalArgumentException(String.format(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(), Arrays.toString(nonExistentListIds)));
         }
 
     }
@@ -156,7 +157,7 @@ public class BillServiceImpl implements BillService {
                 .toArray(String[]::new);
 
         if (nonExistentAccounts.length > 0) {
-            throw new IllegalArgumentException(String.format("Not all accounts are in the bill: %s", Arrays.toString(nonExistentAccounts)));
+            throw new IllegalArgumentException(String.format(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(), Arrays.toString(nonExistentAccounts)));
         }
     }
 

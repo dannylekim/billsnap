@@ -212,7 +212,7 @@ class BillServiceImplIT {
 
         //When/Then
         final IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> billService.associateItemsToAccountBill(associateBillDTO));
-        assertThat(illegalArgumentException.getMessage()).isEqualTo("Not all items exists: [999, 172]");
+        assertThat(illegalArgumentException.getMessage()).isEqualTo("Not all items exist in the bill: [999, 172]");
 
     }
 

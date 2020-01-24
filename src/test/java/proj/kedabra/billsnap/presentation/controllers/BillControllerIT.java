@@ -480,7 +480,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
     }
 
@@ -497,7 +497,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
-        ApiError error = verifyinvalidinputs(result, 2);
+        ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -521,7 +521,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
-        ApiError error = verifyinvalidinputs(result, 2);
+        ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -596,7 +596,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
@@ -611,7 +611,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
@@ -626,7 +626,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_BLANK);
     }
 
@@ -641,7 +641,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 2);
+        ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -663,7 +663,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 2);
+        ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -672,14 +672,6 @@ class BillControllerIT {
                 .collect(java.util.stream.Collectors.toList());
 
         assertThat(errorList.size()).isEqualTo(error.getErrors().size());
-    }
-    private ApiError verifyinvalidinputs(MvcResult result, int i) throws java.io.IOException {
-        String content = result.getResponse().getContentAsString();
-        ApiError error = mapper.readValue(content, ApiError.class);
-
-        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
-        assertThat(error.getErrors().size()).isEqualTo(i);
-        return error;
     }
 
     @Test
@@ -693,7 +685,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
@@ -708,7 +700,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
@@ -723,7 +715,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
@@ -738,7 +730,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
 
@@ -753,7 +745,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
 
@@ -768,7 +760,7 @@ class BillControllerIT {
 
         //When/Then
         MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
-        ApiError error = verifyinvalidinputs(result, 1);
+        ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
 
@@ -819,4 +811,14 @@ class BillControllerIT {
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(associateBillResource)))
                 .andExpect(status().is4xxClientError()).andReturn();
     }
+
+    private ApiError verifyInvalidInputs(MvcResult result, int i) throws java.io.IOException {
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(i);
+        return error;
+    }
+    
 }
