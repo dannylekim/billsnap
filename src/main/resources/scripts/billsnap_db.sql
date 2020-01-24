@@ -10,7 +10,9 @@ create type group_role as enum ('ADMIN', 'MEMBER');
 
 create type gender as enum ('MALE', 'FEMALE', 'OTHER');
 
-create type invitation_status as enum('ACCEPTED', 'DECLINED', 'PENDING');
+create type invitation_status as enum ('ACCEPTED', 'DECLINED', 'PENDING');
+
+create type payment_status_type as enum ('PAID', 'IN_PROGRESS');
 
 create function count_not_nulls(p_array anyarray) returns bigint
     immutable
@@ -181,19 +183,21 @@ create table if not exists items_vs_accounts
 
 create table if not exists bills_vs_accounts
 (
-    bill_id    integer not null
+    bill_id        integer             not null
         constraint "BILLS_VS_USERS_bill_id_fkey"
             references bill,
-    account_id integer not null
+    account_id     integer             not null
         constraint "BILLS_VS_USERS_user_id_fkey"
             references account,
-    percentage numeric(7, 4),
+    percentage     numeric(7, 4),
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
     constraint not_null_if_balance
         check ((is_split_by_balance(bill_id) AND (percentage IS NOT NULL)) OR
                ((NOT is_split_by_balance(bill_id)) AND (percentage IS NULL))),
-    status     invitation_status not null
+    status         invitation_status   not null,
+    amount_paid    numeric(14, 2)      null,
+    payment_status payment_status_type null
 );
 
 create table if not exists notifications

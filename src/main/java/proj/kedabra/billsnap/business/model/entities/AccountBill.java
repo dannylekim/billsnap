@@ -14,10 +14,13 @@ import javax.persistence.MapsId;
 import javax.persistence.Table;
 
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
-import lombok.Data;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+
+import lombok.Data;
+
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 
 @Data
 @Entity
@@ -48,4 +51,12 @@ public class AccountBill implements Serializable {
     @Enumerated(EnumType.STRING)
     @Type(type = "pgsql_enum")
     private InvitationStatusEnum status;
+
+    @Column(name = "amount_paid", precision = 14, scale = 2)
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @Column(name = "payment_status")
+    @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
+    private PaymentStatusEnum paymentStatus;
 }

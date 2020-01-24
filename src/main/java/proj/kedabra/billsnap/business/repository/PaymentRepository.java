@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.repository;
 
+import java.math.BigDecimal;
 import java.util.stream.Stream;
 
 import org.springframework.data.jpa.repository.Query;
@@ -25,5 +26,19 @@ public interface PaymentRepository extends CrudRepository<Bill, Long> {
             "GROUP BY account.email",
             nativeQuery = true)
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
+
+
+    @Query(value = "SELECT SUM(item.cost)" +
+            "FROM bill as b, item, bills_vs_accounts as bva, items_vs_accounts as iva, account " +
+            "WHERE b.id = bva.bill_id " +
+            "AND b.id = item.bill_id " +
+            "AND iva.item_id = item.id " +
+            "AND account.id = iva.account_id " +
+            "AND bva.account_id = account.id " +
+            "AND b.status = 'OPEN' " +
+            "AND b.id = :#{#bill.getId()} " +
+            "AND account.id = :#{#account.getId()} ",
+            nativeQuery = true)
+    BigDecimal getTotalAmountOwedToBill(@Param("account") Account account, @Param("bill") Bill bill);
 
 }

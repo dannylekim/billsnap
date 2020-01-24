@@ -10,6 +10,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,7 @@ import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+
 @Service
 public class BillServiceImpl implements BillService {
 
@@ -49,11 +51,11 @@ public class BillServiceImpl implements BillService {
     private final PaymentMapper paymentMapper;
 
     public BillServiceImpl(
-            final BillRepository        billRepository,
-            final BillMapper            billMapper,
+            final BillRepository billRepository,
+            final BillMapper billMapper,
             final AccountBillRepository accountBillRepository,
-            final PaymentMapper         paymentMapper,
-            final PaymentRepository     paymentRepository ) {
+            final PaymentMapper paymentMapper,
+            final PaymentRepository paymentRepository) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
@@ -88,6 +90,10 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
         return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
+    }
+    @Override
+    public Bill getBill(Long id) {
+        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
     }
 
     @Transactional(rollbackFor = Exception.class)

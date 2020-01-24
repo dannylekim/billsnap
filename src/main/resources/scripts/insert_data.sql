@@ -15,7 +15,6 @@ INSERT INTO account (id, email, password, first_name, middle_name, last_name, ge
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
              VALUES (4000, 'paymentowed@test.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
-
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
              VALUES (5000, 'user@hasbills.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
                     'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
@@ -73,7 +72,7 @@ VALUES (1004, 'billForPaymentOwed', 1000, 1000, 'OPEN', current_timestamp, curre
 
 INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
                   tip_amount, split_by, location_id, active)
-VALUES (1005, 'test', 1000, 1000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
+VALUES (1005, 'test', 6000, 6000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
 
 INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
