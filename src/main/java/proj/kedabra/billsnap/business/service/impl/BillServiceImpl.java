@@ -145,7 +145,7 @@ public class BillServiceImpl implements BillService {
                 .toArray(Long[]::new);
 
         if (nonExistentListIds.length > 0) {
-            throw new IllegalArgumentException(String.format(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(), Arrays.toString(nonExistentListIds)));
+            throw new IllegalArgumentException(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentListIds)));
         }
 
     }
@@ -157,7 +157,7 @@ public class BillServiceImpl implements BillService {
                 .toArray(String[]::new);
 
         if (nonExistentAccounts.length > 0) {
-            throw new IllegalArgumentException(String.format(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(), Arrays.toString(nonExistentAccounts)));
+            throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentAccounts)));
         }
     }
 

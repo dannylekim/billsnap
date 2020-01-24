@@ -17,8 +17,8 @@ public enum ErrorMessageEnum {
     BAD_CREDENTIALS("Username or password is incorrect."),
     INTERNAL_SERVER_ERROR("Server error has occurred, please try again later."),
     BILL_ID_DOES_NOT_EXIST("No bill with that id exists"),
-    SOME_ACCOUNTS_NONEXISTENT_IN_BILL("Not all accounts are in the bill: %s"),
-    SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: %s"),
+    SOME_ACCOUNTS_NONEXISTENT_IN_BILL("Not all accounts are in the bill: {}"),
+    SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: {}"),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

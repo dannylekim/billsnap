@@ -812,12 +812,12 @@ class BillControllerIT {
                 .andExpect(status().is4xxClientError()).andReturn();
     }
 
-    private ApiError verifyInvalidInputs(MvcResult result, int i) throws java.io.IOException {
+    private ApiError verifyInvalidInputs(MvcResult result, int expectedErrorsAmount) throws java.io.IOException {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
         assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
-        assertThat(error.getErrors().size()).isEqualTo(i);
+        assertThat(error.getErrors().size()).isEqualTo(expectedErrorsAmount);
         return error;
     }
     
