@@ -1,0 +1,1 @@
+-- this file has the needed scripts to use on the databases from version to version to make sure the code works. Simply annotate by version + the scripts needed on the db
