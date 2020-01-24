@@ -12,7 +12,7 @@ public final class AssociateBillDTOFixture {
     public static AssociateBillDTO getDefault() {
         final var associateBillDTO = new AssociateBillDTO();
         associateBillDTO.setId(1250L);
-        associateBillDTO.setItems(Stream.of((ItemAssociationDTOFixture.getDefault())).collect(Collectors.toList()));
+        associateBillDTO.setItems(Stream.of(ItemAssociationDTOFixture.getDefault()).collect(Collectors.toList()));
         return associateBillDTO;
     }
 

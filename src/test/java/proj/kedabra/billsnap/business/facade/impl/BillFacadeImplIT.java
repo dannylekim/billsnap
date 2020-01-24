@@ -61,8 +61,6 @@ class BillFacadeImplIT {
 
     private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
 
-    private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
-
     @Test
     @DisplayName("Should return an exception if the account does not exist")
     void shouldReturnExceptionIfAccountDoesNotExist() {
@@ -228,7 +226,6 @@ class BillFacadeImplIT {
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(10)));
     }
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {

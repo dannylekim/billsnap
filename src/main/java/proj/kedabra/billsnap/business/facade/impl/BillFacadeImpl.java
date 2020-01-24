@@ -172,7 +172,7 @@ public class BillFacadeImpl implements BillFacade {
     private void mapAccountItemIntoHashMap(Item item, AccountItem accountItem, HashMap<Account, CostItemsPair> accountPairMap) {
         final Account thisAccount = accountItem.getAccount();
         final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
-        BigDecimal itemPercentage = accountItem.getPercentage();
+        final BigDecimal itemPercentage = accountItem.getPercentage();
         itemPercentageSplitDTO.setPercentage(itemPercentage);
 
         final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR));

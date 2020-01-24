@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -81,8 +82,8 @@ class BillServiceImplIT {
         assertEquals(billDTO.getTipAmount(), bill.getTipAmount());
         assertEquals(billDTO.getTipPercent(), bill.getTipPercent());
         assertEquals(billDTO.getItems().size(), bill.getItems().size());
-        assertEquals(accountBill.getPercentage(), null);
-        assertEquals(accountBill.getStatus(), InvitationStatusEnum.ACCEPTED);
+        assertNull(accountBill.getPercentage());
+        assertEquals(InvitationStatusEnum.ACCEPTED, accountBill.getStatus());
         assertEquals(accountBill.getBill(), bill);
 
         final ItemDTO itemDTO = billDTO.getItems().get(0);
@@ -183,7 +184,6 @@ class BillServiceImplIT {
         //Then
         assertThat(paymentOwedList.size()).isEqualTo(0);
     }
-
 
 
     @Test
@@ -325,7 +325,7 @@ class BillServiceImplIT {
         associateBill.getItems().get(0).getItems().get(0).setItemId(1010L);
 
         //When
-        var bill = billService.associateItemsToAccountBill(associateBill);
+        billService.associateItemsToAccountBill(associateBill);
 
         //Then
         final var account = accountRepository.getAccountByEmail("associateitem3@test.com");
