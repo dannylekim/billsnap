@@ -41,6 +41,8 @@ public class JwtService implements Serializable {
 
     private static final String TOKEN_TYPE = "JWT";
 
+    private static final String ROLES = "roles";
+
     @Autowired
     public JwtService(ObjectMapper mapper, @Value("${jwt.secret}") String jwtSecret, @Value("${jwt.expiration}") Long jwtExpiration) {
         this.mapper = mapper;
@@ -62,7 +64,7 @@ public class JwtService implements Serializable {
                 .setHeaderParam("typ", TOKEN_TYPE)
                 .setSubject(user.getUsername())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpiration))
-                .claim("roles", roles)
+                .claim(ROLES, roles)
                 .compact();
     }
 
@@ -79,7 +81,7 @@ public class JwtService implements Serializable {
     }
 
     public Collection<GrantedAuthority> getJwtAuthorities(String token) {
-        return ((List<?>) getJwtBody(token).get("roles"))
+        return ((List<?>) getJwtBody(token).get(ROLES))
                 .stream()
                 .map(String.class::cast)
                 .map(SimpleGrantedAuthority::new)

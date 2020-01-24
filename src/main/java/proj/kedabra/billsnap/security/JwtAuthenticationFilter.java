@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Slf4j
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -59,7 +60,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         try {
             String requestData = request.getReader().lines().collect(Collectors.joining());
             LoginResource loginAttempt = mapper.readValue(requestData, LoginResource.class);
-            Errors errors = new BeanPropertyBindingResult(LoginResource.class, "Login Resource");
+            Errors errors = new BeanPropertyBindingResult(LoginResource.class, LoginResource.class.getSimpleName());
             validator.validate(loginAttempt, errors);
 
             if (errors.hasErrors()) {
@@ -70,7 +71,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             password = loginAttempt.getPassword();
 
         } catch (IOException e) {
-            log.error("IOException when processing login request content.", new AuthenticationServiceException(e.getMessage()));
+            log.error("Error when processing login request content.", new AuthenticationServiceException(e.getMessage()));
             throw new AuthenticationServiceException(e.getMessage());
         }
 
@@ -93,13 +94,15 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private void validateRequestDetails(HttpServletRequest request) {
         if (!request.getMethod().equals(HttpMethod.POST.name())) {
-            log.warn("Error at Login POST method check.", new AuthenticationServiceException("Incorrect login request method."));
-            throw new AuthenticationServiceException("Incorrect login request method.");
+            final var ex = new AuthenticationServiceException(ErrorMessageEnum.INCORRECT_LOGIN_METHOD.getMessage());
+            log.warn("Error at Login POST method check.", ex);
+            throw ex;
         }
         final var contentType = request.getContentType();
         if (contentType == null || !contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
-            log.warn("Error at Login request content-type check.", new AuthenticationServiceException("Login request input is not JSON content-type."));
-            throw new AuthenticationServiceException("Login request input is not JSON content-type.");
+            final var ex = new AuthenticationServiceException(ErrorMessageEnum.MEDIA_TYPE_NOT_JSON.getMessage());
+            log.warn("Error at Login request content-type check.", ex);
+            throw ex;
         }
     }
 }
