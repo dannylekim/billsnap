@@ -98,6 +98,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             log.warn("Error at Login POST method check.", ex);
             throw ex;
         }
+      
         final var contentType = request.getContentType();
         if (contentType == null || !contentType.equals(MediaType.APPLICATION_JSON_VALUE)) {
             final var ex = new AuthenticationServiceException(ErrorMessageEnum.MEDIA_TYPE_NOT_JSON.getMessage());
