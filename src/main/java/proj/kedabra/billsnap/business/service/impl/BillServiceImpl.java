@@ -98,7 +98,7 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO) {
-        final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException("No bill with that id exists"));
+        final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage()));
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAccountsInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
