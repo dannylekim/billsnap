@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import lombok.Data;
 
 @Data
-public class PaymentDTO {
+public class PaymentInformationDTO {
 
     private String email;
 

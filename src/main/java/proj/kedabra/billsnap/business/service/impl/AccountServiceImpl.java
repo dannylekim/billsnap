@@ -1,6 +1,9 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -43,6 +46,13 @@ public class AccountServiceImpl implements AccountService {
         newAccount.setPassword(passwordEncoder.encode(newAccount.getPassword()));
         newAccount.setStatus(AccountStatusEnum.REGISTERED);
         return mapper.toDTO(accountRepository.save(newAccount));
-
     }
+
+    @Override
+    public AccountDTO getAccount(String email) {
+        return Optional.ofNullable(accountRepository.getAccountByEmail(email)).map(mapper::toDTO)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
+    }
+
+
 }

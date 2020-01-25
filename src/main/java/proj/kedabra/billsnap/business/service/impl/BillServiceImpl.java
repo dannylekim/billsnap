@@ -1,11 +1,26 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.AccountItem;
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
@@ -13,13 +28,7 @@ import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
-import proj.kedabra.billsnap.business.model.entities.*;
-import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
-
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -72,12 +81,16 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
+    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, AccountDTO account) {
         return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
+    }
+    @Override
+    public BillCompleteDTO getBill(Long id) {
+        return billRepository.findById(id).map(billMapper::toDTO).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
+    public List<PaymentOwedDTO> calculateAmountOwed(AccountDTO account) {
         return getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 
