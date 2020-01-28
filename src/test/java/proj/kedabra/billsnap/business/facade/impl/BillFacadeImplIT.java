@@ -13,6 +13,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
@@ -178,8 +180,8 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return two mapped BillCompleteDTO in getAllBills")
-    void shouldReturn2BillCompleteDTO() {
+    @DisplayName("Should return two mapped BillSplitDTO in getAllBills")
+    void shouldReturn2BillSplitDTOInGetAllBills() {
         //Given
         final var testEmail = "test@email.com";
         final var billIdsToCompare = new HashSet<Long>();
@@ -187,25 +189,31 @@ class BillFacadeImplIT {
         billIdsToCompare.add(1001L);
 
         //When
-        final List<BillCompleteDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
+        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
 
         //Then
         assertEquals(2, allBillsByEmail.size());
         final Iterable<Bill> billsByTwoIds = billRepository.findAllById(billIdsToCompare);
+        final List<Bill> billsListByTwoIdsList = StreamSupport.stream(billsByTwoIds.spliterator(), false)
+                .collect(Collectors.toList());
 
-        //Assuming both the list + iterator are sorted in the same fashion
-        verifyBillDTOToBill(allBillsByEmail.get(0), billsByTwoIds.iterator().next());
-        verifyBillDTOToBill(allBillsByEmail.get(1), billsByTwoIds.iterator().next());
+        if (allBillsByEmail.get(0).getId().equals(1000L)) {
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
+        } else if (allBillsByEmail.get(0).getId().equals(1001L)){
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
+        }
     }
 
     @Test
     @DisplayName("Should return emptyList in getAllBills")
     void shouldReturnEmptyList() {
-        //Given
+        //Given existent user with 0 bills
         final var testEmail = "user@user.com";
 
         //When
-        final List<BillCompleteDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
+        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
 
         //Then
         assertEquals(0, allBillsByEmail.size());
@@ -249,31 +257,38 @@ class BillFacadeImplIT {
                 .iterator().next();
         assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
         assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.OPEN);
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
         assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
+        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
         assertThat(billSplitDTO.getCategory()).isEqualTo(bill.getCategory());
         assertThat(billSplitDTO.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(billSplitDTO.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
+        assertThat(billSplitDTO.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getItemsPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
-        //for the time being we verify a bill with only 1 item. Should be generic when needed.
-        final Item item = bill.getItems().iterator().next();
-        final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
+        if (!bill.getItems().isEmpty()) {
+            //for the time being we verify a bill with only 1 item. Should be generic when needed.
+            final Item item = bill.getItems().iterator().next();
+            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
 
-        assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
-        assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-        assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
-        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
-        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
-        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
-        assertThat(billSplitDTO.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
-        assertThat(billSplitDTO.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
+            assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
+            assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
+            assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
+        } else {
+            assertThat(BigDecimal.ZERO.compareTo(billSplitDTO.getBalance())).isEqualTo(0);
+        }
 
     }
 
     private void verifyBillDTOToBill(BillCompleteDTO returnBillDTO, Bill bill) {
+        assertEquals(bill.getId(), returnBillDTO.getId());
+        assertEquals(bill.getStatus(), returnBillDTO.getStatus());
+        assertEquals(bill.getCreated(), returnBillDTO.getCreated());
+        assertEquals(bill.getUpdated(), returnBillDTO.getUpdated());
         assertEquals(BillStatusEnum.OPEN, bill.getStatus());
         assertEquals(bill.getCategory(), returnBillDTO.getCategory());
         assertEquals(bill.getCompany(), returnBillDTO.getCompany());
@@ -290,14 +305,9 @@ class BillFacadeImplIT {
             assertEquals(item.getCost(), returnItemDTO.getCost());
             assertEquals(bill.getName(), returnBillDTO.getName());
             assertEquals(item.getCost(), returnBillDTO.getBalance());
-            assertEquals(bill.getId(), returnBillDTO.getId());
-            assertEquals(bill.getStatus(), returnBillDTO.getStatus());
-            assertEquals(bill.getCreated(), returnBillDTO.getCreated());
-            assertEquals(bill.getUpdated(), returnBillDTO.getUpdated());
         } else {
             assertEquals(0, BigDecimal.ZERO.compareTo(returnBillDTO.getBalance()));
         }
-
 
         final Account account = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))

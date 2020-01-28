@@ -84,11 +84,11 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<BillCompleteDTO> getAllBillsByEmail(String email) {
+    public List<BillSplitDTO> getAllBillsByEmail(String email) {
         final Account account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
-        return billService.getAllBillsByAccount(account).map(this::getBillCompleteDTO).collect(Collectors.toList());
+        return billService.getAllBillsByAccount(account).map(this::getBillSplitDTO).collect(Collectors.toList());
     }
 
     @Override

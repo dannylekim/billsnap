@@ -78,14 +78,14 @@ public class BillController {
     @ApiOperation(value = "Get all bills", notes = "Get all bills associated to an account",
             authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
-            @ApiResponse(code = 201, response = BillResource.class, message = "Successfully retrieved all bills!"),
+            @ApiResponse(code = 201, response = BillSplitResource.class, message = "Successfully retrieved all bills!"),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public List<BillResource> getAllBills(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
+    public List<BillSplitResource> getAllBills(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
 
-        final List<BillCompleteDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
+        final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
         return billsFromEmail.stream().map(billMapper::toResource).collect(Collectors.toList());
 
     }
