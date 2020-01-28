@@ -10,6 +10,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.transaction.Transactional;
@@ -41,6 +42,7 @@ import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -582,8 +584,8 @@ class BillControllerIT {
         List<BillSplitResource> response = mapper.readValue(content, new TypeReference<List<BillSplitResource>>() {
         });
 
-        verifyBillResources(billOne, response.get(0));
-        verifyBillResources(billTwo, response.get(1));
+        verifyBillSplitResources(billOne, response.get(0));
+        verifyBillSplitResources(billTwo, response.get(1));
     }
 
     @Test
@@ -765,12 +767,11 @@ class BillControllerIT {
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
 
-    private void verifyBillResources(BillResource expectedBillResource, BillSplitResource actualBillResource) {
+    private void verifyBillSplitResources(BillResource expectedBillResource, BillSplitResource actualBillResource) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
         assertEquals(expectedBillResource.getCategory(), actualBillResource.getCategory());
         assertEquals(expectedBillResource.getCompany(), actualBillResource.getCompany());
-        //assertEquals(expectedBillResource.getItems().size(), actualBillResource.getItems().size());
         assertEquals(expectedBillResource.getCreator(), actualBillResource.getCreator());
         assertEquals(expectedBillResource.getResponsible(), actualBillResource.getResponsible());
         assertEquals(BillStatusEnum.OPEN, actualBillResource.getStatus());
@@ -778,6 +779,11 @@ class BillControllerIT {
         assertNotNull(expectedBillResource.getCreated());
         assertNotNull(expectedBillResource.getUpdated());
         assertNotNull(expectedBillResource.getId());
+
+        final HashSet<ItemPercentageSplitResource> itemsList = new HashSet<>();
+        actualBillResource.getItemsPerAccount().forEach(account -> itemsList.addAll(account.getItems()));
+        assertEquals(expectedBillResource.getItems().size(), itemsList.size());
+
     }
 
     private void verify201NormalCaseAddBill(User user, BillCreationResource billCreationResource, BillResource response) {
@@ -821,5 +827,5 @@ class BillControllerIT {
         assertThat(error.getErrors().size()).isEqualTo(expectedErrorsAmount);
         return error;
     }
-    
+
 }

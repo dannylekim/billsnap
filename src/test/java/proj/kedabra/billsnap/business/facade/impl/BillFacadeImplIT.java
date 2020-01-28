@@ -13,6 +13,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
@@ -178,7 +180,7 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return two mapped BillCompleteDTO in getAllBills")
+    @DisplayName("Should return two mapped BillSplitDTO in getAllBills")
     void shouldReturn2BillSplitDTOInGetAllBills() {
         //Given
         final var testEmail = "test@email.com";
@@ -192,10 +194,16 @@ class BillFacadeImplIT {
         //Then
         assertEquals(2, allBillsByEmail.size());
         final Iterable<Bill> billsByTwoIds = billRepository.findAllById(billIdsToCompare);
+        final List<Bill> billsListByTwoIdsList = StreamSupport.stream(billsByTwoIds.spliterator(), false)
+                .collect(Collectors.toList());
 
-        //Assuming both the list + iterator are sorted in the same fashion TODO: fix these assertions
-//        verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsByTwoIds.iterator().next());
-//        verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsByTwoIds.iterator().next());
+        if (allBillsByEmail.get(0).getId().equals(1000L)) {
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
+        } else if (allBillsByEmail.get(0).getId().equals(1001L)){
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
+        }
     }
 
     @Test
@@ -249,7 +257,7 @@ class BillFacadeImplIT {
                 .iterator().next();
         assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
         assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.OPEN);
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
         assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
         assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
         assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
