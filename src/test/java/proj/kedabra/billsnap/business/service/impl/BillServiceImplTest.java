@@ -1,14 +1,14 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -17,24 +17,28 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
+import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
-import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
-import proj.kedabra.billsnap.business.mapper.BillMapper;
-import proj.kedabra.billsnap.business.mapper.PaymentMapper;
+import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
+import proj.kedabra.billsnap.fixtures.BillCompleteDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
@@ -168,7 +172,7 @@ class BillServiceImplTest {
     @DisplayName("Should return list of payment owed with mapping")
     void shouldReturnListOfPaymentOwedWithMapping() {
         //Given
-        final var account = AccountEntityFixture.getDefaultAccount();
+        final var account = AccountDTOFixture.getCreationDTO();
         final var paymentOwed = PaymentOwedProjectionFixture.getDefault();
         final List<PaymentOwed> paymentOwedList = new ArrayList<>();
         paymentOwedList.add(paymentOwed);
@@ -178,7 +182,7 @@ class BillServiceImplTest {
         paymentOwedDTO.setEmail(paymentOwed.getEmail());
         paymentOwedDTO.setAmount(paymentOwed.getAmount());
 
-        when(paymentRepository.getAllAmountOwedByStatusAndAccount(any(BillStatusEnum.class), any(Account.class))).thenReturn(paymentOwedStream);
+        when(paymentRepository.getAllAmountOwedByStatusAndAccount(any(BillStatusEnum.class), any(AccountDTO.class))).thenReturn(paymentOwedStream);
         when(paymentMapper.toDTO(any(PaymentOwed.class))).thenReturn(paymentOwedDTO);
 
         //When
@@ -188,5 +192,33 @@ class BillServiceImplTest {
         assertThat(result.size()).isEqualTo(1);
         assertThat(result.get(0).getEmail()).isEqualTo(paymentOwed.getEmail());
         assertThat(result.get(0).getAmount()).isEqualTo(paymentOwed.getAmount());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if bill does not exist")
+    void shouldThrowExceptionifBillDoesNotExist() {
+
+        //Given
+        when(billRepository.findById(any())).thenReturn(Optional.empty());
+
+        //When/Then
+        assertThrows(ResourceNotFoundException.class, () -> billService.getBill(123L));
+    }
+
+    @Test
+    @DisplayName("Should return mapped bill if bill does exist")
+    void shouldReturnMappedBillIfBillExists() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        when(billRepository.findById(bill.getId())).thenReturn(Optional.of(bill));
+        final var mappedBill = BillCompleteDTOFixture.getDefault();
+        when(billMapper.toDTO(bill)).thenReturn(mappedBill);
+
+        //When
+        final var result = billService.getBill(bill.getId());
+
+        //Then
+        assertThat(result).isSameAs(mappedBill);
+
     }
 }
