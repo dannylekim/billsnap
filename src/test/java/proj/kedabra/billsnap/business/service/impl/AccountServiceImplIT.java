@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
@@ -82,6 +84,28 @@ class AccountServiceImplIT {
         //Then
         Account account = accountRepository.getAccountByEmail(creationResource.getEmail());
         assertEquals(dto.getId(), account.getId());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if account is not found in DB")
+    void shouldThrowExceptionIfNotFound() {
+        //Given
+        final String email = "nonExistentEmail@email.com";
+
+        //When/Then
+        assertThrows(ResourceNotFoundException.class, () -> accountService.getAccount(email));
+    }
+
+    @Test
+    @DisplayName("Should return an account from the DB")
+    void shouldReturnAnAccountFromDB() {
+        //Given
+        var creationResource = AccountDTOFixture.getCreationDTO();
+
+        //When
+        final AccountDTO account = accountService.getAccount(creationResource.getEmail());
+        assertThat(account.getId()).isEqualTo(creationResource.getId());
+
     }
 
 }
