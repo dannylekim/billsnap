@@ -126,7 +126,7 @@ public class BillController {
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "List of emails to invite", value = "List of emails to invite")
                                                                      @PathVariable("billId") final Long billId,
                                                                      @RequestBody @Valid final InviteRegisteredResource inviteRegisteredResource,

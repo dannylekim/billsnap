@@ -556,7 +556,7 @@ class BillControllerIT {
                 .andExpect(status().isCreated()).andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List response = mapper.readValue(content, new TypeReference<List<BillSplitResource>>() {
+        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<List<BillSplitResource>>() {
         });
         assertTrue(response.isEmpty());
 
@@ -774,38 +774,38 @@ class BillControllerIT {
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
     @Test
-    @DisplayName("Should return exception if 1+ emails in InviteRegisteredResource are not in email format for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource are not in email format for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsNotEmailFormatInInviteRegisteredResourceGivenPost() throws Exception{
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final String existentEmail = "test@email.com";
-        final String invalidEmail = "notemailformatcom";
+        final var existentEmail = "test@email.com";
+        final var invalidEmail = "notemailformatcom";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
-        final Long existentBillId = 1000L;
+        final var existentBillId = 1000L;
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailureInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
-        ApiError error = verifyInvalidInputs(result, 1);
+        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
     }
 
     @Test
-    @DisplayName("Should return exception if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsBlankInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final String existentEmail = "test@email.com";
-        final String invalidEmail = " ";
+        final var existentEmail = "test@email.com";
+        final var invalidEmail = " ";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
-        final Long existentBillId = 1000L;
+        final var existentBillId = 1000L;
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailureInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
-        ApiError error = verifyInvalidInputs(result, 2);
+        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -817,20 +817,20 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return exception if 1+ emails in InviteRegisteredResource is too long for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource is too long for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsTooLongInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final String existentEmail = "test@email.com";
-        final String invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
+        final var existentEmail = "test@email.com";
+        final var invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
-        final Long existentBillId = 1000L;
+        final var existentBillId = 1000L;
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailureInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
-        ApiError error = verifyInvalidInputs(result, 2);
+        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
                 .map(ApiSubError::getMessage)
@@ -842,34 +842,34 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return exception if accounts list is empty in InviteRegisteredResource for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exception if accounts list is empty in InviteRegisteredResource for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsEmptyInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(new ArrayList<>());
-        final Long existentBillId = 1000L;
+        final var existentBillId = 1000L;
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailureInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
-        ApiError error = verifyInvalidInputs(result, 1);
+        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
 
     @Test
-    @DisplayName("Should return exception if accounts list is null in InviteRegisteredResource for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exception if accounts list is null in InviteRegisteredResource for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsNullInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(null);
-        final Long existentBillId = 1000L;
+        final var existentBillId = 1000L;
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailureInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
-        ApiError error = verifyInvalidInputs(result, 1);
+        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
 
@@ -919,10 +919,10 @@ class BillControllerIT {
                 .andExpect(status().is4xxClientError()).andReturn();
     }
 
-    private MvcResult performMvcPostRequest4xxFailureInviteRegistered(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
+    private MvcResult performMvcPostRequestBadRequestInviteRegistered(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
         return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+                .andExpect(status().isBadRequest()).andReturn();
     }
 
     private MvcResult performMvcPutRequest4xxFailure(String bearerToken, AssociateBillResource associateBillResource) throws Exception {
