@@ -3,13 +3,11 @@ package proj.kedabra.billsnap.business.service.impl;
 import java.math.BigDecimal;
 import java.util.Optional;
 
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
-import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.PaymentService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -19,20 +17,14 @@ public class PaymentServiceImpl implements PaymentService {
 
     private final PaymentRepository paymentRepository;
 
-    private final AccountRepository accountRepository;
-
-    public PaymentServiceImpl(final PaymentRepository paymentRepository, final AccountRepository accountRepository) {
+    public PaymentServiceImpl(final PaymentRepository paymentRepository) {
         this.paymentRepository = paymentRepository;
-        this.accountRepository = accountRepository;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BigDecimal payBill(final AccountDTO accountDTO, final BillCompleteDTO billDTO, final BigDecimal paymentAmount) {
-        final var totalAmountOwedToBill = paymentRepository.getTotalAmountOwedToBill(accountDTO, billDTO);
-
-        final var account = Optional.ofNullable(accountRepository.getAccountByEmail(accountDTO.getEmail()))
-                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
+    public BigDecimal payBill(final Account account, final Bill bill, final BigDecimal paymentAmount) {
+        final var totalAmountOwedToBill = paymentRepository.getTotalAmountOwedToBill(account, bill);
 
         final var accountBill = account
                 .getBills()

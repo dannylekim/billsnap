@@ -1,7 +1,6 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -13,13 +12,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.PaymentService;
 import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
-import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 
 public class PaymentFacadeImplTest {
 
@@ -41,24 +39,11 @@ public class PaymentFacadeImplTest {
     }
 
     @Test
-    @DisplayName("Should return an exception if given an email that does not exist")
-    void shouldReturnExceptionIfEmailDoesNotExist() {
-        //Given
-        final String testEmail = "abc@123.ca";
-        when(accountService.getAccount(testEmail)).thenReturn(null);
-
-        //when//then
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> paymentFacadeImpl.getAmountsOwed(testEmail))
-                .withMessage("Account does not exist");
-    }
-
-    @Test
     @DisplayName("Should return empty PaymentOwedDTO when no bills are found")
     void shouldReturnEmptyPaymentOwedDTOWhenNoBillsAreFound() {
         //Given
         final String testEmail = "abc@123.ca";
-        final var account = AccountDTOFixture.getCreationDTO();
+        final var account = AccountEntityFixture.getDefaultAccount();
         when(accountService.getAccount(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
@@ -75,7 +60,7 @@ public class PaymentFacadeImplTest {
     void shouldReturnListOfOneAccountMappedToAmountOwed() {
         //Given
         final String testEmail = "abc@123.ca";
-        final var account = AccountDTOFixture.getCreationDTO();
+        final var account = AccountEntityFixture.getDefaultAccount();
         final var paymentOwed = new PaymentOwedDTO();
         final var paymentsOwedList = new ArrayList<PaymentOwedDTO>();
         paymentOwed.setEmail("owed@yomama.com");

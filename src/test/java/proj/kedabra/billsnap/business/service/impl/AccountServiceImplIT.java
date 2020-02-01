@@ -18,7 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.utils.enums.AccountStatusEnum;
@@ -78,7 +77,7 @@ class AccountServiceImplIT {
         creationResource.setEmail("nonExistentEmail@email.com");
 
         //When
-        AccountDTO dto = accountService.registerAccount(creationResource);
+        Account dto = accountService.registerAccount(creationResource);
 
 
         //Then
@@ -103,7 +102,7 @@ class AccountServiceImplIT {
         var creationResource = AccountDTOFixture.getCreationDTO();
 
         //When
-        final AccountDTO account = accountService.getAccount(creationResource.getEmail());
+        final Account account = accountService.getAccount(creationResource.getEmail());
         assertThat(account.getId()).isEqualTo(creationResource.getId());
 
     }
