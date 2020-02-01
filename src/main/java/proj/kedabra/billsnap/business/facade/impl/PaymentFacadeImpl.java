@@ -44,11 +44,7 @@ public class PaymentFacadeImpl implements PaymentFacade {
     public BigDecimal payBill(PaymentInformationDTO paymentInfo) {
         final var account = accountService.getAccount(paymentInfo.getEmail());
         final var bill = billService.getBill(paymentInfo.getBillId());
-        final var remainingBalance = paymentService.payBill(account, bill, paymentInfo.getAmount());
-
-        //TODO verifyResolutionStatus
-
-        return remainingBalance;
+        return paymentService.payBill(account, bill, paymentInfo.getAmount());
     }
 
 }

@@ -16,8 +16,9 @@ public enum ErrorMessageEnum {
     WRONG_REQ_METHOD("Incorrect login request method."),
     BAD_CREDENTIALS("Username or password is incorrect."),
     INTERNAL_SERVER_ERROR("Server error has occurred, please try again later."),
-    BILL_DOES_NOT_EXIST("Bill does not exist"),
-    CANNOT_PAY_MORE_THAN_OWED("Cannot pay more than the amount owed"),
+    BILL_DOES_NOT_EXIST("Bill does not exist."),
+    CANNOT_PAY_MORE_THAN_OWED("Cannot pay more than the amount owed."),
+    ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL("Account does not have the bill specified."),
 
 
     //=========================================TESTING ONLY===============================================

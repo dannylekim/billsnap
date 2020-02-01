@@ -10,6 +10,7 @@ import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.PaymentService;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
@@ -24,15 +25,11 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BigDecimal payBill(final Account account, final Bill bill, final BigDecimal paymentAmount) {
+
+        final var accountBill = account.getAccountBill(bill)
+                .orElseThrow(() -> new IllegalArgumentException(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage()));
+
         final var totalAmountOwedToBill = paymentRepository.getTotalAmountOwedToBill(account, bill);
-
-        final var accountBill = account
-                .getBills()
-                .stream()
-                .filter(ab -> ab.getAccount().equals(account))
-                .findFirst()
-                .orElseThrow();
-
         final var amountPaid = Optional.ofNullable(accountBill.getAmountPaid()).orElse(BigDecimal.ZERO);
         final var newAmountPaid = amountPaid.add(paymentAmount);
         final var remainingBalance = totalAmountOwedToBill.subtract(newAmountPaid);
@@ -42,6 +39,10 @@ public class PaymentServiceImpl implements PaymentService {
         }
 
         accountBill.setAmountPaid(newAmountPaid);
+
+        if (remainingBalance.compareTo(BigDecimal.ZERO) == 0) {
+            bill.setStatus(BillStatusEnum.RESOLVED);
+        }
 
         return remainingBalance;
     }

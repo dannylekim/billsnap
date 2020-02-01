@@ -3,6 +3,7 @@ package proj.kedabra.billsnap.business.model.entities;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -101,4 +102,8 @@ public class Account implements Serializable {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Notification> notifications = new HashSet<>();
+
+    public Optional<AccountBill> getAccountBill(final Bill bill) {
+        return bills.stream().filter(ab -> ab.getBill().equals(bill)).findFirst();
+    }
 }

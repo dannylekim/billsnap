@@ -2,7 +2,9 @@ package proj.kedabra.billsnap.business.facade.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -16,6 +18,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.fixtures.PaymentInformationDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -27,6 +32,9 @@ class PaymentFacadeImplIT {
 
     @Autowired
     private PaymentFacadeImpl paymentFacade;
+
+    @Autowired
+    private BillRepository billRepository;
 
     @Test
     @DisplayName("Should return an exception if the account does not exist")
@@ -67,6 +75,49 @@ class PaymentFacadeImplIT {
 
         //Then
         assertThat(paymentOwedList.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should throw exception if account does not exist")
+    void shouldThrowExceptionOnInexistingAccount() {
+        //given
+        final var email = "fakeaf@email.com";
+        final var billId = 1002L;
+
+        //when/then
+        assertThatIllegalArgumentException().isThrownBy(() -> paymentFacade.payBill(PaymentInformationDTOFixture.getDefaultWithBillAndEmail(billId, email)));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Bill does not exist")
+    void shouldThrowExceptionOnInexistingBill() {
+        //given
+        final var email = "paymentowed@test.com";
+        final var billId = 99919294L;
+
+        //when/then
+        assertThatIllegalArgumentException().isThrownBy(() -> paymentFacade.payBill(PaymentInformationDTOFixture.getDefaultWithBillAndEmail(billId, email)));
+    }
+
+    @Test
+    @DisplayName("Should save in database amount paid and new status")
+    void shouldSaveInDbAmountPaidAndStatus() {
+        //Given
+        final var email = "paymentowed@test.com";
+        final var billId = 1002L;
+        final var paymentInfo = PaymentInformationDTOFixture.getDefaultWithBillAndEmail(billId, email);
+        final var amount = new BigDecimal("3");
+        paymentInfo.setAmount(amount);
+
+        //When
+        final var remainingBalance = paymentFacade.payBill(paymentInfo);
+
+        //Then
+        final var bill = billRepository.findById(billId).orElseThrow();
+        final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().getEmail().equals(email)).findFirst().orElseThrow();
+        assertThat(accountBill.getAmountPaid()).isEqualTo(amount);
+        assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.RESOLVED);
+        assertThat(remainingBalance).isEqualTo(BigDecimal.ZERO);
     }
 
 }

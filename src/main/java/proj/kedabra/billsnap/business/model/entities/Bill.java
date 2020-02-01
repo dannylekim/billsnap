@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
@@ -113,8 +114,13 @@ public class Bill implements Serializable {
     @EqualsAndHashCode.Exclude
     private Set<AccountBill> accounts = new HashSet<>();
 
+
     @OneToMany(mappedBy = "bill", orphanRemoval = true, cascade = CascadeType.ALL)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Notification> notifications = new HashSet<>();
+
+    public Optional<AccountBill> getAccountBill(final Account account) {
+        return accounts.stream().filter(ab -> ab.getAccount().equals(account)).findFirst();
+    }
 }
