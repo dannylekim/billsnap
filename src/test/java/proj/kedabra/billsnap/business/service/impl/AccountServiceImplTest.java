@@ -11,11 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalAnswers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.mapper.AccountMapperImpl;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 
 class AccountServiceImplTest {
 
@@ -54,7 +56,7 @@ class AccountServiceImplTest {
         when(accountRepository.save(any())).then(AdditionalAnswers.returnsFirstArg());
 
         //When
-        AccountDTO accountDTO = accountServiceImpl.registerAccount(creationResource);
+        Account accountDTO = accountServiceImpl.registerAccount(creationResource);
 
         //Then
         assertEquals(creationResource.getEmail(), accountDTO.getEmail());
@@ -62,4 +64,31 @@ class AccountServiceImplTest {
         assertEquals(creationResource.getLastName(), accountDTO.getLastName());
     }
 
+    @Test
+    @DisplayName("Should return AccountDTO")
+    void shouldReturnAccountDTO() {
+        //Given
+        final String email = "test@email.com";
+        final Account accountEntity = AccountEntityFixture.getDefaultAccount();
+        when(accountRepository.getAccountByEmail(email)).thenReturn(accountEntity);
+
+        //when
+        final Account account = accountServiceImpl.getAccount(email);
+
+        //then
+        assertEquals(account.getEmail(), accountEntity.getEmail());
+        assertEquals(account.getFirstName(), accountEntity.getFirstName());
+        assertEquals(account.getLastName(), accountEntity.getLastName());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if account doesn't exist")
+    void shouldThrowExceptionIfAccountDoesNotExist() {
+        //Given
+        final String email = "test@email.com";
+        when(accountRepository.getAccountByEmail(email)).thenReturn(null);
+
+        //when/then
+        assertThrows(ResourceNotFoundException.class, () -> accountServiceImpl.getAccount(email));
+    }
 }

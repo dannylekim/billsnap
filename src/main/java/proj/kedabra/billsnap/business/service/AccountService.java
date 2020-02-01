@@ -1,9 +1,12 @@
 package proj.kedabra.billsnap.business.service;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.model.entities.Account;
 
 public interface AccountService {
 
-    AccountDTO registerAccount(AccountDTO accountDTO);
+    Account registerAccount(AccountDTO accountDTO);
+
+    Account getAccount(String email);
 
 }

@@ -13,6 +13,8 @@ create type if not exists gender as enum ('MALE', 'FEMALE', 'OTHER');
 
 create type if not exists invitation_status as enum('ACCEPTED', 'DECLINED', 'PENDING');
 
+create type if not exists payment_status_type as enum ('PAID', 'IN_PROGRESS');
+
 create sequence if not exists account_id_seq start with 1 increment by 1;
 
 create sequence if not exists bill_id_seq start with 1 increment by 1;
@@ -163,17 +165,18 @@ create table if not exists items_vs_accounts
 
 create table if not exists bills_vs_accounts
 (
-    bill_id     integer           not null
+    bill_id        integer             not null
         constraint "BILLS_VS_USERS_bill_id_fkey"
             references bill,
-    account_id  integer           not null
+    account_id     integer             not null
         constraint "BILLS_VS_USERS_user_id_fkey"
             references account,
-    percentage  numeric(7, 4)     null,
+    percentage     numeric(7, 4)       null,
     constraint "BILLS_VS_USERS_pkey"
         primary key (bill_id, account_id),
-    status      invitation_status not null,
-    amount_paid numeric(14, 2)    null
+    status         invitation_status   not null,
+    amount_paid    numeric(14, 2)      null,
+    payment_status payment_status_type null
 );
 
 create table if not exists notifications

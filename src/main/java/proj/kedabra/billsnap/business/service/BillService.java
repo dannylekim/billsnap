@@ -17,4 +17,6 @@ public interface BillService {
 
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
 
+    Bill getBill(Long id);
+
 }

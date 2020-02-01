@@ -1,54 +1,41 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
-import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
-import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.service.AccountService;
+import proj.kedabra.billsnap.business.service.PaymentService;
+import proj.kedabra.billsnap.business.service.impl.BillServiceImpl;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 
 public class PaymentFacadeImplTest {
 
     private PaymentFacadeImpl paymentFacadeImpl;
 
     @Mock
-    private AccountRepository accountRepository;
+    private AccountService accountService;
 
     @Mock
     private BillServiceImpl billService;
 
+    @Mock
+    private PaymentService paymentService;
+
     @BeforeEach
     void setup() {
-
         MockitoAnnotations.initMocks(this);
-        paymentFacadeImpl = new PaymentFacadeImpl(accountRepository, billService);
-
-    }
-
-    @Test
-    @DisplayName("Should return an exception if given an email that does not exist")
-    void shouldReturnExceptionIfEmailDoesNotExist() {
-        //Given
-        final String testEmail = "abc@123.ca";
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(null);
-
-        //when//then
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy( () -> paymentFacadeImpl.getAmountsOwed(testEmail))
-                .withMessage("Account does not exist");
+        paymentFacadeImpl = new PaymentFacadeImpl(accountService, billService, paymentService);
     }
 
     @Test
@@ -57,7 +44,7 @@ public class PaymentFacadeImplTest {
         //Given
         final String testEmail = "abc@123.ca";
         final var account = AccountEntityFixture.getDefaultAccount();
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
+        when(accountService.getAccount(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(new ArrayList<PaymentOwedDTO>());
 
         //when
@@ -79,7 +66,7 @@ public class PaymentFacadeImplTest {
         paymentOwed.setEmail("owed@yomama.com");
         paymentOwed.setAmount(BigDecimal.valueOf(69));
         paymentsOwedList.add(paymentOwed);
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(account);
+        when(accountService.getAccount(testEmail)).thenReturn(account);
         when(billService.calculateAmountOwed(account)).thenReturn(paymentsOwedList);
 
         //when

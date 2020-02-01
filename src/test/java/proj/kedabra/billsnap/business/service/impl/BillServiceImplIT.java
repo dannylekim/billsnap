@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
@@ -17,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,8 +31,8 @@ import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
-import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -175,6 +177,26 @@ class BillServiceImplIT {
 
         //Then
         assertThat(paymentOwedList.size()).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("Should return exception if bill does not exist")
+    void shouldReturnExceptionIfBillDoesNotExist() {
+        //Given/when/then
+        assertThrows(ResourceNotFoundException.class, () -> billService.getBill(12366L));
+    }
+
+    @Test
+    @DisplayName("Should return bill")
+    void shouldReturnTargettedBill() {
+        //Given
+        final long id = 1000L;
+
+        //When
+        final Bill bill = billService.getBill(id);
+
+        //Then
+        assertThat(bill.getId()).isEqualTo(id);
     }
 
 
