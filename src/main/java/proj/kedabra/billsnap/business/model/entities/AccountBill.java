@@ -20,6 +20,7 @@ import org.hibernate.annotations.TypeDef;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 
 @Data
 @Entity
@@ -51,7 +52,11 @@ public class AccountBill implements Serializable {
     @Type(type = "pgsql_enum")
     private InvitationStatusEnum status;
 
-    //TODO possibly should just always be 0 rather than null?
     @Column(name = "amount_paid", precision = 14, scale = 2)
-    private BigDecimal amountPaid;
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @Column(name = "payment_status")
+    @Enumerated(EnumType.STRING)
+    @Type(type = "pgsql_enum")
+    private PaymentStatusEnum paymentStatus;
 }

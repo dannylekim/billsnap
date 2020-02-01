@@ -99,7 +99,7 @@ class AccountServiceImplIT {
     @DisplayName("Should return an account from the DB")
     void shouldReturnAnAccountFromDB() {
         //Given
-        var creationResource = AccountDTOFixture.getCreationDTO();
+        final var creationResource = AccountDTOFixture.getCreationDTO();
 
         //When
         final Account account = accountService.getAccount(creationResource.getEmail());

@@ -28,16 +28,16 @@ public interface PaymentRepository extends CrudRepository<Bill, Long> {
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
 
 
-    @Query(value = "SELECT SUM(item.cost) " +
+    @Query(value = "SELECT SUM(item.cost)" +
             "FROM bill as b, item, bills_vs_accounts as bva, items_vs_accounts as iva, account " +
             "WHERE b.id = bva.bill_id " +
             "AND b.id = item.bill_id " +
             "AND iva.item_id = item.id " +
             "AND account.id = iva.account_id " +
-            "AND bva.account_id = :#{#account.getId()} " +
+            "AND bva.account_id = account.id " +
             "AND b.status = 'OPEN' " +
-            "AND b.id = bill.id " +
-            "AND account.id <> :#{#account.getId()} ",
+            "AND b.id = :#{#bill.getId()} " +
+            "AND account.id = :#{#account.getId()} ",
             nativeQuery = true)
     BigDecimal getTotalAmountOwedToBill(@Param("account") Account account, @Param("bill") Bill bill);
 
