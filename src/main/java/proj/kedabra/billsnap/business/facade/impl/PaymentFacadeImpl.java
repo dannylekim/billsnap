@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.PaymentInformationDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
@@ -35,7 +34,7 @@ public class PaymentFacadeImpl implements PaymentFacade {
     @Override
     @Transactional(readOnly = true)
     public List<PaymentOwedDTO> getAmountsOwed(final String email) {
-        final AccountDTO account = accountService.getAccount(email);
+        final var account = accountService.getAccount(email);
 
         return billService.calculateAmountOwed(account);
     }

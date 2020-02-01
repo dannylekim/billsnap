@@ -9,8 +9,6 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
@@ -81,16 +79,16 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, AccountDTO account) {
+    public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
         return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
     }
     @Override
-    public BillCompleteDTO getBill(Long id) {
-        return billRepository.findById(id).map(billMapper::toDTO).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+    public Bill getBill(Long id) {
+        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public List<PaymentOwedDTO> calculateAmountOwed(AccountDTO account) {
+    public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
         return getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).map(paymentMapper::toDTO).collect(Collectors.toList());
     }
 

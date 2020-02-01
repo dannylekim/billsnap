@@ -7,8 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-import proj.kedabra.billsnap.business.dto.AccountDTO;
-import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
+import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -26,7 +25,7 @@ public interface PaymentRepository extends CrudRepository<Bill, Long> {
             "AND account.id <> :#{#account.getId()} " +
             "GROUP BY account.email",
             nativeQuery = true)
-    Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") AccountDTO account);
+    Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(@Param("status") BillStatusEnum status, @Param("account") Account account);
 
 
     @Query(value = "SELECT SUM(item.cost) " +
@@ -40,6 +39,6 @@ public interface PaymentRepository extends CrudRepository<Bill, Long> {
             "AND b.id = bill.id " +
             "AND account.id <> :#{#account.getId()} ",
             nativeQuery = true)
-    BigDecimal getTotalAmountOwedToBill(@Param("account") AccountDTO account, @Param("bill") BillCompleteDTO bill);
+    BigDecimal getTotalAmountOwedToBill(@Param("account") Account account, @Param("bill") Bill bill);
 
 }
