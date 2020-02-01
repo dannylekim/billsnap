@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,12 +22,12 @@ import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import io.swagger.annotations.Authorization;
-import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
-import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import springfox.documentation.annotations.ApiIgnore;
 
+import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
@@ -36,6 +37,8 @@ import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
+import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 
 @RestController
 public class BillController {
@@ -113,4 +116,27 @@ public class BillController {
         final BillSplitDTO billSplit = billFacade.associateAccountsToBill(associateBill);
         return billMapper.toResource(billSplit);
     }
+
+    @PostMapping("bills/{billId}/accounts")
+    @ApiOperation(value = "Invite registered users to bill", notes = "Sends notification invite to all registered users in given list",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiResponses({
+            @ApiResponse(code = 200, response = PendingRegisteredBillSplitResource.class, message = "Successfully invited Registered users to bill!"),
+            @ApiResponse(code = 400, response = ApiError.class, message = "Error inviting registered users to bill."),
+            @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
+            @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+    })
+    @ResponseStatus(HttpStatus.CREATED)
+    public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "List of emails to invite", value = "List of emails to invite")
+                                                                     @PathVariable("billId") final Long billId,
+                                                                     @RequestBody @Valid final InviteRegisteredResource inviteRegisteredResource,
+                                                                     final BindingResult bindingResult,
+                                                                     @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+        if (bindingResult.hasErrors()) {
+            throw new FieldValidationException(bindingResult.getAllErrors());
+        }
+
+        return null;
+    }
+
 }
