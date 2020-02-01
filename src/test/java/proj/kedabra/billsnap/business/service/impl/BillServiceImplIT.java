@@ -33,13 +33,16 @@ import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
+import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.NotificationsRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -59,6 +62,12 @@ class BillServiceImplIT {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private NotificationsRepository notificationsRepository;
+
+    @Autowired
+    private AccountBillRepository accountBillRepository;
 
     @Test
     @DisplayName("Should return a default bill")
@@ -239,7 +248,7 @@ class BillServiceImplIT {
 
     @Test
     @DisplayName("Should throw error if a specified account is not found on the bill")
-    void shouldThrowErrorIfAccountDoesNotExistinBill() {
+    void shouldThrowErrorIfAccountDoesNotExistInBill() {
         //Given
         final AssociateBillDTO associateBillDTO = AssociateBillDTOFixture.getDefault();
         associateBillDTO.getItems().get(0).setEmail("fakeEmails@fake.com");
@@ -357,5 +366,89 @@ class BillServiceImplIT {
                 .filter(accountItem -> accountItem.getItem().getId().equals(associateItemId)).collect(Collectors.toList());
 
         assertThat(listOfExistingItems.size()).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Should create a Notification when inviting a Registered user to Bill that is not already part of the Bill")
+    void shouldCreateNotificationWhenInviteRegisteredOneUser() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(1000L);
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var emailNotInBill = "nobills@inthisemail.com";
+        accountNotInBill.setEmail(emailNotInBill);
+        final var accountsList = List.of(accountNotInBill);
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        //Then
+        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, accountNotInBill).isPresent())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should create a Notification when inviting many Registered users to Bill that are not already part of the Bill")
+    void shouldCreateNotificationWhenInviteRegisteredManyUsers() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(1000L);
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var emailNotInBill = "nobills@inthisemail.com";
+        accountNotInBill.setEmail(emailNotInBill);
+        final var secondAccountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var secondEmailNotInBill = "user@hasbills.com";
+        secondAccountNotInBill.setEmail(secondEmailNotInBill);
+        final var accountsList = List.of(accountNotInBill, secondAccountNotInBill);
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        //Then
+        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, accountNotInBill).isPresent())
+                .isTrue();
+        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, secondAccountNotInBill).isPresent())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should create an AccountBill when inviting a Registered user to Bill that is not already part of the Bill")
+    void shouldCreateAccountBillWhenInviteRegisteredOneUser() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(1000L);
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var emailNotInBill = "nobills@inthisemail.com";
+        accountNotInBill.setEmail(emailNotInBill);
+        final var accountsList = List.of(accountNotInBill);
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, accountNotInBill).isPresent())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Should create an AccountBill when inviting many Registered users to Bill that are not already part of the Bill")
+    void shouldCreateAccountBillWhenInviteRegisteredManyUsers() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(1000L);
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var emailNotInBill = "nobills@inthisemail.com";
+        accountNotInBill.setEmail(emailNotInBill);
+        final var secondAccountNotInBill = AccountEntityFixture.getDefaultAccount();
+        final var secondEmailNotInBill = "user@hasbills.com";
+        secondAccountNotInBill.setEmail(secondEmailNotInBill);
+        final var accountsList = List.of(accountNotInBill, secondAccountNotInBill);
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, accountNotInBill).isPresent())
+                .isTrue();
+        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, secondAccountNotInBill).isPresent())
+                .isTrue();
     }
 }

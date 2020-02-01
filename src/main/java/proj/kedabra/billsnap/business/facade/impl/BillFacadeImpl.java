@@ -19,6 +19,7 @@ import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.CostItemsPair;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
+import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
@@ -29,6 +30,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
@@ -39,6 +41,8 @@ public class BillFacadeImpl implements BillFacade {
     private final AccountRepository accountRepository;
 
     private final BillService billService;
+
+    private final AccountService accountService;
 
     private final BillMapper billMapper;
 
@@ -51,9 +55,10 @@ public class BillFacadeImpl implements BillFacade {
     private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
 
     @Autowired
-    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, final BillMapper billMapper, final AccountMapper accountMapper, final ItemMapper itemMapper) {
+    public BillFacadeImpl(final AccountRepository accountRepository, final BillService billService, AccountService accountService, final BillMapper billMapper, final AccountMapper accountMapper, final ItemMapper itemMapper) {
         this.accountRepository = accountRepository;
         this.billService = billService;
+        this.accountService = accountService;
         this.billMapper = billMapper;
         this.accountMapper = accountMapper;
         this.itemMapper = itemMapper;
@@ -69,7 +74,8 @@ public class BillFacadeImpl implements BillFacade {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
         final List<Account> accountsList = accountRepository.getAccountsByEmailIn(billDTO.getAccountsList()).collect(Collectors.toList());
         final List<String> billDTOAccounts = billDTO.getAccountsList();
-
+        
+        //TODO: replace with AccountService.getAccounts
         if (billDTOAccounts.size() > accountsList.size()) {
             final List<String> accountsStringList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
             final List<String> nonExistentEmails = new ArrayList<>(billDTOAccounts);
@@ -97,6 +103,32 @@ public class BillFacadeImpl implements BillFacade {
         final Bill bill = billService.associateItemsToAccountBill(associateBillDTO);
 
         return getBillSplitDTO(bill);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String principal, List<String> accounts) {
+
+        final var bill = billService.getBill(billId);
+        if (!bill.getResponsible().getEmail().equals(principal)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+        }
+
+        final List<Account> accountsList = accountService.getAccounts(accounts);
+        final List<String> emailsList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
+        final List<String> commonEmailsList = bill.getAccounts().stream()
+                .map(ab -> ab.getAccount().getEmail())
+                .filter(emailsList::contains).collect(Collectors.toList());
+        if (!commonEmailsList.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(commonEmailsList.toString()));
+        }
+
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        final var billSplitDTO = getBillSplitDTO(bill);
+        final var pendingRegisteredBillSplitDTO = billMapper.toPendingRegisteredBillSplitDTO(billSplitDTO);
+        pendingRegisteredBillSplitDTO.setPendingAccounts(accounts);
+        return pendingRegisteredBillSplitDTO;
     }
 
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
@@ -134,9 +166,9 @@ public class BillFacadeImpl implements BillFacade {
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
         final HashMap<Account, CostItemsPair> accountPairMap = new HashMap<>();
         bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
-                    CostItemsPair costItemsPair = new CostItemsPair(BigDecimal.ZERO, new ArrayList<>());
-                    accountPairMap.put(account, costItemsPair);
-                });
+            CostItemsPair costItemsPair = new CostItemsPair(BigDecimal.ZERO, new ArrayList<>());
+            accountPairMap.put(account, costItemsPair);
+        });
         mapAllBillAccountItemsIntoHashMap(bill, accountPairMap);
         mapHashMapIntoItemsPerAccount(accountPairMap, itemsPerAccount);
         billSplitDTO.setItemsPerAccount(itemsPerAccount);
@@ -152,7 +184,7 @@ public class BillFacadeImpl implements BillFacade {
         });
     }
 
-    private void verifyItemPercentageSum(Item item, BigDecimal percentage){
+    private void verifyItemPercentageSum(Item item, BigDecimal percentage) {
         if (percentage.compareTo(BigDecimal.valueOf(100)) != 0) {
             throw new IllegalArgumentException(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), percentage));
         }

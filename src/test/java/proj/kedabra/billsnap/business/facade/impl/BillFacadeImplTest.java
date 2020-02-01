@@ -36,6 +36,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
@@ -65,6 +66,9 @@ class BillFacadeImplTest {
     private AccountRepository accountRepository;
 
     @Mock
+    private AccountService accountService;
+
+    @Mock
     private BillService billService;
 
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
@@ -75,7 +79,7 @@ class BillFacadeImplTest {
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper, itemMapper);
+        billFacade = new BillFacadeImpl(accountRepository, billService, accountService, billMapper, accountMapper, itemMapper);
 
     }
 

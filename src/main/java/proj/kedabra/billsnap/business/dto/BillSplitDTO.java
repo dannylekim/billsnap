@@ -2,7 +2,6 @@ package proj.kedabra.billsnap.business.dto;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -12,6 +11,7 @@ import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
 @Data
 public class BillSplitDTO {
+
     private Long id;
 
     private String name;

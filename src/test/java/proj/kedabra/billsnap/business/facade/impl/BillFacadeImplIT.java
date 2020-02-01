@@ -42,6 +42,8 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 
@@ -200,7 +202,7 @@ class BillFacadeImplIT {
         if (allBillsByEmail.get(0).getId().equals(1000L)) {
             verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
             verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
-        } else if (allBillsByEmail.get(0).getId().equals(1001L)){
+        } else if (allBillsByEmail.get(0).getId().equals(1001L)) {
             verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
             verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
         }
@@ -237,6 +239,7 @@ class BillFacadeImplIT {
     @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
+        //Given
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = billRepository.findById(dto.getId()).orElseThrow();
         final var item = bill.getItems().iterator().next();
@@ -250,6 +253,106 @@ class BillFacadeImplIT {
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
         assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getCost()).isEqualTo(item.getCost());
     }
+
+    @Test
+    @DisplayName("Should return error if User requesting POST bills/{billId}/accounts is not the Bill responsible")
+    void shouldReturnErrorIfUserMakingRequestIsNotBillResponsible() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billId = 1000L;
+        final var notBillResponsible = "nobills@inthisemail.com";
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw error if bill does not exist in Invite Registered call")
+    void shouldThrowErrorIfBillDoesNotExistInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var principal = "test@email.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var nonExistentBillId = 90019001L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw error if one account does not exist in Invite Registered call")
+    void shouldThrowErrorIfOneAccountDoesNotExistInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var nonExistentEmail = "clearly@nonexistent.gov";
+        final var existentBillId = 1000L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill, nonExistentEmail));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw error if many accounts do not exist in Invite Registered call")
+    void shouldThrowErrorIfManyAccountDoNotExistInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var nonExistentEmail = "clearly@nonexistent.gov";
+        final var secondNonExistentEmail = "veryfake@fake.ca";
+        final var existentBillId = 1000L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill, nonExistentEmail, secondNonExistentEmail));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, secondNonExistentEmail).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw error if one account is already part of bill in Invite Registered call")
+    void shouldThrowErrorIfOneAccountIsAlreadyPartOfBillInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "user@withABill.com";
+        final var accountInBill = "user@hasbills.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var existentBillId = 1005L;
+        inviteRegisteredResource.setAccounts(List.of(accountInBill, accountNotInBill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(accountInBill).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw error if many accounts are already part of bill in Invite Registered call")
+    void shouldThrowErrorIfManyAccountsAreAlreadyPartOfBillInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "user@withABill.com";
+        final var accountInBill = "user@hasbills.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var existentBillId = 1005L;
+        inviteRegisteredResource.setAccounts(List.of(billResponsible, accountInBill, accountNotInBill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessageContaining(billResponsible).withMessageContaining(accountInBill);
+    }
+
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)

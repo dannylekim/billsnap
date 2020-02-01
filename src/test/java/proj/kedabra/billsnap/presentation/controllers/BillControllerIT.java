@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -46,6 +47,7 @@ import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
+import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -775,7 +777,7 @@ class BillControllerIT {
     }
     @Test
     @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource are not in email format for POST /bills/{billId}/accounts")
-    void shouldReturnExceptionIfListEmailsNotEmailFormatInInviteRegisteredResourceGivenPost() throws Exception{
+    void shouldReturnExceptionIfListEmailsNotEmailFormatInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
@@ -873,6 +875,31 @@ class BillControllerIT {
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
 
+    @Test
+    @DisplayName("Should return 200 when adding multiple existing users not part of Bill in Invite Registered Person to Bill")
+    void shouldReturn200ForNormalCaseInviteRegisteredGivenPost() throws Exception {
+        //Given the User makes a request for a bill where User is the responsible
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var secondAccountNotInBill = "user@withABill.com";
+        final var existentBillId = 1000L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill, secondAccountNotInBill));
+
+        //When
+        final var mvcResult = performMvcPostRequest200OKInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
+
+        //Then
+        final var pendingAccountsList = response.getPendingAccounts().stream()
+                .filter(acc -> acc.equals(accountNotInBill) || acc.equals(secondAccountNotInBill))
+                .collect(Collectors.toList());
+        assertThat(pendingAccountsList.size()).isEqualTo(2);
+
+    }
+
     private void verifyBillSplitResources(BillResource expectedBillResource, BillSplitResource actualBillResource) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
@@ -911,6 +938,12 @@ class BillControllerIT {
         return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
                 .andExpect(status().isCreated()).andReturn();
+    }
+
+    private MvcResult performMvcPostRequest200OKInviteRegistered(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
+        return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
+                .andExpect(status().isOk()).andReturn();
     }
 
     private MvcResult performMvcPostRequest4xxFailure(String bearerToken, BillCreationResource billCreationResource) throws Exception {

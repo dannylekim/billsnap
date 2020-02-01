@@ -7,7 +7,7 @@ import lombok.EqualsAndHashCode;
 
 @EqualsAndHashCode(callSuper = true)
 @Data
-public class PendingRegisteredBillSplitDTO extends BillSplitDTO{
+public class PendingRegisteredBillSplitDTO extends BillSplitDTO {
 
     private List<String> pendingAccounts;
 

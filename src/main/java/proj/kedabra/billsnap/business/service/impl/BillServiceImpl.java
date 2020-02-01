@@ -96,6 +96,13 @@ public class BillServiceImpl implements BillService {
         return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill inviteRegisteredToBill(Bill bill, List<Account> accounts) {
+
+        return null;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public List<PaymentOwedDTO> calculateAmountOwed(Account account) {
         return getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).map(paymentMapper::toDTO).collect(Collectors.toList());
