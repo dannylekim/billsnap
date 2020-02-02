@@ -19,7 +19,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "notifications", schema = "public")
-public class Notification implements Serializable {
+public class Notifications implements Serializable {
 
     private static final long serialVersionUID = 5729865586128253732L;
 

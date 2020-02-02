@@ -26,6 +26,12 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
         return new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ApiError handleIllegalStateException(final IllegalStateException ex) {
+        return new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     protected ApiError handleUnknownException(final Exception ex) {
