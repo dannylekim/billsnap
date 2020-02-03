@@ -9,6 +9,11 @@ In essence, BillSnap is a Bill Splitting and Roommate management application.
 
 The goal is to allow ease of splitting bills with who ordered what or which roommate needs to pay which bill and at which occurrence.
 
+
+## Prerequisites
+
+- Java 12 or higher
+
 ## Getting Started
 
 First clone the project with the command
