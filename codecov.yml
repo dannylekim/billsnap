@@ -28,5 +28,8 @@ comment:
 ignore:
   - src/main/java/proj/kedabra/billsnap/config/.*
   - src/main/java/proj/kedabra/billsnap/utils/enums/.*
+  - src/main/java/proj/kedabra/billsnap/presentation/controllers/.*
+  - src/main/java/proj/kedabra/billsnap/presentation/resources/.*
+  - src/main/java/proj/kedabra/billsnap/business/model/.*
   - src/main/java/proj/kedabra/billsnap/BillsnapApplication.java
 
