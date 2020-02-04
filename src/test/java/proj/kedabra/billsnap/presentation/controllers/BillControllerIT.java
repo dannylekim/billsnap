@@ -13,7 +13,6 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -876,11 +875,33 @@ class BillControllerIT {
     }
 
     @Test
+    @DisplayName("Should return 200 when adding one existing user not part of Bill in Invite Registered Person to Bill")
+    void shouldReturn200ForNormalCaseOneUserInviteRegisteredGivenPost() throws Exception {
+        //Given the User makes a request for a bill where User is the responsible
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var existentBillId = 1000L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+
+        //When
+        final var mvcResult = performMvcPostRequest200OKInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
+
+        //Then
+        assertThat((int) response.getPendingAccounts().stream()
+                .filter(acc -> acc.equals(accountNotInBill)).count())
+                .isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("Should return 200 when adding multiple existing users not part of Bill in Invite Registered Person to Bill")
     void shouldReturn200ForNormalCaseInviteRegisteredGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
-        final var user = UserFixture.getDefault();
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var accountNotInBill = "nobills@inthisemail.com";
         final var secondAccountNotInBill = "user@withABill.com";
@@ -893,11 +914,9 @@ class BillControllerIT {
         final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
 
         //Then
-        final var pendingAccountsList = response.getPendingAccounts().stream()
-                .filter(acc -> acc.equals(accountNotInBill) || acc.equals(secondAccountNotInBill))
-                .collect(Collectors.toList());
-        assertThat(pendingAccountsList.size()).isEqualTo(2);
-
+        assertThat((int) response.getPendingAccounts().stream()
+                .filter(acc -> acc.equals(accountNotInBill) || acc.equals(secondAccountNotInBill)).count())
+                .isEqualTo(2);
     }
 
     private void verifyBillSplitResources(BillResource expectedBillResource, BillSplitResource actualBillResource) {

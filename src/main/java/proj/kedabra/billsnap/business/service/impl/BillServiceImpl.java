@@ -1,6 +1,8 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -26,6 +28,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -74,8 +77,8 @@ public class BillServiceImpl implements BillService {
         bill.setActive(true);
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.getItems().forEach(i -> mapItems(i, bill, account, 100));
-        accountList.forEach(acc -> mapAccount(bill, acc, null));
-        mapAccount(bill, account, null);
+        accountList.forEach(acc -> mapAccountBill(bill, acc, null, InvitationStatusEnum.ACCEPTED));
+        mapAccountBill(bill, account, null, InvitationStatusEnum.ACCEPTED);
 
         return billRepository.save(bill);
     }
@@ -99,8 +102,12 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill inviteRegisteredToBill(Bill bill, List<Account> accounts) {
+        accounts.forEach(acc -> {
+            createNotification(bill, acc);
+            mapAccountBill(bill, acc, null, InvitationStatusEnum.PENDING);
+        });
 
-        return null;
+        return bill;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -133,7 +140,6 @@ public class BillServiceImpl implements BillService {
             });
         });
     }
-
 
     private void removeReferencedAccountItems(Bill bill, List<ItemAssociationDTO> items) {
         final var list = items.stream()
@@ -183,13 +189,21 @@ public class BillServiceImpl implements BillService {
         item.getAccounts().add(accountItem);
     }
 
-    private void mapAccount(final Bill bill, final Account account, BigDecimal percentage) {
+    private void mapAccountBill(final Bill bill, final Account account, BigDecimal percentage, InvitationStatusEnum status) {
         var accountBill = new AccountBill();
         accountBill.setAccount(account);
         accountBill.setBill(bill);
         accountBill.setPercentage(percentage);
-        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+        accountBill.setStatus(status);
         bill.getAccounts().add(accountBill);
+    }
+
+    private void createNotification(Bill bill, Account account) {
+        final var notification = new Notifications();
+        notification.setAccount(account);
+        notification.setBill(bill);
+        notification.setTimeSent(ZonedDateTime.now(ZoneId.systemDefault()));
+        bill.getNotifications().add(notification);
     }
 
 }

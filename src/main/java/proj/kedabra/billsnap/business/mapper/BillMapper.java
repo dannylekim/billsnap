@@ -15,6 +15,7 @@ import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE, injectionStrategy = InjectionStrategy.CONSTRUCTOR, uses = AccountMapper.class)
 public interface BillMapper {
@@ -28,6 +29,8 @@ public interface BillMapper {
     BillResource toResource(BillCompleteDTO billDTO);
 
     BillSplitResource toResource(BillSplitDTO billSplitDTO);
+
+    PendingRegisteredBillSplitResource toResource(PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO);
 
     BillSplitDTO toBillSplitDTO(Bill bill);
 

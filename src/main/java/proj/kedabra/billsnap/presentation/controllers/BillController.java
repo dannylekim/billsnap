@@ -127,8 +127,9 @@ public class BillController {
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "List of emails to invite", value = "List of emails to invite")
+    public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "billId", value = "bill ID")
                                                                      @PathVariable("billId") final Long billId,
+                                                                     @ApiParam(required = true, name = "List of emails to invite", value = "List of emails to invite")
                                                                      @RequestBody @Valid final InviteRegisteredResource inviteRegisteredResource,
                                                                      final BindingResult bindingResult,
                                                                      @ApiIgnore @AuthenticationPrincipal final Principal principal) {
@@ -136,7 +137,8 @@ public class BillController {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
 
-        return null;
+        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(billId, principal.getName(), inviteRegisteredResource.getAccounts());
+        return billMapper.toResource(pendingRegisteredBillSplitDTO);
     }
 
 }

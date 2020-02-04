@@ -33,10 +33,8 @@ import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
-import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
-import proj.kedabra.billsnap.business.repository.NotificationsRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -62,12 +60,6 @@ class BillServiceImplIT {
 
     @Autowired
     private AccountRepository accountRepository;
-
-    @Autowired
-    private NotificationsRepository notificationsRepository;
-
-    @Autowired
-    private AccountBillRepository accountBillRepository;
 
     @Test
     @DisplayName("Should return a default bill")
@@ -371,7 +363,7 @@ class BillServiceImplIT {
     @Test
     @DisplayName("Should create a Notification when inviting a Registered user to Bill that is not already part of the Bill")
     void shouldCreateNotificationWhenInviteRegisteredOneUser() {
-        //Given
+        //Given account with no notifications
         final var bill = BillEntityFixture.getDefault();
         bill.setId(1000L);
         final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
@@ -383,8 +375,11 @@ class BillServiceImplIT {
         billService.inviteRegisteredToBill(bill, accountsList);
 
         //Then
-        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, accountNotInBill).isPresent())
-                .isTrue();
+        assertThat(bill.getNotifications().size()).isEqualTo(1);
+        final var notification = bill.getNotifications().iterator().next();
+        assertThat(notification.getBill()).isEqualTo(bill);
+        assertThat(notification.getAccount()).isEqualTo(accountNotInBill);
+
     }
 
     @Test
@@ -405,28 +400,33 @@ class BillServiceImplIT {
         billService.inviteRegisteredToBill(bill, accountsList);
 
         //Then
-        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, accountNotInBill).isPresent())
-                .isTrue();
-        assertThat(notificationsRepository.getNotificationsByBillAndAccount(bill, secondAccountNotInBill).isPresent())
-                .isTrue();
+        assertThat(bill.getNotifications().size()).isEqualTo(2);
+        assertThat(bill.getNotifications().stream().anyMatch(n -> n.getAccount().equals(accountNotInBill))).isTrue();
+        assertThat(bill.getNotifications().stream().anyMatch(n -> n.getAccount().equals(secondAccountNotInBill))).isTrue();
+
     }
 
     @Test
     @DisplayName("Should create an AccountBill when inviting a Registered user to Bill that is not already part of the Bill")
     void shouldCreateAccountBillWhenInviteRegisteredOneUser() {
-        //Given
+        //Given an account with no bills
         final var bill = BillEntityFixture.getDefault();
         bill.setId(1000L);
         final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
         final var emailNotInBill = "nobills@inthisemail.com";
         accountNotInBill.setEmail(emailNotInBill);
         final var accountsList = List.of(accountNotInBill);
+        final var originalBillAccountBillSize = bill.getAccounts().size();
 
         //When
         billService.inviteRegisteredToBill(bill, accountsList);
 
-        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, accountNotInBill).isPresent())
-                .isTrue();
+        //Then
+        assertThat(bill.getAccounts().size()).isEqualTo(originalBillAccountBillSize + 1);
+        final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().equals(accountNotInBill)).findFirst().orElseThrow();
+        assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+        assertThat(accountBill.getPercentage()).isNull();
+
     }
 
     @Test
@@ -442,13 +442,19 @@ class BillServiceImplIT {
         final var secondEmailNotInBill = "user@hasbills.com";
         secondAccountNotInBill.setEmail(secondEmailNotInBill);
         final var accountsList = List.of(accountNotInBill, secondAccountNotInBill);
+        final var originalBillAccountBillSize = bill.getAccounts().size();
+
 
         //When
         billService.inviteRegisteredToBill(bill, accountsList);
 
-        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, accountNotInBill).isPresent())
-                .isTrue();
-        assertThat(accountBillRepository.getAccountBillByBillAndAccount(bill, secondAccountNotInBill).isPresent())
-                .isTrue();
+        //Then
+        assertThat(bill.getAccounts().size()).isEqualTo(originalBillAccountBillSize + 2);
+        bill.getAccounts().stream()
+                .filter(ab -> ab.getAccount().equals(accountNotInBill) || ab.getAccount().equals(secondAccountNotInBill))
+                .forEach(accountBill -> {
+                    assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+                    assertThat(accountBill.getPercentage()).isNull();
+                });
     }
 }
