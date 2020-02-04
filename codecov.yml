@@ -32,4 +32,6 @@ ignore:
   - src/main/java/proj/kedabra/billsnap/presentation/resources/.*
   - src/main/java/proj/kedabra/billsnap/business/model/.*
   - src/main/java/proj/kedabra/billsnap/BillsnapApplication.java
+  - src/main/java/proj/kedabra/billsnap/business/repository/.*
+
 
