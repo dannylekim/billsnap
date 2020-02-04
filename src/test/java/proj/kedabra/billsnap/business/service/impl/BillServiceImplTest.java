@@ -193,7 +193,7 @@ class BillServiceImplTest {
 
     @Test
     @DisplayName("Should throw exception if bill does not exist")
-    void shouldThrowExceptionifBillDoesNotExist() {
+    void shouldThrowExceptionIfBillDoesNotExist() {
 
         //Given
         when(billRepository.findById(any())).thenReturn(Optional.empty());
@@ -202,5 +202,40 @@ class BillServiceImplTest {
         assertThrows(ResourceNotFoundException.class, () -> billService.getBill(123L));
     }
 
+    @Test
+    @DisplayName("Should create notification when inviting one Registered User")
+    void shouldCreateNotificationWhenInviteRegistered() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        final var account = AccountEntityFixture.getDefaultAccount();
+        final List<Account> accountsList = List.of(account);
 
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        //Then
+        assertThat(bill.getNotifications().size()).isEqualTo(1);
+        final var notification = bill.getNotifications().iterator().next();
+        assertThat(notification.getBill()).isEqualTo(bill);
+        assertThat(notification.getAccount()).isEqualTo(account);
+    }
+
+    @Test
+    @DisplayName("Should create AccountBill with Pending status when inviting one Registered User")
+    void shouldCreateAccountBillWhenInviteRegisteredPending() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        final var account = AccountEntityFixture.getDefaultAccount();
+        final List<Account> accountsList = List.of(account);
+        int originalBillAccountBillSize = bill.getAccounts().size();
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        //Then
+        assertThat(bill.getAccounts().size()).isEqualTo(originalBillAccountBillSize + 1);
+        final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().equals(account)).findFirst().orElseThrow();
+        assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+        assertThat(accountBill.getPercentage()).isNull();
+    }
 }

@@ -407,7 +407,7 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should create an AccountBill when inviting a Registered user to Bill that is not already part of the Bill")
+    @DisplayName("Should create an AccountBill with Pending status when inviting a Registered user to Bill that is not already part of the Bill")
     void shouldCreateAccountBillWhenInviteRegisteredOneUser() {
         //Given an account with no bills
         final var bill = BillEntityFixture.getDefault();
@@ -430,7 +430,7 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should create an AccountBill when inviting many Registered users to Bill that are not already part of the Bill")
+    @DisplayName("Should create an AccountBill with Pending status when inviting many Registered users to Bill that are not already part of the Bill")
     void shouldCreateAccountBillWhenInviteRegisteredManyUsers() {
         //Given
         final var bill = BillEntityFixture.getDefault();
