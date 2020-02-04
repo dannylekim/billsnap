@@ -204,6 +204,7 @@ public class BillServiceImpl implements BillService {
         notification.setBill(bill);
         notification.setTimeSent(ZonedDateTime.now(ZoneId.systemDefault()));
         bill.getNotifications().add(notification);
+        account.getNotifications().add(notification);
     }
 
 }
