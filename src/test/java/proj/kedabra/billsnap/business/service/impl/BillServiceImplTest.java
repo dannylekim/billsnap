@@ -227,7 +227,7 @@ class BillServiceImplTest {
         final var bill = BillEntityFixture.getDefault();
         final var account = AccountEntityFixture.getDefaultAccount();
         final List<Account> accountsList = List.of(account);
-        int originalBillAccountBillSize = bill.getAccounts().size();
+        final int originalBillAccountBillSize = bill.getAccounts().size();
 
         //When
         billService.inviteRegisteredToBill(bill, accountsList);
