@@ -58,7 +58,7 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public List<Account> getAccounts(List<String> emails) {
+    public List<Account> getAccounts(final List<String> emails) {
         final List<Account> accountsList = accountRepository.getAccountsByEmailIn(emails).collect(Collectors.toList());
 
         if (emails.size() > accountsList.size()) {

@@ -101,7 +101,7 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Bill inviteRegisteredToBill(Bill bill, List<Account> accounts) {
+    public Bill inviteRegisteredToBill(final Bill bill, final List<Account> accounts) {
         accounts.forEach(acc -> {
             createNotification(bill, acc);
             mapAccountBill(bill, acc, null, InvitationStatusEnum.PENDING);

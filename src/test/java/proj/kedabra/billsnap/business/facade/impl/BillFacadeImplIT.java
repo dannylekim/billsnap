@@ -12,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -377,12 +378,8 @@ class BillFacadeImplIT {
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
-        var dto = new BillSplitDTO();
-        if (pendingRegisteredBillSplitDTO == null) {
-            dto = billSplitDTO;
-        } else {
-            dto = pendingRegisteredBillSplitDTO;
-        }
+        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent()? pendingRegisteredBillSplitDTO : billSplitDTO;
+
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();

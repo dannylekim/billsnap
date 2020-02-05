@@ -84,7 +84,7 @@ class BillFacadeImplTest {
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billService, accountService, billMapper, accountMapper, itemMapper);
+        billFacade = new BillFacadeImpl(billService, accountService, billMapper, accountMapper, itemMapper);
 
     }
 
@@ -94,7 +94,7 @@ class BillFacadeImplTest {
         // Given
         final var billDTO = BillDTOFixture.getDefault();
         final String testEmail = "abc@123.ca";
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(null);
+        when(accountService.getAccount(testEmail)).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         // When/Then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
@@ -115,8 +115,8 @@ class BillFacadeImplTest {
         final Account existingAccount = AccountEntityFixture.getDefaultAccount();
         existingAccount.setEmail(existingEmail2);
         billDTO.setAccountsList(List.of(existingEmail2, nonExistentEmail, nonExistentEmail2));
-        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
-        when(accountRepository.getAccountByEmail(existingEmail)).thenReturn(AccountEntityFixture.getDefaultAccount());
+        when(accountService.getAccounts(any()))
+                .thenThrow(new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, nonExistentEmail2).toString())));
 
         //When/Then
 
@@ -144,7 +144,7 @@ class BillFacadeImplTest {
     void shouldThrowExceptionIfEmailDoesNotExistInGetAllBills() {
         //Given
         final String nonExistentEmail = "nonexistent@email.ca";
-        when(accountRepository.getAccountByEmail(any())).thenReturn(null);
+        when(accountService.getAccount(nonExistentEmail)).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
