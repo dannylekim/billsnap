@@ -6,6 +6,7 @@ import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
+import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 
 public interface BillFacade {
 
@@ -14,4 +15,7 @@ public interface BillFacade {
     List<BillSplitDTO> getAllBillsByEmail(String email);
 
     BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO);
+
+    PendingRegisteredBillSplitDTO inviteRegisteredToBill(Long billId, String userEmail, List<String> accounts);
+
 }

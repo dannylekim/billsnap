@@ -1,9 +1,13 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +22,7 @@ import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class AccountServiceImplTest {
 
@@ -90,5 +95,26 @@ class AccountServiceImplTest {
 
         //when/then
         assertThrows(ResourceNotFoundException.class, () -> accountServiceImpl.getAccount(email));
+    }
+
+    @Test
+    @DisplayName("Should return exception if list of emails contains many emails that do not exist")
+    void ShouldReturnExceptionIfManyEmailsInListOfEmailsDoNotExist() {
+        //Given
+        final var existentAccount = AccountEntityFixture.getDefaultAccount();
+        final String existentEmail = "userdetails@service.com";
+        existentAccount.setEmail(existentEmail);
+        final var anotherExistentAccount = AccountEntityFixture.getDefaultAccount();
+        final String anotherExistentEmail = "test@email.com";
+        anotherExistentAccount.setEmail(anotherExistentEmail);
+        final String nonExistentEmail = "nonexistent@email.com";
+        final var secondNonExistentEmail = "anothernonexistent@email.com";
+        final var accountsList = List.of(existentEmail, nonExistentEmail, anotherExistentEmail, secondNonExistentEmail);
+        final var existentAccountsList = Stream.of(existentAccount, anotherExistentAccount);
+        when(accountRepository.getAccountsByEmailIn(accountsList)).thenReturn(existentAccountsList);
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> accountServiceImpl.getAccounts(accountsList))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, secondNonExistentEmail).toString()));
     }
 }

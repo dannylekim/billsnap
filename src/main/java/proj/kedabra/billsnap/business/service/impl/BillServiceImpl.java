@@ -31,6 +31,7 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
@@ -50,17 +51,21 @@ public class BillServiceImpl implements BillService {
 
     private final PaymentMapper paymentMapper;
 
+    private final NotificationService notificationService;
+
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
             final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
-            final PaymentRepository paymentRepository) {
+            final PaymentRepository paymentRepository,
+            final NotificationService notificationService) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -74,8 +79,8 @@ public class BillServiceImpl implements BillService {
         bill.setActive(true);
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.getItems().forEach(i -> mapItems(i, bill, account, 100));
-        accountList.forEach(acc -> mapAccount(bill, acc, null));
-        mapAccount(bill, account, null);
+        accountList.forEach(acc -> mapAccountBill(bill, acc, null, InvitationStatusEnum.ACCEPTED));
+        mapAccountBill(bill, account, null, InvitationStatusEnum.ACCEPTED);
 
         return billRepository.save(bill);
     }
@@ -94,6 +99,17 @@ public class BillServiceImpl implements BillService {
     @Override
     public Bill getBill(Long id) {
         return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill inviteRegisteredToBill(final Bill bill, final List<Account> accounts) {
+        accounts.forEach(acc -> {
+            notificationService.createNotification(bill, acc);
+            mapAccountBill(bill, acc, null, InvitationStatusEnum.PENDING);
+        });
+
+        return bill;
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -126,7 +142,6 @@ public class BillServiceImpl implements BillService {
             });
         });
     }
-
 
     private void removeReferencedAccountItems(Bill bill, List<ItemAssociationDTO> items) {
         final var list = items.stream()
@@ -176,12 +191,12 @@ public class BillServiceImpl implements BillService {
         item.getAccounts().add(accountItem);
     }
 
-    private void mapAccount(final Bill bill, final Account account, BigDecimal percentage) {
+    private void mapAccountBill(final Bill bill, final Account account, BigDecimal percentage, InvitationStatusEnum status) {
         var accountBill = new AccountBill();
         accountBill.setAccount(account);
         accountBill.setBill(bill);
         accountBill.setPercentage(percentage);
-        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+        accountBill.setStatus(status);
         bill.getAccounts().add(accountBill);
     }
 

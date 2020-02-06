@@ -33,6 +33,7 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -60,12 +61,15 @@ class BillServiceImplTest {
     @Mock
     private PaymentMapper paymentMapper;
 
+    @Mock
+    private NotificationService notificationService;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService);
     }
 
     @Test
@@ -193,12 +197,31 @@ class BillServiceImplTest {
 
     @Test
     @DisplayName("Should throw exception if bill does not exist")
-    void shouldThrowExceptionifBillDoesNotExist() {
+    void shouldThrowExceptionIfBillDoesNotExist() {
 
         //Given
         when(billRepository.findById(any())).thenReturn(Optional.empty());
 
         //When/Then
         assertThrows(ResourceNotFoundException.class, () -> billService.getBill(123L));
+    }
+
+    @Test
+    @DisplayName("Should create AccountBill with Pending status when inviting one Registered User")
+    void shouldCreateAccountBillWhenInviteRegisteredPending() {
+        //Given
+        final var bill = BillEntityFixture.getDefault();
+        final var account = AccountEntityFixture.getDefaultAccount();
+        final List<Account> accountsList = List.of(account);
+        final int originalBillAccountBillSize = bill.getAccounts().size();
+
+        //When
+        billService.inviteRegisteredToBill(bill, accountsList);
+
+        //Then
+        assertThat(bill.getAccounts().size()).isEqualTo(originalBillAccountBillSize + 1);
+        final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().equals(account)).findFirst().orElseThrow();
+        assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+        assertThat(accountBill.getPercentage()).isNull();
     }
 }

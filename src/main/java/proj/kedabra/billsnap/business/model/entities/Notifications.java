@@ -9,8 +9,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -25,16 +25,16 @@ public class Notifications implements Serializable {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(generator = "notification_id_seq")
-    @SequenceGenerator(name = "notification_id_seq", sequenceName = "notification_id_seq", allocationSize = 1)
+    @GeneratedValue(generator = "notifications_id_seq")
+    @SequenceGenerator(name = "notifications_id_seq", sequenceName = "notifications_id_seq", allocationSize = 1)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("bill_id")
+    @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("account_id")
+    @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
     @Column(name = "time_sent")

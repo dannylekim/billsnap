@@ -1,0 +1,77 @@
+package proj.kedabra.billsnap.fixtures;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+
+public class PendingRegisteredBillSplitDTOFixture {
+
+    private PendingRegisteredBillSplitDTOFixture() {}
+
+    public static PendingRegisteredBillSplitDTO getMappedBillSplitDTOFixture() {
+        final var dto = new PendingRegisteredBillSplitDTO();
+        final var bill = BillEntityFixture.getDefault();
+        final var item = bill.getItems().iterator().next();
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+
+        final var accountItem1 = AccountItemEntityFixture.getDefault();
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        accountItem1.setAccount(account1);
+        accountItem1.setItem(item);
+        accountItem1.setPercentage(accountPercentageSplit);
+
+        final var accountItem2 = AccountItemEntityFixture.getDefault();
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail("hellomotto@cell.com");
+        account2.setId(1357L);
+        accountItem2.setAccount(account2);
+        accountItem2.setItem(item);
+        accountItem2.setPercentage(accountPercentageSplit);
+
+        dto.setBalance(item.getCost().add(bill.getTipAmount()));
+        dto.setTotalTip(bill.getTipAmount());
+        dto.setCategory(bill.getCategory());
+        dto.setCompany(bill.getCompany());
+        dto.setCreated(bill.getCreated());
+        dto.setId(bill.getId());
+        dto.setName(bill.getName());
+        dto.setSplitBy(bill.getSplitBy());
+        dto.setStatus(bill.getStatus());
+        dto.setUpdated(bill.getUpdated());
+
+        final var accountDTO1 = AccountDTOFixture.getCreationDTO();
+        accountDTO1.setEmail(account1.getEmail());
+        accountDTO1.setId(account1.getId());
+        dto.setCreator(accountDTO1);
+        dto.setResponsible(accountDTO1);
+
+        final var accountDTO2 = AccountDTOFixture.getCreationDTO();
+        accountDTO2.setEmail(account2.getEmail());
+        accountDTO2.setId(account2.getId());
+
+        final var itemAssociationSplitDTO1 = ItemAssociationSplitDTOFixture.getDefault();
+        itemAssociationSplitDTO1.setAccount(accountDTO1);
+        itemAssociationSplitDTO1.setCost(BigDecimal.valueOf(2));
+        final var itemPercentageSplitDTO1 = ItemPercentageSplitDTOFixture.getDefault();
+        itemPercentageSplitDTO1.setPercentage(accountItem1.getPercentage());
+        itemPercentageSplitDTO1.setCost(item.getCost());
+        itemPercentageSplitDTO1.setName(item.getName());
+        itemPercentageSplitDTO1.setItemId(item.getId());
+        itemAssociationSplitDTO1.setItems(List.of(itemPercentageSplitDTO1));
+
+        final var itemAssociationSplitDTO2 = ItemAssociationSplitDTOFixture.getDefault();
+        itemAssociationSplitDTO2.setAccount(accountDTO2);
+        itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2));
+        final var itemPercentageSplitDTO2 = ItemPercentageSplitDTOFixture.getDefault();
+        itemPercentageSplitDTO2.setPercentage(accountItem2.getPercentage());
+        itemPercentageSplitDTO2.setCost(item.getCost());
+        itemPercentageSplitDTO2.setName(item.getName());
+        itemPercentageSplitDTO2.setItemId(item.getId());
+        itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
+
+        dto.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
+
+        return dto;
+    }
+}
