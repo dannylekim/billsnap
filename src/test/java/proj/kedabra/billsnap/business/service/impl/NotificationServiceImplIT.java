@@ -49,7 +49,7 @@ public class NotificationServiceImplIT {
         assertThat(bill.getNotifications().size()).isEqualTo(originalBillNotificationsSize + 1);
         assertThat(notification.getAccount()).isEqualTo(account);
         assertThat(notification.getBill()).isEqualTo(bill);
-        assertThat(notification.getTimeSent()).isCloseTo(ZonedDateTime.now(ZoneId.systemDefault()), within(200, ChronoUnit.MILLIS));
+        assertThat(notification.getTimeSent()).isCloseTo(ZonedDateTime.now(ZoneId.systemDefault()), within(500, ChronoUnit.MILLIS));
 
     }
 }
