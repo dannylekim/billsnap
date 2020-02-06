@@ -33,6 +33,7 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -60,12 +61,15 @@ class BillServiceImplTest {
     @Mock
     private PaymentMapper paymentMapper;
 
+    @Mock
+    private NotificationService notificationService;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService);
     }
 
     @Test
@@ -200,24 +204,6 @@ class BillServiceImplTest {
 
         //When/Then
         assertThrows(ResourceNotFoundException.class, () -> billService.getBill(123L));
-    }
-
-    @Test
-    @DisplayName("Should create notification when inviting one Registered User")
-    void shouldCreateNotificationWhenInviteRegistered() {
-        //Given
-        final var bill = BillEntityFixture.getDefault();
-        final var account = AccountEntityFixture.getDefaultAccount();
-        final List<Account> accountsList = List.of(account);
-
-        //When
-        billService.inviteRegisteredToBill(bill, accountsList);
-
-        //Then
-        assertThat(bill.getNotifications().size()).isEqualTo(1);
-        final var notification = bill.getNotifications().iterator().next();
-        assertThat(notification.getBill()).isEqualTo(bill);
-        assertThat(notification.getAccount()).isEqualTo(account);
     }
 
     @Test

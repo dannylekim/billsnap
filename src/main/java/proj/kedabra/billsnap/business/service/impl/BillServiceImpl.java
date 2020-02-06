@@ -1,8 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -28,12 +26,12 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
-import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
@@ -53,17 +51,21 @@ public class BillServiceImpl implements BillService {
 
     private final PaymentMapper paymentMapper;
 
+    private final NotificationService notificationService;
+
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
             final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
-            final PaymentRepository paymentRepository) {
+            final PaymentRepository paymentRepository,
+            final NotificationService notificationService) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
+        this.notificationService = notificationService;
     }
 
 
@@ -103,7 +105,7 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Bill inviteRegisteredToBill(final Bill bill, final List<Account> accounts) {
         accounts.forEach(acc -> {
-            createNotification(bill, acc);
+            notificationService.createNotification(bill, acc);
             mapAccountBill(bill, acc, null, InvitationStatusEnum.PENDING);
         });
 
@@ -196,15 +198,6 @@ public class BillServiceImpl implements BillService {
         accountBill.setPercentage(percentage);
         accountBill.setStatus(status);
         bill.getAccounts().add(accountBill);
-    }
-
-    private void createNotification(Bill bill, Account account) {
-        final var notification = new Notifications();
-        notification.setAccount(account);
-        notification.setBill(bill);
-        notification.setTimeSent(ZonedDateTime.now(ZoneId.systemDefault()));
-        bill.getNotifications().add(notification);
-        account.getNotifications().add(notification);
     }
 
 }

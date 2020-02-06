@@ -1,12 +1,16 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -370,15 +374,19 @@ class BillServiceImplIT {
         final var emailNotInBill = "nobills@inthisemail.com";
         accountNotInBill.setEmail(emailNotInBill);
         final var accountsList = List.of(accountNotInBill);
+        final var originalAccountNotificationsSize = accountNotInBill.getNotifications().size();
+        final var originalBillNotificationsSize = bill.getNotifications().size();
 
         //When
         billService.inviteRegisteredToBill(bill, accountsList);
 
         //Then
-        assertThat(bill.getNotifications().size()).isEqualTo(1);
         final var notification = bill.getNotifications().iterator().next();
-        assertThat(notification.getBill()).isEqualTo(bill);
+        assertThat(accountNotInBill.getNotifications().size()).isEqualTo(originalAccountNotificationsSize + 1);
+        assertThat(bill.getNotifications().size()).isEqualTo(originalBillNotificationsSize + 1);
         assertThat(notification.getAccount()).isEqualTo(accountNotInBill);
+        assertThat(notification.getBill()).isEqualTo(bill);
+        assertThat(notification.getTimeSent()).isCloseTo(ZonedDateTime.now(ZoneId.systemDefault()), within(200, ChronoUnit.MILLIS));
 
     }
 
