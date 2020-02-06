@@ -87,10 +87,10 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String principal, final List<String> accounts) {
+    public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
 
         final var bill = billService.getBill(billId);
-        if (!bill.getResponsible().getEmail().equals(principal)) {
+        if (!bill.getResponsible().getEmail().equals(userEmail)) {
             throw new IllegalArgumentException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
         }
 
