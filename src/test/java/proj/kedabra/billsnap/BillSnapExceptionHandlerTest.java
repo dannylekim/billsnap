@@ -26,11 +26,11 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with FieldValidation")
     void shouldReturnFieldValidationResponseEntity() {
         //Given
-        var fieldError = FieldErrorFixture.getDefault(0);
-        var ex = new FieldValidationException(List.of(fieldError));
+        final var fieldError = FieldErrorFixture.getDefault(0);
+        final var ex = new FieldValidationException(List.of(fieldError));
 
         //When
-        ApiError response = billSnapExceptionHandler.handleFieldValidation(ex);
+        final ApiError response = billSnapExceptionHandler.handleFieldValidation(ex);
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -42,10 +42,10 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with error 500 and unknown error message")
     void shouldReturnUnknownResponseEntity() {
         //Given
-        var ex = new UnsupportedOperationException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new UnsupportedOperationException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleUnknownException(ex);
+        final ApiError response = billSnapExceptionHandler.handleUnknownException(ex);
 
         //Then
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatus());
@@ -56,10 +56,10 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with error 400 and IllegalArgument's message")
     void shouldReturn400ForIllegalArgumentException() {
         //Given
-        var ex = new IllegalArgumentException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new IllegalArgumentException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleIllegalArgument(ex);
+        final ApiError response = billSnapExceptionHandler.handleIllegalArgument(ex);
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -70,10 +70,10 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with error 400 and IllegalState's message")
     void shouldReturn400ForIllegalStateException() {
         //Given
-        var ex = new IllegalStateException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new IllegalStateException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleIllegalState(ex);
+        final ApiError response = billSnapExceptionHandler.handleIllegalState(ex);
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -86,10 +86,10 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with error 400 and ResourceNotFound's message")
     void shouldReturn400ForResourceNotFoundException() {
         //Given
-        var ex = new ResourceNotFoundException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new ResourceNotFoundException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleResourceNotFound(ex);
+        final ApiError response = billSnapExceptionHandler.handleResourceNotFound(ex);
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
@@ -100,10 +100,10 @@ class BillSnapExceptionHandlerTest {
     @DisplayName("Should return ResponseEntity with error 403 and AccessForbidden's message")
     void shouldReturn403ForAccessForbiddenException() {
         //Given
-        var ex = new AccessForbiddenException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new AccessForbiddenException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        ApiError response = billSnapExceptionHandler.handleHttpAccessForbidden(ex);
+        final ApiError response = billSnapExceptionHandler.handleHttpAccessForbidden(ex);
 
         //Then
         assertEquals(HttpStatus.FORBIDDEN, response.getStatus());

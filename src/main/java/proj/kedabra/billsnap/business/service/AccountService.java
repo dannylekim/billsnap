@@ -11,5 +11,5 @@ public interface AccountService {
 
     Account getAccount(String email);
 
-    List<Account> getAccounts(List<String> emails );
+    List<Account> getAccounts(List<String> emails);
 }

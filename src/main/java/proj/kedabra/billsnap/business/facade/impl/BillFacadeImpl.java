@@ -147,7 +147,7 @@ public class BillFacadeImpl implements BillFacade {
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
         final HashMap<Account, CostItemsPair> accountPairMap = new HashMap<>();
         bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
-            var costItemsPair = new CostItemsPair(BigDecimal.ZERO, new ArrayList<>());
+            final var costItemsPair = new CostItemsPair(BigDecimal.ZERO, new ArrayList<>());
             accountPairMap.put(account, costItemsPair);
         });
         mapAllBillAccountItemsIntoHashMap(bill, accountPairMap);

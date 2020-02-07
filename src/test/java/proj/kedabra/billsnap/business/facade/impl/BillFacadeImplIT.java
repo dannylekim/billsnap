@@ -368,7 +368,6 @@ class BillFacadeImplIT {
         final List<String> accountsList = List.of(accountNotInBill);
         inviteRegisteredResource.setAccounts(accountsList);
 
-
         //When
         final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
 

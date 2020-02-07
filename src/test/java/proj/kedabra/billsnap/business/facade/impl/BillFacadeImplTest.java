@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -435,7 +436,7 @@ class BillFacadeImplTest {
         when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
         when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
                 i -> {
-                    Item itemInput = (Item) i.getArguments()[0];
+                    final Item itemInput = (Item) i.getArguments()[0];
                     final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
                     itemDTO.setItemId(itemInput.getId());
                     itemDTO.setName(itemInput.getName());
@@ -446,7 +447,7 @@ class BillFacadeImplTest {
         );
         when(accountMapper.toDTO(any(Account.class))).thenAnswer(
                 a -> {
-                    Account acc = (Account) a.getArguments()[0];
+                    final Account acc = (Account) a.getArguments()[0];
                     final AccountDTO accountDTO = new AccountDTO();
                     accountDTO.setId(acc.getId());
                     accountDTO.setEmail(acc.getEmail());
@@ -466,12 +467,8 @@ class BillFacadeImplTest {
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
-        var dto = new BillSplitDTO();
-        if (pendingRegisteredBillSplitDTO == null) {
-            dto = billSplitDTO;
-        } else {
-            dto = pendingRegisteredBillSplitDTO;
-        }
+        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
+
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();
