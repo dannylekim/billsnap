@@ -6,8 +6,10 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.fixtures.FieldErrorFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
@@ -51,7 +53,7 @@ class BillSnapExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 500 and IllegalArgument")
+    @DisplayName("Should return ResponseEntity with error 400 and IllegalArgument's message")
     void shouldReturn400ForIllegalArgumentException() {
         //Given
         var ex = new IllegalArgumentException(NOT_THIS_ERROR_MESSAGE);
@@ -61,6 +63,50 @@ class BillSnapExceptionHandlerTest {
 
         //Then
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+        assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return ResponseEntity with error 400 and IllegalState's message")
+    void shouldReturn400ForIllegalStateException() {
+        //Given
+        var ex = new IllegalStateException(NOT_THIS_ERROR_MESSAGE);
+
+        //When
+        ApiError response = billSnapExceptionHandler.handleIllegalState(ex);
+
+        //Then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+        assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
+    }
+
+
+
+    @Test
+    @DisplayName("Should return ResponseEntity with error 400 and ResourceNotFound's message")
+    void shouldReturn400ForResourceNotFoundException() {
+        //Given
+        var ex = new ResourceNotFoundException(NOT_THIS_ERROR_MESSAGE);
+
+        //When
+        ApiError response = billSnapExceptionHandler.handleResourceNotFound(ex);
+
+        //Then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+        assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return ResponseEntity with error 400 and AccessForbidden's message")
+    void shouldReturn400ForAccessForbiddenException() {
+        //Given
+        var ex = new AccessForbiddenException(NOT_THIS_ERROR_MESSAGE);
+
+        //When
+        ApiError response = billSnapExceptionHandler.handleHttpAccessForbidden(ex);
+
+        //Then
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatus());
         assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
     }
 

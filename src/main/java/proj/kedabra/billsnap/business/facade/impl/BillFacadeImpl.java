@@ -19,6 +19,7 @@ import proj.kedabra.billsnap.business.dto.CostItemsPair;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
@@ -91,7 +92,7 @@ public class BillFacadeImpl implements BillFacade {
 
         final var bill = billService.getBill(billId);
         if (!bill.getResponsible().getEmail().equals(userEmail)) {
-            throw new IllegalArgumentException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+            throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
         }
 
         final List<Account> accountsList = accountService.getAccounts(accounts);

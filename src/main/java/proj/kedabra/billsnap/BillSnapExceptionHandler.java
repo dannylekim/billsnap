@@ -1,11 +1,13 @@
 package proj.kedabra.billsnap;
 
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.presentation.ApiError;
 
@@ -28,8 +30,20 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    protected ApiError handleIllegalStateException(final IllegalStateException ex) {
+    protected ApiError handleIllegalState(final IllegalStateException ex) {
         return new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    protected ApiError handleResourceNotFound(final ResourceNotFoundException ex) {
+        return new ApiError(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    protected ApiError handleHttpAccessForbidden(final AccessForbiddenException ex) {
+        return new ApiError(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

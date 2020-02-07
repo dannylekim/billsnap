@@ -34,6 +34,7 @@ import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -266,7 +267,7 @@ class BillFacadeImplIT {
         final var notBillResponsible = "nobills@inthisemail.com";
 
         //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
@@ -378,7 +379,7 @@ class BillFacadeImplIT {
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
-        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent()? pendingRegisteredBillSplitDTO : billSplitDTO;
+        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))

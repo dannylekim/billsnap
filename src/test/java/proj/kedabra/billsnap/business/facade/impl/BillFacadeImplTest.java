@@ -30,6 +30,7 @@ import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
@@ -329,7 +330,7 @@ class BillFacadeImplTest {
         when(billService.getBill(any())).thenReturn(bill);
 
         //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class)
+        assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
