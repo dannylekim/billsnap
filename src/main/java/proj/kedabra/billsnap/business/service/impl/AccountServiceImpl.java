@@ -1,6 +1,9 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -54,5 +57,18 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
     }
 
+    @Override
+    public List<Account> getAccounts(final List<String> emails) {
+        final List<Account> accountsList = accountRepository.getAccountsByEmailIn(emails).collect(Collectors.toList());
+
+        if (emails.size() > accountsList.size()) {
+            final List<String> nonExistentEmails = new ArrayList<>(emails);
+            final List<String> accountsStringList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
+            nonExistentEmails.removeAll(accountsStringList);
+            throw new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
+        }
+
+        return accountsList;
+    }
 
 }

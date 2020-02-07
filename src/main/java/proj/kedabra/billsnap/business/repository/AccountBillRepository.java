@@ -11,4 +11,5 @@ import proj.kedabra.billsnap.business.model.entities.AccountBillId;
 public interface AccountBillRepository extends CrudRepository<AccountBill, AccountBillId> {
 
     Stream<AccountBill> getAllByAccount(Account account);
+
 }

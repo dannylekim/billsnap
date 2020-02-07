@@ -11,7 +11,9 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -28,6 +30,8 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
+import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
@@ -36,9 +40,11 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.fixtures.AccountBillEntityFixture;
 import proj.kedabra.billsnap.fixtures.AccountDTOFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
@@ -46,6 +52,8 @@ import proj.kedabra.billsnap.fixtures.BillCompleteDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
+import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
+import proj.kedabra.billsnap.fixtures.PendingRegisteredBillSplitDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class BillFacadeImplTest {
@@ -65,6 +73,9 @@ class BillFacadeImplTest {
     private AccountRepository accountRepository;
 
     @Mock
+    private AccountService accountService;
+
+    @Mock
     private BillService billService;
 
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
@@ -75,7 +86,7 @@ class BillFacadeImplTest {
     void setup() {
 
         MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(accountRepository, billService, billMapper, accountMapper, itemMapper);
+        billFacade = new BillFacadeImpl(billService, accountService, billMapper, accountMapper, itemMapper);
 
     }
 
@@ -85,7 +96,7 @@ class BillFacadeImplTest {
         // Given
         final var billDTO = BillDTOFixture.getDefault();
         final String testEmail = "abc@123.ca";
-        when(accountRepository.getAccountByEmail(testEmail)).thenReturn(null);
+        when(accountService.getAccount(testEmail)).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         // When/Then
         final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
@@ -106,8 +117,8 @@ class BillFacadeImplTest {
         final Account existingAccount = AccountEntityFixture.getDefaultAccount();
         existingAccount.setEmail(existingEmail2);
         billDTO.setAccountsList(List.of(existingEmail2, nonExistentEmail, nonExistentEmail2));
-        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
-        when(accountRepository.getAccountByEmail(existingEmail)).thenReturn(AccountEntityFixture.getDefaultAccount());
+        when(accountService.getAccounts(any()))
+                .thenThrow(new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, nonExistentEmail2).toString())));
 
         //When/Then
 
@@ -135,7 +146,7 @@ class BillFacadeImplTest {
     void shouldThrowExceptionIfEmailDoesNotExistInGetAllBills() {
         //Given
         final String nonExistentEmail = "nonexistent@email.ca";
-        when(accountRepository.getAccountByEmail(any())).thenReturn(null);
+        when(accountService.getAccount(nonExistentEmail)).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
@@ -278,39 +289,212 @@ class BillFacadeImplTest {
         final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
 
         //Then
-        verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
+        verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
 
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
         assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getCost())
                 .isEqualTo(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR)));
     }
 
-    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
+    @Test
+    @DisplayName("Should throw error if billId references non-existent bill in Invite Registered call")
+    void shouldThrowErrorIfNonExistentBillIdInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var principal = "test@email.com";
+        final var accountNotInBill = "nobills@inthisemail.com";
+        final var nonExistentBillId = 90019001L;
+        inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+
+        when(billService.getBill(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error if User requesting POST bills/{billId}/accounts is not the Bill responsible")
+    void shouldReturnErrorIfUserMakingRequestIsNotBillResponsible() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billId = 1000L;
+        final var notBillResponsible = "nobills@inthisemail.com";
+        final var bill = BillEntityFixture.getDefault();
+        final var billResponsible = "bill@responsible.com";
+        final var principal = AccountEntityFixture.getDefaultAccount();
+        principal.setEmail(billResponsible);
+        bill.setResponsible(principal);
+        bill.setId(billId);
+
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw error if one account does not exist in Invite Registered call")
+    void shouldThrowErrorIfOneAccountDoesNotExistInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var emailNotInBill = "nobills@inthisemail.com";
+        final var nonExistentEmail = "clearly@nonexistent.gov";
+        final var existentBillId = 1000L;
+        final var accountsList = List.of(emailNotInBill, nonExistentEmail);
+        inviteRegisteredResource.setAccounts(accountsList);
+
+        final var bill = BillEntityFixture.getDefault();
+        final var principal = AccountEntityFixture.getDefaultAccount();
+        principal.setEmail(billResponsible);
+        bill.setResponsible(principal);
+        bill.setId(existentBillId);
+
+        final var nonExistentEmails = List.of(nonExistentEmail);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(accountService.getAccounts(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString())));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw error if one account is already part of Bill in Invite Registered call")
+    void shouldThrowErrorIfOneAccountIsPartOfBillInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var emailNotInBill = "nobills@inthisemail.com";
+        final var emailInBill = "email@inbill.com";
+        final var existentBillId = 1000L;
+        final var accountsList = List.of(emailNotInBill, emailInBill);
+        inviteRegisteredResource.setAccounts(accountsList);
+
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        accountNotInBill.setEmail(emailNotInBill);
+        final var accountInBill = AccountEntityFixture.getDefaultAccount();
+        accountInBill.setEmail(emailInBill);
+
+        final var bill = BillEntityFixture.getDefault();
+        final var principal = AccountEntityFixture.getDefaultAccount();
+        principal.setEmail(billResponsible);
+        bill.setResponsible(principal);
+        bill.setId(existentBillId);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(accountInBill);
+        accountBill.setBill(bill);
+
+        bill.setAccounts(Set.of(accountBill));
+
+        final var existentAccountList = List.of(accountInBill, accountNotInBill);
+
+        when(accountService.getAccounts(any())).thenReturn(existentAccountList);
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(emailInBill).toString()));
+    }
+
+    @Test
+    @DisplayName("Should return mapped PendingRegisteredBillSplitDTO when Invite Registered Call with one new User")
+    void shouldReturnMappedPendingRegisteredBillSplitDTOInInviteRegistered() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var emailNotInBill = "nobills@inthisemail.com";
+        final var existentBillId = 1000L;
+        final List<String> accountsList = List.of(emailNotInBill);
+        inviteRegisteredResource.setAccounts(accountsList);
+
+        final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
+        accountNotInBill.setEmail(emailNotInBill);
+
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var principal = AccountEntityFixture.getDefaultAccount();
+        principal.setEmail(billResponsible);
+        bill.setResponsible(principal);
+        bill.setId(existentBillId);
+
+        when(accountService.getAccounts(any())).thenReturn(new ArrayList<>());
+        when(billService.getBill(any())).thenReturn(bill);
+
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+        final var billSplitDTO = BillSplitDTOFixture.getDefault();
+        billSplitDTO.setId(existentBillId);
+        billSplitDTO.setItemsPerAccount(null);
+
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+        when(accountMapper.toDTO(any(Account.class))).thenAnswer(
+                a -> {
+                    final Account acc = (Account) a.getArguments()[0];
+                    final AccountDTO accountDTO = new AccountDTO();
+                    accountDTO.setId(acc.getId());
+                    accountDTO.setEmail(acc.getEmail());
+                    return accountDTO;
+                }
+        );
+        final var pendingRegisteredBillSplitDTOFixture = PendingRegisteredBillSplitDTOFixture.getMappedBillSplitDTOFixture();
+        pendingRegisteredBillSplitDTOFixture.setId(existentBillId);
+        when(billMapper.toPendingRegisteredBillSplitDTO(any())).thenReturn(pendingRegisteredBillSplitDTOFixture);
+
+        //When
+        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
+
+        //Then
+        verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
+        assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
+    }
+
+    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
+        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
+
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();
-        assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(dto.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(dto.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
         assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.OPEN);
-        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
-        assertThat(billSplitDTO.getCategory()).isEqualTo(bill.getCategory());
-        assertThat(billSplitDTO.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(dto.getId()).isEqualTo(bill.getId());
+        assertThat(dto.getName()).isEqualTo(bill.getName());
+        assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
+        assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(500, ChronoUnit.MILLIS));
+        assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
 
-        final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getItemsPerAccount();
+        final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
         //for the time being we verify a bill with only 1 item. Should be generic when needed.
-        final Item item = bill.getItems().iterator().next();
-        final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
-        assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
-        assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-        assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
-        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
-        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
-        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
-        assertThat(billSplitDTO.getUpdated()).isCloseTo(bill.getUpdated(), within(500, ChronoUnit.MILLIS));
-        assertThat(billSplitDTO.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
+        if (!bill.getItems().isEmpty()) {
+            final Item item = bill.getItems().iterator().next();
+            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
+            assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
+            assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
+            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
+        }
 
     }
 

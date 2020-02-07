@@ -20,6 +20,9 @@ public interface BillService {
 
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
 
+
     Bill getBill(Long id);
+
+    Bill inviteRegisteredToBill(Bill bill, List<Account> accounts);
 
 }
