@@ -97,8 +97,8 @@ class BillSnapExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 400 and AccessForbidden's message")
-    void shouldReturn400ForAccessForbiddenException() {
+    @DisplayName("Should return ResponseEntity with error 403 and AccessForbidden's message")
+    void shouldReturn403ForAccessForbiddenException() {
         //Given
         var ex = new AccessForbiddenException(NOT_THIS_ERROR_MESSAGE);
 
