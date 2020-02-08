@@ -38,7 +38,7 @@ create table if not exists location
     city        varchar(20)  null,
     state       varchar(20)  null,
     country     varchar(20)  null,
-    postal_code varchar(10)  null,
+    postal_code varchar(10) null
 );
 
 create table if not exists account
