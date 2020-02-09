@@ -1,15 +1,15 @@
 plugins {
     id 'org.asciidoctor.convert' version '1.5.3'
-    id 'org.springframework.boot' version '2.1.4.RELEASE'
+    id 'org.springframework.boot' version '2.2.4.RELEASE'
     id 'java'
     id "net.ltgt.errorprone" version "0.8"
-    id "io.spring.dependency-management" version "1.0.7.RELEASE"
+    id "io.spring.dependency-management" version "1.0.9.RELEASE"
     id 'jacoco'
 }
 
 group = 'proj.kedabra'
 version = '0.0.12-SNAPSHOT'
-sourceCompatibility = '12'
+sourceCompatibility = '13'
 
 configurations {
     compileOnly {
@@ -19,23 +19,41 @@ configurations {
 
 repositories {
     mavenCentral()
+    jcenter {
+        url "http://oss.jfrog.org/artifactory/oss-snapshot-local/"
+    }
 }
 
 ext {
     set('snippetsDir', file('build/generated-snippets'))
 }
 
+def springFoxVersion = '3.0.0-SNAPSHOT'
 
 dependencies {
+
+    // Spring Boot
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-aop'
     implementation 'org.springframework.boot:spring-boot-starter-cache'
     implementation 'org.springframework.boot:spring-boot-starter-data-rest'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
-    implementation 'io.springfox:springfox-swagger-ui:2.9.2'
-    implementation 'io.springfox:springfox-swagger2:2.9.2'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+
+    // Swagger
+    implementation group: 'io.springfox', name: 'springfox-swagger-ui', version: "${springFoxVersion}"
+    implementation("io.springfox:springfox-swagger2:$springFoxVersion") {
+        exclude module: 'swagger-annotations'
+        exclude module: 'swagger-models'
+    }
+    implementation("io.swagger:swagger-annotations:1.5.21")
+    implementation("io.swagger:swagger-models:1.5.21")
+    implementation group:'io.springfox', name:'springfox-spring-webmvc', version: "${springFoxVersion}"
 
     // Lombok
     compileOnly 'org.projectlombok:lombok'
@@ -47,29 +65,29 @@ dependencies {
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:1.3.0.Final"
     errorproneJavac("com.google.errorprone:javac:9+181-r4173-1")
 
-    implementation 'org.springframework.boot:spring-boot-starter-security'
-    implementation 'org.springframework.boot:spring-boot-starter-web'
-    compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.4.4'
-
-    //JJWT library for json web tokens
-    compile 'io.jsonwebtoken:jjwt-api:0.10.5'
-    runtime 'io.jsonwebtoken:jjwt-impl:0.10.5',
+    //JWT library for json web tokens
+    implementation 'io.jsonwebtoken:jjwt-api:0.10.5'
+    implementation 'io.jsonwebtoken:jjwt-impl:0.10.5',
             'io.jsonwebtoken:jjwt-jackson:0.10.5'
 
     //Sentry
-    compile 'io.sentry:sentry-logback:1.7.27'
+    implementation 'io.sentry:sentry-logback:1.7.27'
 
-    runtimeOnly 'org.springframework.boot:spring-boot-devtools'
+    // Database
     runtimeOnly 'com.h2database:h2'
     implementation 'org.postgresql:postgresql'
     testImplementation 'org.assertj:assertj-core:3.11.1'
+    implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.4.4'
+
+
+    // Tests
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.restdocs:spring-restdocs-mockmvc'
     testImplementation 'org.springframework.security:spring-security-test'
     testImplementation 'org.junit.jupiter:junit-jupiter-engine'
+    testImplementation 'org.mockito:mockito-junit-jupiter:3.2.4'
     testCompile("org.junit.jupiter:junit-jupiter-params:5.4.2")
     errorprone("com.google.errorprone:error_prone_core:2.3.3")
-    compile group: 'org.springframework.boot', name: 'spring-boot-configuration-processor', version: '2.1.6.RELEASE'
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -137,7 +155,9 @@ jacocoTestReport {
 compileJava {
     options.compilerArgs = [
             '-Amapstruct.suppressGeneratorTimestamp=true',
-            '-Amapstruct.suppressGeneratorVersionInfoComment=true'
+            '-Amapstruct.suppressGeneratorVersionInfoComment=true',
+            '-Amapstruct.unmappedTargetPolicy=IGNORE',
+            '-Amapstruct.defaultComponentModel=spring'
     ]
 }
 

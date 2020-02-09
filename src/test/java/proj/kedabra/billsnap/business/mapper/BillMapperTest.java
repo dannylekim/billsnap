@@ -5,23 +5,15 @@ import static org.assertj.core.api.Assertions.within;
 
 import java.time.temporal.ChronoUnit;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
-import org.mockito.MockitoAnnotations;
 
 import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
 
 class BillMapperTest {
 
-    private BillMapperImpl billMapper;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        billMapper = new BillMapperImpl(Mappers.getMapper(AccountMapper.class));
-    }
+    private BillMapper billMapper = Mappers.getMapper(BillMapper.class);
 
     @Test
     @DisplayName("Should map BillSplitDTO to PendingRegisteredBillSplitDTO")
