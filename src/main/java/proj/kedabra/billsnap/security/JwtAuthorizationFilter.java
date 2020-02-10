@@ -61,7 +61,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private Optional<UsernamePasswordAuthenticationToken> getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(TOKEN_HEADER);
+        final String token = request.getHeader(TOKEN_HEADER);
         if (StringUtils.isNotEmpty(token) && token.startsWith(TOKEN_PREFIX)) {
             try {
                 String username = jwtService.getJwtUsername(token);
@@ -81,10 +81,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             } catch (SignatureException ex) {
                 log.warn(INVALID_SIGNATURE_TOKEN_LOG, token, ex.getMessage());
             }
-        } else {
-            log.warn(INVALID_AUTHORIZATION_HEADER_LOG);
-            return Optional.empty();
         }
+        log.warn(INVALID_AUTHORIZATION_HEADER_LOG);
         return Optional.empty();
     }
 }
