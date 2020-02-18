@@ -60,7 +60,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/configuration/security",
                 "/swagger-ui.html",
                 "/h2-console/**",
-                "/webjars/**");
+                "/webjars/**",
+                "/");
     }
 
     @Override
