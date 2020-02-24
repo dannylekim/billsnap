@@ -135,7 +135,7 @@ class BillControllerIT {
         verify201NormalCaseAddBill(user, billCreationResource, response);
         assertThat(response.getAccountsList()).isNotEmpty();
         assertThat(response.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
-        assertThat(response.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
+        assertThat(response.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
     }
 
     @Test
@@ -557,7 +557,7 @@ class BillControllerIT {
                 .andExpect(status().isCreated()).andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<List<BillSplitResource>>() {
+        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
         });
         assertTrue(response.isEmpty());
 
@@ -589,7 +589,7 @@ class BillControllerIT {
 
         content = result.getResponse().getContentAsString();
 
-        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<List<BillSplitResource>>() {
+        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
         verifyBillSplitResources(billOne, response.get(0));
