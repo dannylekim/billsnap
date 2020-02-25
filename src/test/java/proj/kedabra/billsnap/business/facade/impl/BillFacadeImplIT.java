@@ -17,7 +17,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.assertj.core.api.AssertionsForClassTypes;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -144,8 +143,8 @@ class BillFacadeImplIT {
 
         verifyBillDTOToBill(returnBillDTO, bill);
         assertThat(returnBillDTO.getAccountsList()).isNotEmpty();
-        AssertionsForClassTypes.assertThat(returnBillDTO.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
-        assertThat(returnBillDTO.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
+        assertThat(returnBillDTO.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
+        assertThat(returnBillDTO.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
     }
 
     @Test
