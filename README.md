@@ -12,7 +12,7 @@ The goal is to allow ease of splitting bills with who ordered what or which room
 
 ## Prerequisites
 
-- Java 12 or higher
+- Java 13 or higher
 
 ## Getting Started
 
