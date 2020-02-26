@@ -8,11 +8,14 @@ import org.springframework.core.env.Environment;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import springfox.documentation.annotations.ApiIgnore;
+
 /**
  * This controller reroutes all root requests from the context path directly to our swagger UI API documentation page
  * so we could access directly from {domain}:{port}/{contextPath}
  */
 @RestController
+@ApiIgnore
 public class SwaggerHomeController {
 
     private final String contextPath;
