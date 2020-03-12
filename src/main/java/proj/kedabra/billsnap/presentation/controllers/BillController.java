@@ -39,6 +39,7 @@ import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 
 @RestController
 public class BillController {
@@ -86,10 +87,10 @@ public class BillController {
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.CREATED)
-    public List<BillSplitResource> getAllBills(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
+    public List<ShortBillResource> getAllBills(@ApiIgnore @AuthenticationPrincipal final Principal principal) {
 
         final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
-        return billsFromEmail.stream().map(billMapper::toResource).collect(Collectors.toList());
+        return billsFromEmail.stream().map(billMapper::toShortBillResource).collect(Collectors.toList());
 
     }
 
