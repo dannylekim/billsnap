@@ -14,6 +14,7 @@ import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 
 @Mapper(uses = AccountMapper.class)
 public interface BillMapper {
@@ -25,6 +26,8 @@ public interface BillMapper {
     BillDTO toBillDTO(BillCreationResource billCreationResource);
 
     BillResource toResource(BillCompleteDTO billDTO);
+
+    ShortBillResource toShortBillResource(BillSplitDTO billSplitDTO);
 
     BillSplitResource toResource(BillSplitDTO billSplitDTO);
 
