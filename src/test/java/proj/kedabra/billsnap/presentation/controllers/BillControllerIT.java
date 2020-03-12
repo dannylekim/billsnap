@@ -593,8 +593,8 @@ class BillControllerIT {
         List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
-        verifyShortBillResources(billOne, response.get(0));
-        verifyShortBillResources(billTwo, response.get(1));
+        verifyShortBillResources(billOne, response.get(0), BillStatusEnum.OPEN);
+        verifyShortBillResources(billTwo, response.get(1), BillStatusEnum.OPEN);
     }
 
     @Test
@@ -920,11 +920,11 @@ class BillControllerIT {
                 .isEqualTo(2);
     }
 
-    private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource) {
+    private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
         assertEquals(expectedBillResource.getCategory(), actualBillResource.getCategory());
-        assertEquals(BillStatusEnum.OPEN, actualBillResource.getStatus());
+        assertEquals(status, actualBillResource.getStatus());
         assertEquals(0, expectedBillResource.getBalance().compareTo(actualBillResource.getBalance()));
     }
 
