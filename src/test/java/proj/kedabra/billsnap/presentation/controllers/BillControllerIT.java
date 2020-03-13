@@ -47,6 +47,7 @@ import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
@@ -564,7 +565,7 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return list of 2 BillSplitResources after adding 2 bills")
+    @DisplayName("Should return list of 2 ShortBillResources after adding 2 bills")
     void shouldReturnListOf2Resources() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
@@ -589,11 +590,11 @@ class BillControllerIT {
 
         content = result.getResponse().getContentAsString();
 
-        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
+        List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
-        verifyBillSplitResources(billOne, response.get(0));
-        verifyBillSplitResources(billTwo, response.get(1));
+        verifyShortBillResources(billOne, response.get(0), BillStatusEnum.OPEN);
+        verifyShortBillResources(billTwo, response.get(1), BillStatusEnum.OPEN);
     }
 
     @Test
@@ -917,6 +918,14 @@ class BillControllerIT {
         assertThat((int) response.getPendingAccounts().stream()
                 .filter(acc -> acc.equals(accountNotInBill) || acc.equals(secondAccountNotInBill)).count())
                 .isEqualTo(2);
+    }
+
+    private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
+        assertEquals(expectedBillResource.getId(), actualBillResource.getId());
+        assertEquals(expectedBillResource.getName(), actualBillResource.getName());
+        assertEquals(expectedBillResource.getCategory(), actualBillResource.getCategory());
+        assertEquals(status, actualBillResource.getStatus());
+        assertEquals(0, expectedBillResource.getBalance().compareTo(actualBillResource.getBalance()));
     }
 
     private void verifyBillSplitResources(BillResource expectedBillResource, BillSplitResource actualBillResource) {
