@@ -466,17 +466,29 @@ class BillFacadeImplTest {
         assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
     }
 
-    //    @Test
+    @Test
     @DisplayName("Should return BillSplitDTO in getDetailedBill")
     void shouldReturnBillSplitDTOInGetDetailedBill() {
         //Given
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
-        final var billId = 1000L;
-        bill.setId(1000L);
-        final var userEmail = bill.getAccounts().iterator().next().getAccount().getEmail();
+        final var billId = bill.getId();
+        final var userEmail = "accountentity@test.com";
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
 
         when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTOFixture);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
 
         //When
         final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
@@ -489,7 +501,6 @@ class BillFacadeImplTest {
     @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
     void shouldReturnExceptionIfUserNotPartOfBill() {
         //Given
-        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         final var billId = 1000L;
         bill.setId(1000L);
