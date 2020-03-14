@@ -99,9 +99,9 @@ public class BillController {
             authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
             @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully retrieved detailed bill!"),
-            @ApiResponse(code = 400, response = ApiError.class, message = "Bill was not found with billId."),
-            @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
-            @ApiResponse(code = 403, response = ApiError.class, message = "You are not part of the bill."),
+            @ApiResponse(code = 400, response = ApiError.class, message = "No bill with that id exists"),
+            @ApiResponse(code = 401, response = ApiError.class, message = "Access is unauthorized!"),
+            @ApiResponse(code = 403, response = ApiError.class, message = "Account does not have the bill specified."),
     })
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource getDetailedBill(@ApiIgnore

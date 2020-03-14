@@ -50,6 +50,7 @@ import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.security.JwtService;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -103,12 +104,6 @@ class BillControllerIT {
     private static final String NUMBER_OUT_OF_BOUNDS_3_4 = "numeric value out of bounds (<3 digits>.<4 digits> expected)";
 
     private static final String NOT_IN_EMAIL_FORMAT = "Must be in an email format. ex: test@email.com.";
-
-    private static final String BILL_NOT_FOUND = "Bill was not found with billId.";
-
-    private static final String UNAUTHORIZED_ACCESS_RESOURCE = "You are unauthorized to access this resource.";
-
-    private static final String USER_NOT_PART_OF_BILL = "You are unauthorized to access this resource.";
 
     @Test
     @DisplayName("Should return proper reply with 201 status for POST /bill")
@@ -962,7 +957,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(BILL_NOT_FOUND);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST);
     }
 
     @Disabled
@@ -979,7 +974,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(UNAUTHORIZED_ACCESS_RESOURCE);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.UNAUTHORIZED_ACCESS);
     }
 
     @Disabled
@@ -997,7 +992,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(USER_NOT_PART_OF_BILL);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL);
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
