@@ -94,7 +94,7 @@ public class BillController {
 
     }
 
-    @GetMapping("/bill/{billId}")
+    @GetMapping("/bills/{billId}")
     @ApiOperation(value = "Get detailed bill", notes = "Get detailed bill associated to account",
             authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
     @ApiResponses({
