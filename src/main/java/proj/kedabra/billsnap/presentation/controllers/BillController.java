@@ -108,8 +108,7 @@ public class BillController {
                                              @AuthenticationPrincipal final Principal principal,
                                              @PathVariable("billId") final Long billId) {
 
-        final BillSplitDTO detailedBill = billFacade.getDetailedBillByEmail(principal.getName(), billId);
-        return billMapper.toResource(detailedBill);
+        return null;
     }
 
     @PutMapping("/bills")
