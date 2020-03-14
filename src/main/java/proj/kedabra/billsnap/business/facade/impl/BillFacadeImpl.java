@@ -80,6 +80,13 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    public BillSplitDTO getDetailedBillByEmail(final String email, final Long billId) {
+        // TODO Implement call to service
+        return null;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
         final Bill bill = billService.associateItemsToAccountBill(associateBillDTO);
 

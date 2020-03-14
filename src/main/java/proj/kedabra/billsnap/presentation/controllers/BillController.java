@@ -94,6 +94,24 @@ public class BillController {
 
     }
 
+    @GetMapping("/bill/{billId}")
+    @ApiOperation(value = "Get detailed bill", notes = "Get detailed bill associated to account",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiResponses({
+            @ApiResponse(code = 201, response = BillSplitResource.class, message = "Successfully retrieved detailed bill!"),
+            @ApiResponse(code = 400, response = ApiError.class, message = "Bill was not found with billId."),
+            @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
+            @ApiResponse(code = 403, response = ApiError.class, message = "You are not part of the bill."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public BillSplitResource getDetailedBill(@ApiIgnore
+                                             @AuthenticationPrincipal final Principal principal,
+                                             @PathVariable("billId") final Long billId) {
+
+        final BillSplitDTO detailedBill = billFacade.getDetailedBillByEmail(principal.getName(), billId);
+        return billMapper.toResource(detailedBill);
+    }
+
     @PutMapping("/bills")
     @ApiOperation(value = "Associate users/modify bill", notes = "Modify bill's users/items and user-item association",
             authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
