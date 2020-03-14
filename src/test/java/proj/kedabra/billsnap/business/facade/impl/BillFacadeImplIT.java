@@ -377,11 +377,26 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return BillSplitDTO in getDetailedBill")
-    void shouldReturnBillSplitDTOInGetDetailedBill() {
-        //Given
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is Bill Creator")
+    void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
+        //Given user that is bill's creator
         final var billId = 1000L;
         final var userEmail = "test@email.com";
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        final var bill = billRepository.getBillById(billId);
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is in Bill's accounts")
+    void shouldReturnBillSplitDTOInGetDetailedBillUserInBillAccounts() {
+        //Given user is in bill's accounts
+        final var billId = 1100L;
+        final var userEmail = "userdetails@service.com";
 
         //When
         final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);

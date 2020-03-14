@@ -116,8 +116,13 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO getDetailedBill(Long billId, String userEmail) {
         final var bill = billService.getBill(billId);
-        if (!bill.getCreator().getEmail().equals(userEmail) ||
-                bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).noneMatch(email -> email.equals(userEmail))) {
+        final boolean isNotCreator = !bill.getCreator().getEmail().equals(userEmail);
+        final boolean isNotInBillsAccount = bill.getAccounts().stream()
+                .map(AccountBill::getAccount)
+                .map(Account::getEmail)
+                .noneMatch(email -> email.equals(userEmail));
+
+        if (isNotCreator && isNotInBillsAccount) {
             throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_IN_BILL.getMessage());
         }
         return getBillSplitDTO(bill);

@@ -467,13 +467,44 @@ class BillFacadeImplTest {
     }
 
     @Test
-    @DisplayName("Should return BillSplitDTO in getDetailedBill")
-    void shouldReturnBillSplitDTOInGetDetailedBill() {
-        //Given
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is Bill Creator")
+    void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
+        //Given user that is bill's creator
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         final var billId = bill.getId();
         final var userEmail = "accountentity@test.com";
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTOFixture);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is in Bill's accounts")
+    void shouldReturnBillSplitDTOInGetDetailedBillUserInBillAccounts() {
+        //Given user is in bill's accounts
+        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = bill.getId();
+        final var userEmail = "hellomotto@cell.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
 
         when(billService.getBill(any())).thenReturn(bill);
