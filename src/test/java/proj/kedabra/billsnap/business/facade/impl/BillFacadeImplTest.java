@@ -466,6 +466,43 @@ class BillFacadeImplTest {
         assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
     }
 
+    //    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill")
+    void shouldReturnBillSplitDTOInGetDetailedBill() {
+        //Given
+        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = 1000L;
+        bill.setId(1000L);
+        final var userEmail = bill.getAccounts().iterator().next().getAccount().getEmail();
+
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = 1000L;
+        bill.setId(1000L);
+        final var userEmail = "nonexistent@email.com";
+
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_IN_BILL.getMessage());
+    }
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 

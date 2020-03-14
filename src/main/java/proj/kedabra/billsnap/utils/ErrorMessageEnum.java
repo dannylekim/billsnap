@@ -26,6 +26,7 @@ public enum ErrorMessageEnum {
     SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: {}"),
     LIST_ACCOUNT_ALREADY_IN_BILL("One or more accounts is already invited or part of the bill: {}"),
     USER_IS_NOT_BILL_RESPONSIBLE("The user making the request is not the Bill responsible"),
+    USER_IS_NOT_IN_BILL("The user making the request is not part of the bill."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

@@ -7,6 +7,8 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
@@ -16,6 +18,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import javax.persistence.Access;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -45,6 +49,8 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.BillEntityFixture;
+import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -375,6 +381,35 @@ class BillFacadeImplIT {
         verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
         assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
     }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill")
+    void shouldReturnBillSplitDTOInGetDetailedBill() {
+        //Given
+        final var billId = 1000L;
+        final var userEmail = "test@email.com";
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        final var bill = billRepository.getBillById(billId);
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var billId = 1000L;
+        final var userEmail = "nonexistent@user.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_IN_BILL.getMessage());
+    }
+
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
