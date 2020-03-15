@@ -18,6 +18,7 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -49,6 +50,7 @@ import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.security.JwtService;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -70,6 +72,8 @@ class BillControllerIT {
     private JwtService jwtService;
 
     private static final String BILL_ENDPOINT = "/bills";
+
+    private static final String BILL_BILLID_ENDPOINT = "/bills/%d";
 
     private static final String BILL_BILLID_ACCOUNTS_ENDPOINT = "/bills/%d/accounts";
 
@@ -920,6 +924,77 @@ class BillControllerIT {
                 .isEqualTo(2);
     }
 
+    @Disabled
+    @Test
+    @DisplayName("Should return 200 when getting successfully detailed bill")
+    void shouldReturn200WhenGettingSuccessfullyDetailedBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1000L;
+
+        // When
+        final var mvcResult = performMvcGetRequest200(bearerToken, existentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
+
+        // Then
+        assertThat(response.getId()).isEqualTo(existentBillId);
+    }
+
+    @Disabled
+    @Test
+    @DisplayName("Should return 400 when bill is not found with billId")
+    void shouldReturn400WhenBillIsNotFoundWithBillId() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var nonExistentBillId = 69420L;
+
+        // When
+        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, nonExistentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST);
+    }
+
+    @Disabled
+    @Test
+    @DisplayName("Should return 401 when Token is not valid")
+    void shouldReturn401WhenTokenIsNotValid() throws Exception {
+        // Given
+        final var bearerToken = "tOkEn";
+        final var existentBillId = 1000L;
+
+        // When
+        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, existentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.UNAUTHORIZED_ACCESS);
+    }
+
+    @Disabled
+    @Test
+    @DisplayName("Should return 403 when getting bill when user is not part of")
+    void shouldReturn403GettingBillWhenUserIsNotPartOf() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1002L;
+
+        // When
+        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, existentBillId);
+        final String content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL);
+    }
+
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
@@ -960,6 +1035,16 @@ class BillControllerIT {
         assertNotNull(response.getCreated());
         assertNotNull(response.getUpdated());
         assertNotNull(response.getId());
+    }
+
+    private MvcResult performMvcGetRequest200(String bearerToken, Long billId) throws Exception {
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
+                .andExpect(status().isOk()).andReturn();
+    }
+
+    private MvcResult performMvcGetRequest4xxFailure(String bearerToken, Long billId) throws Exception {
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
+                .andExpect(status().is4xxClientError()).andReturn();
     }
 
     private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception {

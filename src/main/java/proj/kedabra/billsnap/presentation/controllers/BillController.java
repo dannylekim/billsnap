@@ -94,6 +94,23 @@ public class BillController {
 
     }
 
+    @GetMapping("/bills/{billId}")
+    @ApiOperation(value = "Get detailed bill", notes = "Get detailed bill associated to account",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiResponses({
+            @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully retrieved detailed bill!"),
+            @ApiResponse(code = 400, response = ApiError.class, message = "No bill with that id exists"),
+            @ApiResponse(code = 401, response = ApiError.class, message = "Access is unauthorized!"),
+            @ApiResponse(code = 403, response = ApiError.class, message = "Account does not have the bill specified."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public BillSplitResource getDetailedBill(@ApiIgnore
+                                             @AuthenticationPrincipal final Principal principal,
+                                             @PathVariable("billId") final Long billId) {
+
+        return null;
+    }
+
     @PutMapping("/bills")
     @ApiOperation(value = "Associate users/modify bill", notes = "Modify bill's users/items and user-item association",
             authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
