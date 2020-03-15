@@ -112,6 +112,22 @@ public class BillFacadeImpl implements BillFacade {
         return pendingRegisteredBillSplitDTO;
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public BillSplitDTO getDetailedBill(final Long billId, final String userEmail) {
+        final var bill = billService.getBill(billId);
+        final boolean isNotCreator = !bill.getCreator().getEmail().equals(userEmail);
+        final boolean isNotInBillsAccount = bill.getAccounts().stream()
+                .map(AccountBill::getAccount)
+                .map(Account::getEmail)
+                .noneMatch(email -> email.equals(userEmail));
+
+        if (isNotCreator && isNotInBillsAccount) {
+            throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
+        }
+        return getBillSplitDTO(bill);
+    }
+
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BigDecimal balance = calculateBalance(bill);
