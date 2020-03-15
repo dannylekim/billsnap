@@ -114,7 +114,7 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BillSplitDTO getDetailedBill(Long billId, String userEmail) {
+    public BillSplitDTO getDetailedBill(final Long billId, final String userEmail) {
         final var bill = billService.getBill(billId);
         final boolean isNotCreator = !bill.getCreator().getEmail().equals(userEmail);
         final boolean isNotInBillsAccount = bill.getAccounts().stream()
