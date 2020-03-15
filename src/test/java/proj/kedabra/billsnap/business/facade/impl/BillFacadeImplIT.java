@@ -416,7 +416,7 @@ class BillFacadeImplIT {
         //When/Then
         assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
-                .withMessage(ErrorMessageEnum.USER_IS_NOT_IN_BILL.getMessage());
+                .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
 
