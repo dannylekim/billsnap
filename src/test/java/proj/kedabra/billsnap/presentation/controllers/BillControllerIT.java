@@ -1038,12 +1038,12 @@ class BillControllerIT {
     }
 
     private MvcResult performMvcGetRequest200(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT), billId).header(JWT_HEADER, bearerToken))
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
                 .andExpect(status().isOk()).andReturn();
     }
 
     private MvcResult performMvcGetRequest4xxFailure(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT), billId).header(JWT_HEADER, bearerToken))
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
                 .andExpect(status().is4xxClientError()).andReturn();
     }
 
