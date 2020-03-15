@@ -18,7 +18,6 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -554,18 +553,13 @@ class BillControllerIT {
         //Given
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var billCreationResource = BillCreationResourceFixture.getDefault();
 
         //When/Then
-        MvcResult result = mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
-
-        String content = result.getResponse().getContentAsString();
-        List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
+        final MvcResult result = performMvcGetRequest200AllBills(bearerToken);
+        final String content = result.getResponse().getContentAsString();
+        final List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
         });
-        assertTrue(response.isEmpty());
-
+        assertThat(response).isEmpty();
     }
 
     @Test
@@ -577,24 +571,17 @@ class BillControllerIT {
         final var billCreationResource = BillCreationResourceFixture.getDefault();
 
         MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
-
         String content = result.getResponse().getContentAsString();
-        BillResource billOne = mapper.readValue(content, BillResource.class);
+        final BillResource billOne = mapper.readValue(content, BillResource.class);
 
         result = performMvcPostRequest201Created(bearerToken, billCreationResource);
-
         content = result.getResponse().getContentAsString();
-        BillResource billTwo = mapper.readValue(content, BillResource.class);
-
+        final BillResource billTwo = mapper.readValue(content, BillResource.class);
 
         //When/Then
-        result = mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
-
+        result = performMvcGetRequest200AllBills(bearerToken);
         content = result.getResponse().getContentAsString();
-
-        List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
+        final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
         verifyShortBillResources(billOne, response.get(0), BillStatusEnum.OPEN);
@@ -924,7 +911,6 @@ class BillControllerIT {
                 .isEqualTo(2);
     }
 
-    @Disabled
     @Test
     @DisplayName("Should return 200 when getting successfully detailed bill")
     void shouldReturn200WhenGettingSuccessfullyDetailedBill() throws Exception {
@@ -942,7 +928,26 @@ class BillControllerIT {
         assertThat(response.getId()).isEqualTo(existentBillId);
     }
 
-    @Disabled
+    @Test
+    @DisplayName("GET billId should return mapped detailed bill after creating one bill")
+    void shouldReturnMappedDetailedBillAfterCreatingOneBill() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+
+        final var result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        final String content = result.getResponse().getContentAsString();
+        final BillResource createdBill = mapper.readValue(content, BillResource.class);
+
+        //When/Then
+        final var mvcResult = performMvcGetRequest200(bearerToken, createdBill.getId());
+        final String getContent = mvcResult.getResponse().getContentAsString();
+        final BillSplitResource billSplitResource = mapper.readValue(getContent, BillSplitResource.class);
+
+        verifyBillSplitResources(createdBill, billSplitResource);
+    }
+
     @Test
     @DisplayName("Should return 400 when bill is not found with billId")
     void shouldReturn400WhenBillIsNotFoundWithBillId() throws Exception {
@@ -952,15 +957,14 @@ class BillControllerIT {
         final var nonExistentBillId = 69420L;
 
         // When
-        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, nonExistentBillId);
+        final var mvcResult = performMvcGetRequest400Failure(bearerToken, nonExistentBillId);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
     }
 
-    @Disabled
     @Test
     @DisplayName("Should return 401 when Token is not valid")
     void shouldReturn401WhenTokenIsNotValid() throws Exception {
@@ -969,30 +973,29 @@ class BillControllerIT {
         final var existentBillId = 1000L;
 
         // When
-        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, existentBillId);
+        final var mvcResult = performMvcGetRequest401Failure(bearerToken, existentBillId);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.UNAUTHORIZED_ACCESS);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.UNAUTHORIZED_ACCESS.getMessage());
     }
 
-    @Disabled
     @Test
-    @DisplayName("Should return 403 when getting bill when user is not part of")
+    @DisplayName("Should return 403 when getting bill where user requesting is not part of Bill")
     void shouldReturn403GettingBillWhenUserIsNotPartOf() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var existentBillId = 1002L;
+        final var existentBillId = 1006L;
 
         // When
-        final var mvcResult = performMvcGetRequest4xxFailure(bearerToken, existentBillId);
+        final var mvcResult = performMvcGetRequest403Failure(bearerToken, existentBillId);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
@@ -1037,15 +1040,31 @@ class BillControllerIT {
         assertNotNull(response.getId());
     }
 
+    private MvcResult performMvcGetRequest200AllBills(String bearerToken) throws Exception {
+        return mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken))
+                .andExpect(status().isOk()).andReturn();
+    }
+
     private MvcResult performMvcGetRequest200(String bearerToken, Long billId) throws Exception {
         return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
                 .andExpect(status().isOk()).andReturn();
     }
 
-    private MvcResult performMvcGetRequest4xxFailure(String bearerToken, Long billId) throws Exception {
+    private MvcResult performMvcGetRequest400Failure(String bearerToken, Long billId) throws Exception {
         return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
-                .andExpect(status().is4xxClientError()).andReturn();
+                .andExpect(status().isBadRequest()).andReturn();
     }
+
+    private MvcResult performMvcGetRequest401Failure(String bearerToken, Long billId) throws Exception {
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
+                .andExpect(status().isUnauthorized()).andReturn();
+    }
+
+    private MvcResult performMvcGetRequest403Failure(String bearerToken, Long billId) throws Exception {
+        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
+                .andExpect(status().isForbidden()).andReturn();
+    }
+
 
     private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception {
         return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)

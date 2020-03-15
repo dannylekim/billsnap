@@ -123,7 +123,7 @@ public class BillFacadeImpl implements BillFacade {
                 .noneMatch(email -> email.equals(userEmail));
 
         if (isNotCreator && isNotInBillsAccount) {
-            throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_IN_BILL.getMessage());
+            throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
         }
         return getBillSplitDTO(bill);
     }
