@@ -23,6 +23,9 @@ import org.springframework.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.service.AccountService;
+import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -32,6 +35,8 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     private final AuthenticationManager authenticationManager;
 
     private final JwtService jwtService;
+
+    private final AccountService accountService;
 
     private final Validator validator;
 
@@ -43,9 +48,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, Validator validator, ObjectMapper mapper) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, Validator validator, ObjectMapper mapper, AccountServiceImpl accountService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.accountService = accountService;
         this.validator = validator;
         this.mapper = mapper;
         setFilterProcessesUrl(AUTH_LOGIN_URL);
@@ -86,10 +92,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         User user = ((User) authResult.getPrincipal());
 
         String token = jwtService.generateToken(user);
+        Account account = accountService.getAccount(user.getUsername());
 
         response.addHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-        response.getWriter().write(jwtService.loginSuccessJson(token));
+        response.getWriter().write(jwtService.loginSuccessJson(token, account.getFirstName(), account.getLastName()));
     }
 
     private void validateRequestDetails(HttpServletRequest request) {

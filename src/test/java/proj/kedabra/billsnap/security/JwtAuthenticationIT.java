@@ -32,6 +32,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.fixtures.LoginResourceFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -53,6 +55,9 @@ class JwtAuthenticationIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AccountServiceImpl accountService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -101,9 +106,13 @@ class JwtAuthenticationIT {
         assertNotNull(result.getResponse().getHeader("Authorization"));
         String trimmedAuthorizationHeader = result.getResponse().getHeader("Authorization").replace("Bearer ", "");
 
+        Account account = accountService.getAccount(loginResource.getEmail());
+
         assertEquals(HttpServletResponse.SC_OK, result.getResponse().getStatus());
         assertEquals(LOGIN_SUCCESS, contentJson.getString("message"));
         assertEquals(trimmedAuthorizationHeader, contentJson.getString("token"));
+        assertEquals(account.getFirstName(), contentJson.getString("firstname"));
+        assertEquals(account.getLastName(), contentJson.getString("lastname"));
     }
 
     @Test
@@ -118,6 +127,7 @@ class JwtAuthenticationIT {
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
+
 
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());

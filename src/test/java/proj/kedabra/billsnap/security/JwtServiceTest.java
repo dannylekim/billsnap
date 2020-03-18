@@ -39,14 +39,19 @@ class JwtServiceTest {
     void ShouldReturnJsonFormatSuccessGivenAToken() throws Exception {
         //Given
         String testToken = "tester_token";
+        String firstname = "firstname";
+        String lastname = "lastname";
 
         //When
-        String jsonSuccess = jwtService.loginSuccessJson(testToken);
+        String jsonSuccess = jwtService.loginSuccessJson(testToken, firstname, lastname);
         LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
 
         //Then
         assertEquals(JSON_SUCCESS, response.getMessage());
-        assertEquals("tester_token", response.getToken());
+        assertEquals(testToken, response.getToken());
+        assertEquals(firstname, response.getFirstname());
+        assertEquals(lastname, response.getLastname());
+
     }
 
     @Test
