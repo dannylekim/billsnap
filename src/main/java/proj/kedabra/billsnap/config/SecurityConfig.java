@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.validation.Validator;
 
+import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationEntryPoint;
 import proj.kedabra.billsnap.security.JwtAuthenticationFailureHandler;
@@ -33,16 +34,24 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtService jwtService;
 
+    private final AccountService accountService;
+
     private final ObjectMapper mapper;
 
     private final Validator validator;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtService jwtService, ObjectMapper mapper, @Qualifier("getValidator") Validator validator) {
+    public SecurityConfig(
+            final UserDetailsServiceImpl userDetailsServiceImpl,
+            final JwtService jwtService,
+            final ObjectMapper mapper,
+            @Qualifier("getValidator") final Validator validator,
+            final AccountService accountService) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtService = jwtService;
         this.mapper = mapper;
         this.validator = validator;
+        this.accountService = accountService;
     }
 
     @Override
@@ -90,7 +99,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper);
+        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper, accountService);
         filter.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
         filter.setAuthenticationFailureHandler(new JwtAuthenticationFailureHandler(mapper));
 

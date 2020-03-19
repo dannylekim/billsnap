@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +33,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.fixtures.LoginResourceFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -53,6 +56,9 @@ class JwtAuthenticationIT {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private AccountServiceImpl accountService;
 
     @Autowired
     private ObjectMapper mapper;
@@ -101,9 +107,13 @@ class JwtAuthenticationIT {
         assertNotNull(result.getResponse().getHeader("Authorization"));
         String trimmedAuthorizationHeader = result.getResponse().getHeader("Authorization").replace("Bearer ", "");
 
-        assertEquals(HttpServletResponse.SC_OK, result.getResponse().getStatus());
-        assertEquals(LOGIN_SUCCESS, contentJson.getString("message"));
-        assertEquals(trimmedAuthorizationHeader, contentJson.getString("token"));
+        final Account account = accountService.getAccount(loginResource.getEmail());
+
+        assertThat(HttpServletResponse.SC_OK).isEqualTo(result.getResponse().getStatus());
+        assertThat(LOGIN_SUCCESS).isEqualTo(contentJson.getString("message"));
+        assertThat(trimmedAuthorizationHeader).isEqualTo(contentJson.getString("token"));
+        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstName"));
+        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastName"));
     }
 
     @Test
@@ -118,6 +128,7 @@ class JwtAuthenticationIT {
                 .contentType(MediaType.APPLICATION_JSON)).andExpect(status().is4xxClientError()).andReturn();
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
+
 
         assertEquals(INVALID_INPUTS, error.getMessage());
         assertEquals(1, error.getErrors().size());

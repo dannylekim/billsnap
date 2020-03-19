@@ -13,6 +13,12 @@ public class LoginResponseResource implements Serializable {
     @ApiModelProperty(name = "Login success message")
     private String message;
 
-    @ApiModelProperty(name = "Login bearer token", position = 1)
+    @ApiModelProperty(name = "Account firstname", position = 1)
+    private String firstName;
+
+    @ApiModelProperty(name = "Account lastname", position = 2)
+    private String lastName;
+
+    @ApiModelProperty(name = "Login bearer token", position = 3)
     private String token;
 }
