@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -108,11 +109,11 @@ class JwtAuthenticationIT {
 
         Account account = accountService.getAccount(loginResource.getEmail());
 
-        assertEquals(HttpServletResponse.SC_OK, result.getResponse().getStatus());
-        assertEquals(LOGIN_SUCCESS, contentJson.getString("message"));
-        assertEquals(trimmedAuthorizationHeader, contentJson.getString("token"));
-        assertEquals(account.getFirstName(), contentJson.getString("firstName"));
-        assertEquals(account.getLastName(), contentJson.getString("lastName"));
+        assertThat(HttpServletResponse.SC_OK).isEqualTo(result.getResponse().getStatus());
+        assertThat(LOGIN_SUCCESS).isEqualTo(contentJson.getString("message"));
+        assertThat(trimmedAuthorizationHeader).isEqualTo(contentJson.getString("token"));
+        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstName"));
+        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastName"));
     }
 
     @Test

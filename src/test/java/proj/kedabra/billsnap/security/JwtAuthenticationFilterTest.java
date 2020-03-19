@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -186,11 +187,11 @@ class JwtAuthenticationFilterTest {
 
         //Then
         JSONObject contentJson = new JSONObject(mockResponse.getContentAsString());
-        assertEquals(jwtToken, Objects.requireNonNull(mockResponse.getHeader("Authorization")).replace("Bearer ", ""));
-        assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(jwtToken, contentJson.getString("token"));
-        assertEquals(account.getFirstName(), contentJson.getString("firstname"));
-        assertEquals(account.getLastName(), contentJson.getString("lastname"));
+        assertThat(jwtToken).isEqualTo(Objects.requireNonNull(mockResponse.getHeader("Authorization")).replace("Bearer ", ""));
+        assertThat(MediaType.APPLICATION_JSON_VALUE).isEqualTo(mockResponse.getContentType());
+        assertThat(jwtToken).isEqualTo(contentJson.getString("token"));
+        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstname"));
+        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastname"));
     }
 
     @Test
