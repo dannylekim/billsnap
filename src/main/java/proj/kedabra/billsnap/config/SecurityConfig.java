@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.validation.Validator;
 
-import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
+import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationEntryPoint;
 import proj.kedabra.billsnap.security.JwtAuthenticationFailureHandler;
@@ -34,7 +34,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final JwtService jwtService;
 
-    private final AccountServiceImpl accountService;
+    private final AccountService accountService;
 
     private final ObjectMapper mapper;
 
@@ -46,7 +46,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             final JwtService jwtService,
             final ObjectMapper mapper,
             @Qualifier("getValidator") final Validator validator,
-            final AccountServiceImpl accountService) {
+            final AccountService accountService) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtService = jwtService;
         this.mapper = mapper;

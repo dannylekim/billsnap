@@ -25,7 +25,6 @@ import lombok.extern.slf4j.Slf4j;
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.service.AccountService;
-import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -53,7 +52,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
             final JwtService jwtService,
             final Validator validator,
             final ObjectMapper mapper,
-            final AccountServiceImpl accountService) {
+            final AccountService accountService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.accountService = accountService;
