@@ -41,7 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final Validator validator;
 
     @Autowired
-    public SecurityConfig(UserDetailsServiceImpl userDetailsServiceImpl, JwtService jwtService, ObjectMapper mapper, @Qualifier("getValidator") Validator validator, AccountServiceImpl accountService) {
+    public SecurityConfig(
+            final UserDetailsServiceImpl userDetailsServiceImpl,
+            final JwtService jwtService,
+            final ObjectMapper mapper,
+            @Qualifier("getValidator") final Validator validator,
+            final AccountServiceImpl accountService) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtService = jwtService;
         this.mapper = mapper;

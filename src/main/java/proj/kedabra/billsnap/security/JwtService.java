@@ -88,13 +88,13 @@ public class JwtService implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    String loginSuccessJson(String token, String firstname, String lastname) throws IOException {
+    String loginSuccessJson(String token, String firstName, String lastName) throws IOException {
         try {
             final LoginResponseResource loginResponseResource = new LoginResponseResource();
             loginResponseResource.setMessage(LOGIN_SUCCESS_MESSAGE);
             loginResponseResource.setToken(token);
-            loginResponseResource.setFirstName(firstname);
-            loginResponseResource.setLastName(lastname);
+            loginResponseResource.setFirstName(firstName);
+            loginResponseResource.setLastName(lastName);
 
             return mapper.writeValueAsString(loginResponseResource);
         } catch (JsonProcessingException e) {

@@ -107,7 +107,7 @@ class JwtAuthenticationIT {
         assertNotNull(result.getResponse().getHeader("Authorization"));
         String trimmedAuthorizationHeader = result.getResponse().getHeader("Authorization").replace("Bearer ", "");
 
-        Account account = accountService.getAccount(loginResource.getEmail());
+        final Account account = accountService.getAccount(loginResource.getEmail());
 
         assertThat(HttpServletResponse.SC_OK).isEqualTo(result.getResponse().getStatus());
         assertThat(LOGIN_SUCCESS).isEqualTo(contentJson.getString("message"));

@@ -39,13 +39,13 @@ class JwtServiceTest {
     @DisplayName("Should return JSON success String given a token")
     void ShouldReturnJsonFormatSuccessGivenAToken() throws Exception {
         //Given
-        String testToken = "tester_token";
-        String firstName = "firstname";
-        String lastName = "lastname";
+        final var testToken = "tester_token";
+        final var firstName = "firstname";
+        final var lastName = "lastname";
 
         //When
-        String jsonSuccess = jwtService.loginSuccessJson(testToken, firstName, lastName);
-        LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
+        final String jsonSuccess = jwtService.loginSuccessJson(testToken, firstName, lastName);
+        final LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
 
         //Then
         assertThat(JSON_SUCCESS).isEqualTo(response.getMessage());

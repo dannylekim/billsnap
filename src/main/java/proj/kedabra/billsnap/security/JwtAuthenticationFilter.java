@@ -48,7 +48,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtService jwtService, Validator validator, ObjectMapper mapper, AccountServiceImpl accountService) {
+    public JwtAuthenticationFilter(
+            final AuthenticationManager authenticationManager,
+            final JwtService jwtService,
+            final Validator validator,
+            final ObjectMapper mapper,
+            final AccountServiceImpl accountService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.accountService = accountService;
