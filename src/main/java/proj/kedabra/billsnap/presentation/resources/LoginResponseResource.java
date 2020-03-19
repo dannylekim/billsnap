@@ -14,10 +14,10 @@ public class LoginResponseResource implements Serializable {
     private String message;
 
     @ApiModelProperty(name = "Account firstname", position = 1)
-    private String firstname;
+    private String firstName;
 
     @ApiModelProperty(name = "Account lastname", position = 2)
-    private String lastname;
+    private String lastName;
 
     @ApiModelProperty(name = "Login bearer token", position = 3)
     private String token;

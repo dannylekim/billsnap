@@ -111,8 +111,8 @@ class JwtAuthenticationIT {
         assertEquals(HttpServletResponse.SC_OK, result.getResponse().getStatus());
         assertEquals(LOGIN_SUCCESS, contentJson.getString("message"));
         assertEquals(trimmedAuthorizationHeader, contentJson.getString("token"));
-        assertEquals(account.getFirstName(), contentJson.getString("firstname"));
-        assertEquals(account.getLastName(), contentJson.getString("lastname"));
+        assertEquals(account.getFirstName(), contentJson.getString("firstName"));
+        assertEquals(account.getLastName(), contentJson.getString("lastName"));
     }
 
     @Test

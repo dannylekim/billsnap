@@ -94,7 +94,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper, accountService);
+        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper, accountService);
         filter.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
         filter.setAuthenticationFailureHandler(new JwtAuthenticationFailureHandler(mapper));
 
