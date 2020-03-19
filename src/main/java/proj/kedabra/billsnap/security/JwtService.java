@@ -50,7 +50,7 @@ public class JwtService implements Serializable {
         this.jwtExpiration = jwtExpiration;
     }
 
-    public String generateToken(User user) {
+    public String generateToken(final User user) {
         List<String> roles = user.getAuthorities()
                 .stream()
                 .map(GrantedAuthority::getAuthority)
@@ -68,7 +68,7 @@ public class JwtService implements Serializable {
                 .compact();
     }
 
-    public JwsHeader getJwtHeaders(String token) {
+    public JwsHeader getJwtHeaders(final String token) {
         byte[] signingKey = jwtSecret.getBytes(UTF_8);
         return Jwts.parser()
                 .setSigningKey(signingKey)
@@ -76,7 +76,7 @@ public class JwtService implements Serializable {
                 .getHeader();
     }
 
-    public String getJwtUsername(String token) {
+    public String getJwtUsername(final String token) {
         return getJwtBody(token).getSubject();
     }
 
@@ -88,7 +88,7 @@ public class JwtService implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    String loginSuccessJson(String token, String firstName, String lastName) throws IOException {
+    String loginSuccessJson(final String token, final String firstName, final String lastName) throws IOException {
         try {
             final LoginResponseResource loginResponseResource = new LoginResponseResource();
             loginResponseResource.setMessage(LOGIN_SUCCESS_MESSAGE);
@@ -102,7 +102,7 @@ public class JwtService implements Serializable {
         }
     }
 
-    private Claims getJwtBody(String token) {
+    private Claims getJwtBody(final String token) {
         byte[] signingKey = jwtSecret.getBytes(UTF_8);
         return Jwts.parser()
                 .setSigningKey(signingKey)
