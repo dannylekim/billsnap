@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.security;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Collection;
 
@@ -38,15 +39,19 @@ class JwtServiceTest {
     @DisplayName("Should return JSON success String given a token")
     void ShouldReturnJsonFormatSuccessGivenAToken() throws Exception {
         //Given
-        String testToken = "tester_token";
+        final var testToken = "tester_token";
+        final var firstName = "firstname";
+        final var lastName = "lastname";
 
         //When
-        String jsonSuccess = jwtService.loginSuccessJson(testToken);
-        LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
+        final String jsonSuccess = jwtService.loginSuccessJson(testToken, firstName, lastName);
+        final LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
 
         //Then
-        assertEquals(JSON_SUCCESS, response.getMessage());
-        assertEquals("tester_token", response.getToken());
+        assertThat(JSON_SUCCESS).isEqualTo(response.getMessage());
+        assertThat(testToken).isEqualTo(response.getToken());
+        assertThat(firstName).isEqualTo(response.getFirstName());
+        assertThat(lastName).isEqualTo(response.getLastName());
     }
 
     @Test

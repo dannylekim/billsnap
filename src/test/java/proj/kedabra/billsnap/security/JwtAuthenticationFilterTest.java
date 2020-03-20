@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
@@ -40,6 +41,9 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
+import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
+import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.LoginResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
@@ -60,6 +64,9 @@ class JwtAuthenticationFilterTest {
     @Mock
     private Validator validator;
 
+    @Mock
+    private AccountServiceImpl accountService;
+
     private final String MUST_NOT_BE_BLANK = "must not be blank";
 
     private final String VALID_USER = "email@test.com";
@@ -69,7 +76,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper);
+        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper, accountService);
     }
 
     @Test
@@ -167,19 +174,24 @@ class JwtAuthenticationFilterTest {
         MockHttpServletRequest mockRequest = populateMockRequest();
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
         final String jwtToken = "example_token";
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String successMes = "{\"token\":\"%s\", \"firstname\":\"%s\", \"lastname\":\"%s\"}";
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(UserFixture.getDefault(), VALID_PASSWORD);
 
         when(jwtService.generateToken(any())).thenReturn(jwtToken);
-        when(jwtService.loginSuccessJson(any())).thenReturn(String.format("{\"token\":\"%s\"}", jwtToken));
+        when(accountService.getAccount(any())).thenReturn(account);
+        when(jwtService.loginSuccessJson(any(), any(), any())).thenReturn(String.format(successMes, jwtToken, account.getFirstName(), account.getLastName()));
 
         //When
         filter.successfulAuthentication(mockRequest, mockResponse, mock(FilterChain.class), token);
 
         //Then
         JSONObject contentJson = new JSONObject(mockResponse.getContentAsString());
-        assertEquals(jwtToken, Objects.requireNonNull(mockResponse.getHeader("Authorization")).replace("Bearer ", ""));
-        assertEquals(MediaType.APPLICATION_JSON_VALUE, mockResponse.getContentType());
-        assertEquals(jwtToken, contentJson.getString("token"));
+        assertThat(jwtToken).isEqualTo(Objects.requireNonNull(mockResponse.getHeader("Authorization")).replace("Bearer ", ""));
+        assertThat(MediaType.APPLICATION_JSON_VALUE).isEqualTo(mockResponse.getContentType());
+        assertThat(jwtToken).isEqualTo(contentJson.getString("token"));
+        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstname"));
+        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastname"));
     }
 
     @Test

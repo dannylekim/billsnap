@@ -18,4 +18,6 @@ public interface BillFacade {
 
     PendingRegisteredBillSplitDTO inviteRegisteredToBill(Long billId, String userEmail, List<String> accounts);
 
+    BillSplitDTO getDetailedBill(Long billId, String userEmail);
+
 }

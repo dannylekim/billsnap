@@ -378,6 +378,50 @@ class BillFacadeImplIT {
         assertThat(dtoPendingAccounts.containsAll(accountsList)).isTrue();
     }
 
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is Bill Creator")
+    void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
+        //Given user that is bill's creator
+        final var billId = 1000L;
+        final var userEmail = "test@email.com";
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        final var bill = billRepository.getBillById(billId);
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is in Bill's accounts")
+    void shouldReturnBillSplitDTOInGetDetailedBillUserInBillAccounts() {
+        //Given user is in bill's accounts
+        final var billId = 1100L;
+        final var userEmail = "userdetails@service.com";
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        final var bill = billRepository.getBillById(billId);
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var billId = 1000L;
+        final var userEmail = "nonexistent@user.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
+    }
+
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 

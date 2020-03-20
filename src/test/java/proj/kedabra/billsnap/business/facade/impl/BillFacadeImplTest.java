@@ -487,6 +487,85 @@ class BillFacadeImplTest {
         assertThat(dtoPendingAccounts.containsAll(invitedAccountsList)).isTrue();
     }
 
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is Bill Creator")
+    void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
+        //Given user that is bill's creator
+        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = bill.getId();
+        final var userEmail = "accountentity@test.com";
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTOFixture);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO in getDetailedBill where user is in Bill's accounts")
+    void shouldReturnBillSplitDTOInGetDetailedBillUserInBillAccounts() {
+        //Given user is in bill's accounts
+        final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = bill.getId();
+        final var userEmail = "hellomotto@cell.com";
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTOFixture);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+
+        //When
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
+
+        //Then
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+    @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = 1000L;
+        bill.setId(1000L);
+        final var userEmail = "nonexistent@email.com";
+
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
+    }
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
