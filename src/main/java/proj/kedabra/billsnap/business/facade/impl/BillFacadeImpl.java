@@ -31,6 +31,7 @@ import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
 
@@ -106,9 +107,13 @@ public class BillFacadeImpl implements BillFacade {
 
         billService.inviteRegisteredToBill(bill, accountsList);
 
+        final var pendingAccounts = bill.getAccounts().stream()
+                .filter(a -> a.getStatus().equals(InvitationStatusEnum.PENDING))
+                .map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+
         final var billSplitDTO = getBillSplitDTO(bill);
         final var pendingRegisteredBillSplitDTO = billMapper.toPendingRegisteredBillSplitDTO(billSplitDTO);
-        pendingRegisteredBillSplitDTO.setPendingAccounts(accounts);
+        pendingRegisteredBillSplitDTO.setPendingAccounts(pendingAccounts);
         return pendingRegisteredBillSplitDTO;
     }
 
