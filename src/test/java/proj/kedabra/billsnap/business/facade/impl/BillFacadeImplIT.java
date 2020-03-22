@@ -373,7 +373,9 @@ class BillFacadeImplIT {
         //Then
         final var bill = billRepository.getBillById(existentBillId);
         verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
-        assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
+        final List<String> dtoPendingAccounts = pendingRegisteredBillSplitDTO.getPendingAccounts();
+        assertThat(dtoPendingAccounts.size()).isEqualTo(1);
+        assertThat(dtoPendingAccounts.containsAll(accountsList)).isTrue();
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {

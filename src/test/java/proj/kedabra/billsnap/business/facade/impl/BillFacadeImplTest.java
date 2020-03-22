@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -413,8 +414,8 @@ class BillFacadeImplTest {
         final var billResponsible = "test@email.com";
         final var emailNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1000L;
-        final List<String> accountsList = List.of(emailNotInBill);
-        inviteRegisteredResource.setAccounts(accountsList);
+        final List<String> invitedAccountsList = List.of(emailNotInBill);
+        inviteRegisteredResource.setAccounts(invitedAccountsList);
 
         final var accountNotInBill = AccountEntityFixture.getDefaultAccount();
         accountNotInBill.setEmail(emailNotInBill);
@@ -425,13 +426,32 @@ class BillFacadeImplTest {
         bill.setResponsible(principal);
         bill.setId(existentBillId);
 
+        bill.getAccounts().forEach(ab -> ab.setStatus(InvitationStatusEnum.ACCEPTED));
+
+        final var defaultAccount = AccountEntityFixture.getDefaultAccount();
+        defaultAccount.setEmail(emailNotInBill);
+
+        when(billService.inviteRegisteredToBill(any(Bill.class), any())).thenAnswer(
+                arg -> {
+                    final Bill billInput = (Bill) arg.getArguments()[0];
+                    final var accountBill = new AccountBill();
+                    accountBill.setAccount(defaultAccount);
+                    accountBill.setBill(bill);
+                    accountBill.setPercentage(null);
+                    accountBill.setStatus(InvitationStatusEnum.PENDING);
+                    final var accounts = new HashSet<>(billInput.getAccounts());
+                    accounts.add(accountBill);
+                    billInput.setAccounts(accounts);
+                    return billInput;
+                }
+        );
+
         when(accountService.getAccounts(any())).thenReturn(new ArrayList<>());
         when(billService.getBill(any())).thenReturn(bill);
 
         final var accountPercentageSplit = BigDecimal.valueOf(50);
         final var billSplitDTO = BillSplitDTOFixture.getDefault();
         billSplitDTO.setId(existentBillId);
-        billSplitDTO.setItemsPerAccount(null);
 
         when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
         when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
@@ -463,7 +483,9 @@ class BillFacadeImplTest {
 
         //Then
         verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
-        assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts().containsAll(accountsList)).isTrue();
+        final List<String> dtoPendingAccounts = pendingRegisteredBillSplitDTO.getPendingAccounts();
+        assertThat(dtoPendingAccounts.size()).isEqualTo(1);
+        assertThat(dtoPendingAccounts.containsAll(invitedAccountsList)).isTrue();
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
@@ -484,8 +506,10 @@ class BillFacadeImplTest {
         assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
-        final Set<AccountBill> accounts = bill.getAccounts();
-        assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
+        if (!(dto instanceof PendingRegisteredBillSplitDTO)) {
+            final Set<AccountBill> accounts = bill.getAccounts();
+            assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
+        }
 
         //for the time being we verify a bill with only 1 item. Should be generic when needed.
         if (!bill.getItems().isEmpty()) {
