@@ -27,6 +27,7 @@ public enum ErrorMessageEnum {
     LIST_ACCOUNT_ALREADY_IN_BILL("One or more accounts is already invited or part of the bill: {}"),
     USER_IS_NOT_BILL_RESPONSIBLE("The user making the request is not the Bill responsible"),
     BILL_IS_NOT_OPEN("The bill is not in Open status."),
+    GIVEN_VALUES_NOT_INTEGER_VALUED("The given values are not integer valued: {}"),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
