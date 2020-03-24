@@ -11,8 +11,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,22 +58,24 @@ public class BillServiceImpl implements BillService {
 
     private final NotificationService notificationService;
 
-    @PersistenceContext
-    EntityManager entityManager;
+    private final EntityManager entityManager;
 
+    @Autowired
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
             final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
-            final NotificationService notificationService) {
+            final NotificationService notificationService,
+            final EntityManager entityManager) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
+        this.entityManager = entityManager;
     }
 
 

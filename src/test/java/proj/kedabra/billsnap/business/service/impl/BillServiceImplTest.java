@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -12,10 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
+
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,10 +46,13 @@ import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.fixtures.AccountBillEntityFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
+import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
+import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -73,12 +79,15 @@ class BillServiceImplTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private EntityManager entityManager;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, entityManager);
     }
 
     @Test
@@ -275,36 +284,189 @@ class BillServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should do nothing if Bill is Open")
-    void shouldDoNothingIfBillIsOpen() {
-        //Given
-        final Bill bill = BillEntityFixture.getDefault();
-        bill.setStatus(BillStatusEnum.OPEN);
+    @DisplayName("Should throw Exception if Associate Users Bill call contains non-integer valued percentages")
+    void shouldThrowExceptionIfAssociateCallHasNonIntegerPercentages() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final BigDecimal nonIntegerValue = BigDecimal.valueOf(50.5);
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(9001L);
+            itemPercentageDTO.setPercentage(nonIntegerValue);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
 
         //When/Then
-        assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.GIVEN_VALUES_NOT_INTEGER_VALUED.getMessage(List.of(nonIntegerValue).toString()));
     }
 
     @Test
-    @DisplayName("Should set Status to IN_PROGRESS when executing startBill")
-    void shouldChangeStatusToInProgressWhenStartBill() {
-        //Given
-        final long billId = 123L;
-        final Bill bill = BillEntityFixture.getDefault();
-        final Account account = AccountEntityFixture.getDefaultAccount();
-        final String billResponsible = "billresponsible@email.com";
-        account.setEmail(billResponsible);
-        bill.setResponsible(account);
-        bill.setStatus(BillStatusEnum.OPEN);
+    @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains user not in bill")
+    void shouldThrowExceptionIfAssociateBillCallContainsUserNotInBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String billUser = "user@hasbills.com";
+        final String userNotInBill = "notinbill@email.com";
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+        final long existentBillId = 1003L;
+
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail(billResponsible);
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail(billUser);
+
+        final var accountBill1 = AccountBillEntityFixture.getDefault();
+        accountBill1.setAccount(account1);
+        final var accountBill2 = AccountBillEntityFixture.getDefault();
+        accountBill2.setAccount(account2);
+
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(existentBillId);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(9001L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(userNotInBill);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(8999L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(List.of(userNotInBill).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains item not in bill")
+    void shouldThrowExceptionIfAssociateBillCallContainsItemNotInBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String billUser = "user@hasbills.com";
+        final long nonExistentItemId = 9999L;
+        final long existentItemId = 1004L;
+        final long existentBillId = 1003L;
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail(billResponsible);
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail(billUser);
+
+        final var accountBill1 = AccountBillEntityFixture.getDefault();
+        accountBill1.setAccount(account1);
+        final var accountBill2 = AccountBillEntityFixture.getDefault();
+        accountBill2.setAccount(account2);
+
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(existentBillId);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
+
+        final var item = ItemEntityFixture.getDefault();
+        item.setBill(bill);
+        item.setId(existentItemId);
+
+        bill.setItems(Set.of(item));
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(billUser);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(nonExistentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(List.of(nonExistentItemId).toString()));
+    }
+
+    @Test
+    @DisplayName("Should return Bill with new Associations in /PATCH bills")
+    void shouldReturnBillOnSuccessPATCHAssociateBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String billUser = "user@hasbills.com";
+        final long existentItemId = 1004L;
+        final long existentBillId = 1003L;
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+
+        final var account1 = AccountEntityFixture.getDefaultAccount();
+        account1.setEmail(billResponsible);
+        final var account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setEmail(billUser);
+
+        final var accountBill1 = AccountBillEntityFixture.getDefault();
+        accountBill1.setAccount(account1);
+        final var accountBill2 = AccountBillEntityFixture.getDefault();
+        accountBill2.setAccount(account2);
+
+        final var bill = BillEntityFixture.getDefault();
+        bill.setId(existentBillId);
+        bill.setAccounts(Set.of(accountBill1, accountBill2));
+
+        final var item = ItemEntityFixture.getDefault();
+        item.setBill(bill);
+        item.setId(existentItemId);
+
+        bill.setItems(Set.of(item));
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(billUser);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        doNothing().when(entityManager).flush();
+
         //When
-        final Bill returnedBill = billService.startBill(billId, billResponsible);
+        final Bill returnedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
         //Then
-        assertThat(returnedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
-
+        final List<AccountItem> listAccountItems = returnedBill.getItems().stream()
+                .map(Item::getAccounts).flatMap(Set::stream)
+                .filter(ai -> ai.getPercentage().compareTo(fifty) == 0).collect(Collectors.toList());
+        assertThat(listAccountItems.size()).isEqualTo(2);
     }
 
     @ParameterizedTest
