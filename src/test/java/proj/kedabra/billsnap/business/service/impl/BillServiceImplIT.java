@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -47,6 +48,7 @@ import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -131,7 +133,6 @@ class BillServiceImplIT {
         assertEquals(bill, billRepository.findById(bill.getId()).orElse(null));
     }
 
-
     @Test
     @DisplayName("Should return all bills saved in database to account")
     void shouldReturnAllBillsInDb() {
@@ -211,19 +212,6 @@ class BillServiceImplIT {
         assertThat(bill.getId()).isEqualTo(id);
     }
 
-
-    @Test
-    @DisplayName("Should throw error if referenced bill does not exist")
-    void shouldThrowErrorIfBillDoesNotExist() {
-        //Given
-        final var associateBill = AssociateBillDTOFixture.getDefault();
-        associateBill.setId(185102L);
-
-        //When/Then
-        final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> billService.associateItemsToAccountBill(associateBill));
-        assertThat(exception.getMessage()).isEqualTo("No bill with that id exists");
-    }
-
     @Test
     @DisplayName("Should throw error on specific item/s if does not exist")
     void shouldThrowErrorIfItemDoesNotExistInBill() {
@@ -258,7 +246,6 @@ class BillServiceImplIT {
         assertThat(illegalArgumentException.getMessage()).isEqualTo("Not all accounts are in the bill: [fakeEmails@fake.com, anotherFakeEmail@emails.com]");
 
     }
-
 
     @Test
     @DisplayName("Should modify AccountItem if DTO references an old item that's been associated already")
@@ -340,7 +327,6 @@ class BillServiceImplIT {
         assertThat(listOfExistingItems.get(0).getPercentage()).isEqualTo(percentage);
     }
 
-
     @Test
     @DisplayName("Should not modify AccountItems that aren't referenced in the object")
     void shouldNotModifyUnReferencedAccountItems() {
@@ -387,7 +373,6 @@ class BillServiceImplIT {
         assertThat(notification.getAccount()).isEqualTo(accountNotInBill);
         assertThat(notification.getBill()).isEqualTo(bill);
         assertThat(notification.getTimeSent()).isCloseTo(ZonedDateTime.now(ZoneId.systemDefault()), within(200, ChronoUnit.MILLIS));
-
     }
 
     @Test
@@ -452,7 +437,6 @@ class BillServiceImplIT {
         final var accountsList = List.of(accountNotInBill, secondAccountNotInBill);
         final var originalBillAccountBillSize = bill.getAccounts().size();
 
-
         //When
         billService.inviteRegisteredToBill(bill, accountsList);
 
@@ -465,4 +449,134 @@ class BillServiceImplIT {
                     assertThat(accountBill.getPercentage()).isNull();
                 });
     }
+
+    @Test
+    @DisplayName("Should throw Exception if Associate Users Bill call contains non-integer valued percentages")
+    void shouldThrowExceptionIfAssociateCallHasNonIntegerPercentages() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final BigDecimal nonIntegerValue = BigDecimal.valueOf(50.5);
+        final long existentBillId = 1003L;
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(9001L);
+            itemPercentageDTO.setPercentage(nonIntegerValue);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+        associateBillDTO.setId(existentBillId);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.GIVEN_VALUES_NOT_INTEGER_VALUED.getMessage(List.of(nonIntegerValue).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains user not in bill")
+    void shouldThrowExceptionIfAssociateBillCallContainsUserNotInBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String userNotInBill = "notinbill@email.com";
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+        final long existentBillId = 1003L;
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(9001L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(userNotInBill);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(8999L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+        associateBillDTO.setId(existentBillId);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(List.of(userNotInBill).toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains item not in bill")
+    void shouldThrowExceptionIfAssociateBillCallContainsItemNotInBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String billUser = "user@hasbills.com";
+        final long nonExistentItemId = 9999L;
+        final long existentItemId = 1004L;
+        final long existentBillId = 1003L;
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(billUser);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(nonExistentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+        associateBillDTO.setId(existentBillId);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(List.of(nonExistentItemId).toString()));
+    }
+
+    @Test
+    @DisplayName("Should return Bill with new Associations in /PATCH bills")
+    void shouldReturnBillOnSuccessPATCHAssociateBill() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final String billUser = "user@hasbills.com";
+        final long existentItemId = 1004L;
+        final long existentBillId = 1003L;
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(billUser);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(existentItemId);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+        associateBillDTO.setId(existentBillId);
+
+        //When
+        final Bill returnedBill = billService.associateItemsToAccountBill(associateBillDTO);
+
+        //Then
+        final List<AccountItem> listAccountItems = returnedBill.getItems().stream()
+                .map(Item::getAccounts).flatMap(Set::stream)
+                .filter(ai -> ai.getPercentage().compareTo(fifty) == 0).collect(Collectors.toList());
+        assertThat(listAccountItems.size()).isEqualTo(2);
+    }
+
 }
