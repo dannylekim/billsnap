@@ -308,6 +308,36 @@ class BillServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains duplicate email")
+    void shouldThrowExceptionIfAssociateBillCallContainsDuplicateEmail() {
+        //Given bill with 2 users
+        final String billResponsible = "user@withABill.com";
+        final BigDecimal fifty = BigDecimal.valueOf(50);
+        final long existentBillId = 1003L;
+
+        final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO1.setEmail(billResponsible);
+        itemAssociationDTO1.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(9001L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+        final var itemAssociationDTO2 = ItemAssociationDTOFixture.getDefault();
+        itemAssociationDTO2.setEmail(billResponsible);
+        itemAssociationDTO2.getItems().forEach(itemPercentageDTO -> {
+            itemPercentageDTO.setItemId(8999L);
+            itemPercentageDTO.setPercentage(fifty);
+        });
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setItems(List.of(itemAssociationDTO1, itemAssociationDTO2));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(List.of(billResponsible).toString()));
+    }
+
+    @Test
     @DisplayName("Should throw Exception if /PATCH Associate Users Bill call contains user not in bill")
     void shouldThrowExceptionIfAssociateBillCallContainsUserNotInBill() {
         //Given bill with 2 users

@@ -153,6 +153,7 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO) {
         verifyPercentagesAreIntegerValued(associateBillDTO);
+        verifyNoDuplicateEmails(associateBillDTO);
         final var bill = getBill(associateBillDTO.getId());
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAccountsInBill(bill, items);
@@ -227,6 +228,18 @@ public class BillServiceImpl implements BillService {
 
         if (!nonIntegerList.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.GIVEN_VALUES_NOT_INTEGER_VALUED.getMessage(nonIntegerList.toString()));
+        }
+    }
+
+    private void verifyNoDuplicateEmails(AssociateBillDTO associateBillDTO) {
+        final HashSet<String> allEmails = new HashSet<>();
+        final Set<String> duplicateSet = associateBillDTO.getItems().stream()
+                .map(ItemAssociationDTO::getEmail)
+                .filter(email -> !allEmails.add(email)) //Set.add() returns false if the item was already in the set
+                .collect(Collectors.toSet());
+
+        if (!duplicateSet.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(duplicateSet.toString()));
         }
     }
 
