@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -40,6 +41,7 @@ import proj.kedabra.billsnap.fixtures.ItemCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
+import proj.kedabra.billsnap.presentation.resources.AccountStatusResource;
 import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
@@ -118,7 +120,7 @@ class BillControllerIT {
         BillResource response = mapper.readValue(content, BillResource.class);
 
         verify201NormalCaseAddBill(user, billCreationResource, response);
-        assertTrue(response.getAccountsList().isEmpty());
+        assertThat(response.getAccountsList().size()).isEqualTo(1);
     }
 
     @Test
@@ -138,8 +140,9 @@ class BillControllerIT {
 
         verify201NormalCaseAddBill(user, billCreationResource, response);
         assertThat(response.getAccountsList()).isNotEmpty();
-        assertThat(response.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
-        assertThat(response.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+        final List<AccountStatusResource> inputtedAccounts = response.getAccountsList().stream()
+                .filter(acc -> acc.getAccount().getEmail().equals(existentEmail)).collect(Collectors.toList());
+        assertThat(inputtedAccounts.get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
     }
 
     @Test
