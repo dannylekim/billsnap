@@ -48,6 +48,7 @@ import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
+import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
 
 
 @Tag("integration")
@@ -143,8 +144,9 @@ class BillFacadeImplIT {
 
         verifyBillDTOToBill(returnBillDTO, bill);
         assertThat(returnBillDTO.getAccountsList()).isNotEmpty();
-        assertThat(returnBillDTO.getAccountsList().get(0).getAccount().getEmail()).isEqualTo(existentEmail);
-        assertThat(returnBillDTO.getAccountsList().get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+        final List<AccountStatusPair> inputtedAccountsList = returnBillDTO.getAccountsList().stream()
+                .filter(pair -> pair.getAccount().getEmail().equals(existentEmail)).collect(Collectors.toList());
+        assertThat(inputtedAccountsList.get(0).getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
     }
 
     @Test
@@ -468,7 +470,7 @@ class BillFacadeImplIT {
         final List<ItemDTO> items = returnBillDTO.getItems();
         final Set<Item> billItems = bill.getItems();
         assertEquals(billItems.size(), items.size());
-        assertEquals(returnBillDTO.getAccountsList().size(), bill.getAccounts().size() - 1);
+        assertEquals(returnBillDTO.getAccountsList().size(), bill.getAccounts().size());
 
         if (!items.isEmpty()) {
             //for the time being we verify only 1 item. Should be generic when needed.

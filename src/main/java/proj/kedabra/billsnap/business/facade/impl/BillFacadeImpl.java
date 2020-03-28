@@ -139,12 +139,10 @@ public class BillFacadeImpl implements BillFacade {
         final BillCompleteDTO billCompleteDTO = billMapper.toBillCompleteDTO(bill);
 
         final List<AccountStatusPair> accountStatusList = new ArrayList<>();
-        bill.getAccounts().stream()
-                .filter(accBill -> !accBill.getAccount().getEmail().equals(bill.getCreator().getEmail()))
-                .forEach(accountBill -> {
-                    var pair = new AccountStatusPair(accountMapper.toDTO(accountBill.getAccount()), accountBill.getStatus());
-                    accountStatusList.add(pair);
-                });
+        bill.getAccounts().forEach(accountBill -> {
+            var pair = new AccountStatusPair(accountMapper.toDTO(accountBill.getAccount()), accountBill.getStatus());
+            accountStatusList.add(pair);
+        });
 
         billCompleteDTO.setBalance(balance);
         billCompleteDTO.setAccountsList(accountStatusList);
