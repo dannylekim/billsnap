@@ -2,7 +2,8 @@ package proj.kedabra.billsnap.business.utils.enums;
 
 public enum BillStatusEnum {
     RESOLVED("RESOLVED"),
-    OPEN("OPEN");
+    OPEN("OPEN"),
+    IN_PROGRESS("IN_PROGRESS");
 
     private final String status;
 
