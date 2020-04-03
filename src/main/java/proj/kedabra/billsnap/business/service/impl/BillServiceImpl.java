@@ -111,6 +111,12 @@ public class BillServiceImpl implements BillService {
 
         return bill;
     }
+    @Override
+    public void verifyBillIsOpen(Bill bill) {
+        if (bill.getStatus().equals(BillStatusEnum.IN_PROGRESS) || bill.getStatus().equals(BillStatusEnum.RESOLVED)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        }
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public List<PaymentOwedDTO> calculateAmountOwed(Account account) {

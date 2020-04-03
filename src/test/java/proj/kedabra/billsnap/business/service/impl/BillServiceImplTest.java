@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -40,6 +41,7 @@ import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 class BillServiceImplTest {
 
@@ -223,5 +225,29 @@ class BillServiceImplTest {
         final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().equals(account)).findFirst().orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
         assertThat(accountBill.getPercentage()).isNull();
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Bill is Resolved and not Open")
+    void shouldThrowExceptionIfBillIsResolvedAndNotOpen() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.RESOLVED);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Bill is In Progress and not Open")
+    void shouldThrowExceptionIfBillIsInProgressAndNotOpen() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.IN_PROGRESS);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
     }
 }
