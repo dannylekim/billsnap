@@ -24,6 +24,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -208,6 +209,33 @@ class BillServiceImplTest {
 
         //When/Then
         assertThrows(ResourceNotFoundException.class, () -> billService.getBill(123L));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if the given User email is not the Bill Responsible")
+    void shouldThrowExceptionIfGivenEmailIsNotBillResponsible() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        final String notBillResponsible = "notbillresponsible@email.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.verifyUserIsBillResponsible(bill, notBillResponsible))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should do nothing if the given User email is the Bill Responsible")
+    void shouldDoNothingIfGivenEmailIsBillResponsible() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String billResponsible = "billresponsible@email.com";
+        account.setEmail(billResponsible);
+        bill.setResponsible(account);
+
+        //When/Then
+        assertThatCode(() -> billService.verifyUserIsBillResponsible(bill, billResponsible)).doesNotThrowAnyException();
     }
 
     @Test

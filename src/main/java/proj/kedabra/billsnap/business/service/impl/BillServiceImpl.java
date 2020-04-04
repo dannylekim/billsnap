@@ -20,6 +20,7 @@ import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -100,6 +101,13 @@ public class BillServiceImpl implements BillService {
     @Override
     public Bill getBill(Long id) {
         return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+    }
+
+    @Override
+    public void verifyUserIsBillResponsible(Bill bill, String userEmail) {
+        if (!bill.getResponsible().getEmail().equals(userEmail)) {
+            throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+        }
     }
 
     @Override
