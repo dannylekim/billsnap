@@ -9,6 +9,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
 import proj.kedabra.billsnap.presentation.ApiError;
 
 @RestControllerAdvice
@@ -44,6 +45,12 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
     @ResponseStatus(HttpStatus.FORBIDDEN)
     protected ApiError handleHttpAccessForbidden(final AccessForbiddenException ex) {
         return new ApiError(HttpStatus.FORBIDDEN, ex.getMessage());
+    }
+
+    @ExceptionHandler(MethodNotAllowedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    protected ApiError handleMethodNotAllowed(final MethodNotAllowedException ex) {
+        return new ApiError(HttpStatus.METHOD_NOT_ALLOWED, ex.getMessage());
     }
 
     @ExceptionHandler(Exception.class)

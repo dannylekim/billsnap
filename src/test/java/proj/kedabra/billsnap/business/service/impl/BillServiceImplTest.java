@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -22,6 +23,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -235,7 +237,7 @@ class BillServiceImplTest {
         bill.setStatus(BillStatusEnum.RESOLVED);
 
         //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+        assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
                 .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
     }
 
@@ -247,7 +249,18 @@ class BillServiceImplTest {
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
 
         //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+        assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
                 .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should do nothing if Bill is Open")
+    void shouldDoNothingIfBillIsOpen() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        //When/Then
+        assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
     }
 }

@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
 import proj.kedabra.billsnap.fixtures.FieldErrorFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -109,5 +110,20 @@ class BillSnapExceptionHandlerTest {
         assertEquals(HttpStatus.FORBIDDEN, response.getStatus());
         assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
     }
+
+    @Test
+    @DisplayName("Should return ResponseEntity with error 405 and MethodNotSupported's message")
+    void shouldReturn405ForMethodNotSupportedException() {
+        //Given
+        final var ex = new MethodNotAllowedException(NOT_THIS_ERROR_MESSAGE);
+
+        //When
+        final ApiError response = billSnapExceptionHandler.handleMethodNotAllowed(ex);
+
+        //Then
+        assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatus());
+        assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
+    }
+
 
 }
