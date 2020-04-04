@@ -112,8 +112,8 @@ class BillSnapExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 405 and MethodNotSupported's message")
-    void shouldReturn405ForMethodNotSupportedException() {
+    @DisplayName("Should return ResponseEntity with error 405 and MethodNotAllowed's message")
+    void shouldReturn405ForMethodNotAllowedException() {
         //Given
         final var ex = new MethodNotAllowedException(NOT_THIS_ERROR_MESSAGE);
 
