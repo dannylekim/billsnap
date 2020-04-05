@@ -20,11 +20,12 @@ public interface BillService {
 
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
 
-
     Bill getBill(Long id);
 
     void verifyUserIsBillResponsible(Bill bill, String userEmail);
 
     Bill inviteRegisteredToBill(Bill bill, List<Account> accounts);
+
+    void verifyBillIsOpen(Bill bill);
 
 }

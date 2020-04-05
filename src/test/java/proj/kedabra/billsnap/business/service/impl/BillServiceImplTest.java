@@ -17,6 +17,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -24,6 +26,7 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -254,5 +257,29 @@ class BillServiceImplTest {
         final var accountBill = bill.getAccounts().stream().filter(ab -> ab.getAccount().equals(account)).findFirst().orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.PENDING);
         assertThat(accountBill.getPercentage()).isNull();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should throw exception if Bill is not Open")
+    void shouldThrowExceptionIfBillIsNotOpen(BillStatusEnum status) {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(status);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should do nothing if Bill is Open")
+    void shouldDoNothingIfBillIsOpen() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        //When/Then
+        assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
     }
 }
