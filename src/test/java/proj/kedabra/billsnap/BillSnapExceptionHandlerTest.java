@@ -11,7 +11,7 @@ import org.springframework.http.HttpStatus;
 
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
-import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.fixtures.FieldErrorFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -112,13 +112,13 @@ class BillSnapExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 405 and MethodNotAllowed's message")
-    void shouldReturn405ForMethodNotAllowedException() {
+    @DisplayName("Should return ResponseEntity with error 405 and FunctionalWorkflow's message")
+    void shouldReturn405ForFunctionalWorkflowException() {
         //Given
-        final var ex = new MethodNotAllowedException(NOT_THIS_ERROR_MESSAGE);
+        final var ex = new FunctionalWorkflowException(NOT_THIS_ERROR_MESSAGE);
 
         //When
-        final ApiError response = billSnapExceptionHandler.handleMethodNotAllowed(ex);
+        final ApiError response = billSnapExceptionHandler.handleFunctionalWorkflow(ex);
 
         //Then
         assertEquals(HttpStatus.METHOD_NOT_ALLOWED, response.getStatus());

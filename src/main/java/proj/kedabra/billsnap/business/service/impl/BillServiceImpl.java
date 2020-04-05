@@ -19,8 +19,8 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -122,8 +122,8 @@ public class BillServiceImpl implements BillService {
     }
     @Override
     public void verifyBillIsOpen(Bill bill) {
-        if (bill.getStatus().equals(BillStatusEnum.IN_PROGRESS) || bill.getStatus().equals(BillStatusEnum.RESOLVED)) {
-            throw new MethodNotAllowedException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        if (bill.getStatus() != BillStatusEnum.OPEN) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
         }
     }
 

@@ -17,14 +17,16 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
-import proj.kedabra.billsnap.business.exception.MethodNotAllowedException;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -257,27 +259,16 @@ class BillServiceImplTest {
         assertThat(accountBill.getPercentage()).isNull();
     }
 
-    @Test
-    @DisplayName("Should throw exception if Bill is Resolved and not Open")
-    void shouldThrowExceptionIfBillIsResolvedAndNotOpen() {
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should throw exception if Bill is not Open")
+    void shouldThrowExceptionIfBillIsNotOpen(BillStatusEnum status) {
         //Given
         final Bill bill = BillEntityFixture.getDefault();
-        bill.setStatus(BillStatusEnum.RESOLVED);
+        bill.setStatus(status);
 
         //When/Then
-        assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
-                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should throw exception if Bill is In Progress and not Open")
-    void shouldThrowExceptionIfBillIsInProgressAndNotOpen() {
-        //Given
-        final Bill bill = BillEntityFixture.getDefault();
-        bill.setStatus(BillStatusEnum.IN_PROGRESS);
-
-        //When/Then
-        assertThatExceptionOfType(MethodNotAllowedException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
                 .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
     }
 
