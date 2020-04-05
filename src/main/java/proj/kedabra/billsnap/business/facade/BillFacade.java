@@ -20,4 +20,6 @@ public interface BillFacade {
 
     BillSplitDTO getDetailedBill(Long billId, String userEmail);
 
+    BillSplitDTO startBill(Long billId, String userEmail);
+
 }

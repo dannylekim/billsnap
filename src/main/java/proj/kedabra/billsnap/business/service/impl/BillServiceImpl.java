@@ -109,6 +109,13 @@ public class BillServiceImpl implements BillService {
             throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
         }
     }
+    @Override
+    public Bill startBill(Long id) {
+        final Bill bill = this.getBill(id);
+        verifyBillIsOpen(bill);
+        bill.setStatus(BillStatusEnum.IN_PROGRESS);
+        return bill;
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)

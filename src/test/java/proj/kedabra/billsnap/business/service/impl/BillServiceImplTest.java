@@ -282,4 +282,23 @@ class BillServiceImplTest {
         //When/Then
         assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
     }
+
+    @Test
+    @DisplayName("Should set Status to IN_PROGRESS when executing startBill")
+    void shouldChangeStatusToInProgressWhenStartBill() {
+        //Given
+        final Long id = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When
+        final Bill returnedBill = billService.startBill(id);
+
+        //Then
+        assertThat(returnedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
+
+    }
+
 }
