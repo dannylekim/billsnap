@@ -47,15 +47,12 @@ import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
 import proj.kedabra.billsnap.presentation.resources.AccountStatusResource;
-import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
-import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
-import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -1021,7 +1018,7 @@ class BillControllerIT {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var nonExistentBillId = 69420L;
+        final Long nonExistentBillId = 69420L;
         final var path = String.format(BILL_BILLID_ENDPOINT, nonExistentBillId);
 
         // When
@@ -1030,7 +1027,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
     }
 
     @Test
@@ -1093,7 +1090,7 @@ class BillControllerIT {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var nonExistentBillId = 694206942069420L;
+        final Long nonExistentBillId = 694206942069420L;
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillId);
 
         // When
@@ -1102,7 +1099,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
     }
 
     @Test

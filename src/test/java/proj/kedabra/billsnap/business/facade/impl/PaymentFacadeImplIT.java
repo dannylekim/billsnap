@@ -96,12 +96,12 @@ class PaymentFacadeImplIT {
     void shouldThrowExceptionOnInexistingBill() {
         //given
         final var email = "paymentowed@test.com";
-        final var billId = 99919294L;
+        final Long billId = 99919294L;
 
         //when/then
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> paymentFacade.payBill(PaymentInformationDTOFixture.getDefaultWithBillAndEmail(billId, email)))
-                .withMessage(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+                .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(billId.toString()));
     }
 
     @Test

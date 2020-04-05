@@ -147,13 +147,12 @@ class ResolveBillControllerTest {
         final var value = mapper.writeValueAsString(param);
         when(paymentFacade.payBill(any())).thenReturn(BigDecimal.TEN);
 
-        //when
-        final var mvcResult = this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
+        //when / then
+        this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault())))
                 .andExpect(status().isOk()).andReturn();
 
-        //then
         verify(paymentFacade).payBill(captor.capture());
         final PaymentInformationDTO calledArgument = captor.getValue();
         assertThat(calledArgument.getAmount()).isEqualTo(param.getPaymentAmount());

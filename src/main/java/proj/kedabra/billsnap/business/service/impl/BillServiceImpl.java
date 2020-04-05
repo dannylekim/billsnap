@@ -108,7 +108,7 @@ public class BillServiceImpl implements BillService {
     }
     @Override
     public Bill getBill(Long id) {
-        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(id.toString())));
     }
 
     @Override
@@ -158,6 +158,7 @@ public class BillServiceImpl implements BillService {
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAccountsInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
+        verifyInvitationStatus(bill, items);
         removeReferencedAccountItems(bill, items);
         addNewAssociations(bill, items);
         return bill;
@@ -166,7 +167,6 @@ public class BillServiceImpl implements BillService {
     private void addNewAssociations(Bill bill, List<ItemAssociationDTO> items) {
         final var itemMap = bill.getItems().stream().collect(Collectors.toMap(Item::getId, Function.identity()));
         final var accountMap = bill.getAccounts().stream().map(AccountBill::getAccount).collect(Collectors.toMap(Account::getEmail, Function.identity()));
-
 
         items.forEach(item -> {
             final var account = accountMap.get(item.getEmail());
@@ -188,8 +188,18 @@ public class BillServiceImpl implements BillService {
         entityManager.flush();
     }
 
-    private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
+    private void verifyInvitationStatus(final Bill bill, final List<ItemAssociationDTO> items) {
+        final var declinedEmails = bill.getAccounts().stream().filter(accountBill -> InvitationStatusEnum.DECLINED.equals(accountBill.getStatus())).map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+        final var associatedDeclinedEmails = items.stream().map(ItemAssociationDTO::getEmail).filter(declinedEmails::contains).collect(Collectors.toList());
 
+        if (!associatedDeclinedEmails.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
+        }
+
+
+    }
+
+    private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
         final Set<Item> billItems = bill.getItems();
         final Set<Long> billItemsId = billItems.stream().map(Item::getId).collect(HashSet::new, HashSet::add, HashSet::addAll);
 

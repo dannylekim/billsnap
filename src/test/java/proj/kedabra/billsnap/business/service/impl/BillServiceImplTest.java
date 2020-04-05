@@ -53,6 +53,7 @@ import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
+import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -270,6 +271,32 @@ class BillServiceImplTest {
         assertThat(accountBill.getPercentage()).isNull();
     }
 
+    @Test
+    @DisplayName("Should throw an exception for an association to an account with declined invitation status")
+    void shouldThrowExceptionForDeclinedAssociation() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+
+        final var accountBill = bill.getAccounts().iterator().next();
+        accountBill.setStatus(InvitationStatusEnum.DECLINED);
+
+        final var associateBillDTO = AssociateBillDTOFixture.getDefault();
+        associateBillDTO.setId(bill.getId());
+        final var account = accountBill.getAccount();
+        final var itemAssociationDTO = associateBillDTO.getItems().get(0);
+        itemAssociationDTO.setEmail(account.getEmail());
+        final var item = ItemEntityFixture.getDefault();
+        bill.setItems(Set.of(item));
+        itemAssociationDTO.setItems(List.of(ItemPercentageDTOFixture.getDefaultWithId(item.getId())));
+
+        when(billRepository.findById(associateBillDTO.getId())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.associateItemsToAccountBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(List.of(account.getEmail()).toString()));
+    }
+
     @ParameterizedTest
     @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
     @DisplayName("Should throw exception if Bill is not Open")
@@ -313,7 +340,6 @@ class BillServiceImplTest {
         //Given bill with 2 users
         final String billResponsible = "user@withABill.com";
         final BigDecimal fifty = BigDecimal.valueOf(50);
-        final long existentBillId = 1003L;
 
         final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
         itemAssociationDTO1.setEmail(billResponsible);
