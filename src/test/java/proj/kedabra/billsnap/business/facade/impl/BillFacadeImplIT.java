@@ -34,6 +34,7 @@ import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -423,6 +424,56 @@ class BillFacadeImplIT {
                 .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
+    @Test
+    @DisplayName("Should return BillSplitDTO with status IN_PROGRESS when Start Bill")
+    void ShouldReturnBillSplitDTOWhenStartBill() {
+        //Given
+        final var billId = 1100L;
+        final var userEmail = "user@hasbills.com";
+
+        //When
+        final BillSplitDTO billSplitDTO = billFacade.startBill(billId, userEmail);
+
+        //Then
+        assertThat(billSplitDTO.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Bill is Resolved and not Open in startBill call")
+    void shouldThrowExceptionIfBillIsResolvedNotOpenInStartBill() {
+        //Given
+        final var billId = 1001L;
+        final var userEmail = "test@email.com";
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Bill is In Progress and not Open in startBill call")
+    void shouldThrowExceptionIfBillIsInProgressNotOpenInStartBill() {
+        //Given
+        final var billId = 1101L;
+        final var userEmail = "user@hasbills.com";
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if the given User email is not the Bill Responsible in startBill call")
+    void shouldThrowExceptionIfGivenEmailIsNotBillResponsibleInStartBill() {
+        //Given
+        final var billId = 1100L;
+        final String notBillResponsible = "notbillresponsible@email.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.startBill(billId, notBillResponsible))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;

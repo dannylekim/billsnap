@@ -110,8 +110,9 @@ public class BillServiceImpl implements BillService {
         }
     }
     @Override
-    public Bill startBill(Long id) {
-        final Bill bill = this.getBill(id);
+    public Bill startBill(Long id, String userEmail) {
+        final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, userEmail);
         verifyBillIsOpen(bill);
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
         return bill;

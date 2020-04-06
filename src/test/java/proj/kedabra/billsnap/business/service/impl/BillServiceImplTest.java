@@ -287,14 +287,18 @@ class BillServiceImplTest {
     @DisplayName("Should set Status to IN_PROGRESS when executing startBill")
     void shouldChangeStatusToInProgressWhenStartBill() {
         //Given
-        final Long id = 123L;
+        final long billId = 123L;
         final Bill bill = BillEntityFixture.getDefault();
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String billResponsible = "billresponsible@email.com";
+        account.setEmail(billResponsible);
+        bill.setResponsible(account);
         bill.setStatus(BillStatusEnum.OPEN);
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 
         //When
-        final Bill returnedBill = billService.startBill(id);
+        final Bill returnedBill = billService.startBill(billId, billResponsible);
 
         //Then
         assertThat(returnedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);

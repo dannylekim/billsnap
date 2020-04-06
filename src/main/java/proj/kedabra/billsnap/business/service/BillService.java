@@ -28,6 +28,6 @@ public interface BillService {
 
     void verifyUserIsBillResponsible(Bill bill, String userEmail);
 
-    Bill startBill(Long id);
+    Bill startBill(Long id, String userEmail);
 
 }

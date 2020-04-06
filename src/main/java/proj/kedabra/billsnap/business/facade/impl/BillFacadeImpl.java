@@ -134,7 +134,8 @@ public class BillFacadeImpl implements BillFacade {
     }
     @Override
     public BillSplitDTO startBill(Long billId, String userEmail) {
-        return null;
+        final Bill bill = billService.startBill(billId, userEmail);
+        return getBillSplitDTO(bill);
     }
 
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
