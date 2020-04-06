@@ -282,4 +282,64 @@ class BillServiceImplTest {
         //When/Then
         assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
     }
+
+    @Test
+    @DisplayName("Should set Status to IN_PROGRESS when executing startBill")
+    void shouldChangeStatusToInProgressWhenStartBill() {
+        //Given
+        final long billId = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String billResponsible = "billresponsible@email.com";
+        account.setEmail(billResponsible);
+        bill.setResponsible(account);
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When
+        final Bill returnedBill = billService.startBill(billId, billResponsible);
+
+        //Then
+        assertThat(returnedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
+
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should throw exception if Bill is not Open in Start Bill")
+    void shouldThrowExceptionIfBillIsNotOpenInStartBill(BillStatusEnum status) {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(status);
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String billResponsible = "billresponsible@email.com";
+        account.setEmail(billResponsible);
+        bill.setResponsible(account);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.startBill(billId, billResponsible))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if the given User email is not the Bill Responsible in Start Bill")
+    void shouldThrowExceptionIfGivenEmailIsNotBillResponsibleInStartBill() {
+        //Given
+        final long billId = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        final String notBillResponsible = "notbillresponsible@email.com";
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.startBill(billId, notBillResponsible))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
 }

@@ -4,7 +4,7 @@ create type account_status as enum ('UNREGISTERED', 'REGISTERED');
 
 create type split_type as enum ('BALANCE', 'ITEM');
 
-create type bill_status as enum ('RESOLVED', 'OPEN');
+create type bill_status as enum ('RESOLVED', 'OPEN', 'IN_PROGRESS');
 
 create type group_role as enum ('ADMIN', 'MEMBER');
 

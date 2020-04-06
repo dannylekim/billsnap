@@ -22,10 +22,12 @@ public interface BillService {
 
     Bill getBill(Long id);
 
-    void verifyUserIsBillResponsible(Bill bill, String userEmail);
-
     Bill inviteRegisteredToBill(Bill bill, List<Account> accounts);
 
     void verifyBillIsOpen(Bill bill);
+
+    void verifyUserIsBillResponsible(Bill bill, String userEmail);
+
+    Bill startBill(Long id, String userEmail);
 
 }

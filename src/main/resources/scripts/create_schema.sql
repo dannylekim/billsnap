@@ -5,7 +5,7 @@ create type if not exists account_status as enum ('UNREGISTERED', 'REGISTERED');
 
 create type if not exists split_type as enum ('BALANCE', 'ITEM');
 
-create type if not exists bill_status as enum ('RESOLVED', 'OPEN');
+create type if not exists bill_status as enum ('RESOLVED', 'OPEN', 'IN_PROGRESS');
 
 create type if not exists group_role as enum ('ADMIN', 'MEMBER');
 
