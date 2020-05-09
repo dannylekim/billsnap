@@ -19,6 +19,7 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.Ignore;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -38,6 +39,7 @@ import proj.kedabra.billsnap.fixtures.AssociateBillFixture;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemCreationResourceFixture;
+import proj.kedabra.billsnap.fixtures.StartBillResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -50,6 +52,7 @@ import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
+import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -77,6 +80,8 @@ class BillControllerIT {
     private static final String BILL_BILLID_ENDPOINT = "/bills/%d";
 
     private static final String BILL_BILLID_ACCOUNTS_ENDPOINT = "/bills/%d/accounts";
+
+    private static final String BILL_START_ENDPOINT = "/bills/start";
 
     private static final String JWT_HEADER = "Authorization";
 
@@ -1001,6 +1006,65 @@ class BillControllerIT {
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
+    @Ignore
+    @Test
+    @DisplayName("Should return split bill when start bill")
+    void shouldReturnSplitBillWhenStartWhenStartBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1000L;
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
+
+        // When
+        final var mvcResult = performMvcPostRequest200OKStartBill(bearerToken, startBillResource);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final BillSplitResource billSplitResource = mapper.readValue(content, BillSplitResource.class);
+
+        // Then
+        assertThat(billSplitResource.getId()).isEqualTo(existentBillId);
+        assertThat(billSplitResource.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
+    }
+
+    @Ignore
+    @Test
+    @DisplayName("Should return error bill id non existent when bill start")
+    void shouldReturnErrorBillIdNonExistentWhenBillStart() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var nonExistentBillOId = 694206942069420L;
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillOId);
+
+        // When
+        final var mvcResult = performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Ignore
+    @Test
+    @DisplayName("Should return error bill is not open")
+    void shouldReturnErrorBillIsNotOpen() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1000L;
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
+
+        // When
+        performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
+        final var mvcResult = performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
@@ -1079,6 +1143,17 @@ class BillControllerIT {
         return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
                 .andExpect(status().isOk()).andReturn();
+    }
+
+    private MvcResult performMvcPostRequest200OKStartBill(String bearerToken, StartBillResource startBillResource) throws Exception {
+        return mockMvc.perform(post(BILL_START_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(startBillResource)))
+                .andExpect(status().isOk()).andReturn();
+    }
+    private MvcResult performMvcPostRequest4xxFailureStartBill(String bearerToken, StartBillResource startBillResource) throws Exception {
+        return mockMvc.perform(post(BILL_START_ENDPOINT).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(startBillResource)))
+                .andExpect(status().is4xxClientError()).andReturn();
     }
 
     private MvcResult performMvcPostRequest4xxFailure(String bearerToken, BillCreationResource billCreationResource) throws Exception {
