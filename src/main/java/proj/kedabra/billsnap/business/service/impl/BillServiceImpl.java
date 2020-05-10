@@ -110,6 +110,7 @@ public class BillServiceImpl implements BillService {
         }
     }
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Bill startBill(Long id, String userEmail) {
         final Bill bill = getBill(id);
         verifyUserIsBillResponsible(bill, userEmail);

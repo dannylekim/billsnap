@@ -22,6 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -32,6 +34,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import proj.kedabra.billsnap.business.model.entities.Bill;
+import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillFixture;
@@ -71,6 +75,9 @@ class BillControllerIT {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private BillRepository billRepository;
 
     private static final String BILL_ENDPOINT = "/bills";
 
@@ -769,6 +776,48 @@ class BillControllerIT {
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
+
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should return exception if Bill is not in Open status for Associate Bills")
+    void shouldReturnExceptionIfBillIsNotOpenForAssociateBills(BillStatusEnum status) throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        final Bill billById = billRepository.getBillById(associateBillResource.getId());
+        billById.setStatus(status);
+
+        //When/Then
+        final MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        final String content = result.getResponse().getContentAsString();
+        final ApiError apiError = mapper.readValue(content, ApiError.class);
+
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should return exception if Bill is not in Open status for Invite Registered User To Bill")
+    void shouldReturnExceptionIfBillIsNotOpenInInviteRegisteredPost(BillStatusEnum status) throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentEmail = "test@email.com";
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        inviteRegisteredResource.setAccounts(List.of(existentEmail));
+        final var existentBillId = 1000L;
+        final Bill billById = billRepository.getBillById(existentBillId);
+        billById.setStatus(status);
+
+        //When/Then
+        final MvcResult result = doMvcPostRequestInviteRegistered405Failure(bearerToken, inviteRegisteredResource, existentBillId);
+        final String content = result.getResponse().getContentAsString();
+        final ApiError apiError = mapper.readValue(content, ApiError.class);
+
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
     @Test
     @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource are not in email format for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsNotEmailFormatInInviteRegisteredResourceGivenPost() throws Exception {
@@ -1091,6 +1140,12 @@ class BillControllerIT {
         return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
                 .andExpect(status().isBadRequest()).andReturn();
+    }
+
+    private MvcResult doMvcPostRequestInviteRegistered405Failure(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
+        return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
+                .andExpect(status().isMethodNotAllowed()).andReturn();
     }
 
     private MvcResult performMvcPutRequest4xxFailure(String bearerToken, AssociateBillResource associateBillResource) throws Exception {
