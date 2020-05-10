@@ -19,7 +19,6 @@ import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -120,7 +119,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
 
         //When/Then
-        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
@@ -139,7 +138,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail));
 
         //When/Then
-        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
         String content = result.getResponse().getContentAsString();
         BillResource response = mapper.readValue(content, BillResource.class);
 
@@ -160,7 +159,7 @@ class BillControllerIT {
         billCreationResource.setName("");
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -179,7 +178,7 @@ class BillControllerIT {
         billCreationResource.setName("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -198,7 +197,7 @@ class BillControllerIT {
         billCreationResource.setCategory("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -217,7 +216,7 @@ class BillControllerIT {
         billCreationResource.setCompany("toooooo longggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg");
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -238,7 +237,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -259,7 +258,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -280,7 +279,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -301,7 +300,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -322,7 +321,7 @@ class BillControllerIT {
         billCreationResource.setItems(List.of(item));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -341,7 +340,7 @@ class BillControllerIT {
         billCreationResource.setItems(null);
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -361,7 +360,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.TEN);
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -380,7 +379,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -400,7 +399,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -420,7 +419,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(null);
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -440,7 +439,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(-5));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -460,7 +459,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(1234.56));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -480,7 +479,7 @@ class BillControllerIT {
         billCreationResource.setTipPercent(BigDecimal.valueOf(20.12345));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -502,7 +501,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
     }
@@ -519,7 +518,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -543,7 +542,7 @@ class BillControllerIT {
         billCreationResource.setAccountsList(List.of(existentEmail, invalidEmail));
 
         //When/Then
-        MvcResult result = performMvcPostRequest4xxFailure(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -563,7 +562,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
 
         //When/Then
-        final MvcResult result = performMvcGetRequest200AllBills(bearerToken);
+        final MvcResult result = performMvcGetRequest(bearerToken, BILL_ENDPOINT, 200);
         final String content = result.getResponse().getContentAsString();
         final List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
         });
@@ -578,16 +577,16 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var billCreationResource = BillCreationResourceFixture.getDefault();
 
-        MvcResult result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
         String content = result.getResponse().getContentAsString();
         final BillResource billOne = mapper.readValue(content, BillResource.class);
 
-        result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
         content = result.getResponse().getContentAsString();
         final BillResource billTwo = mapper.readValue(content, BillResource.class);
 
         //When/Then
-        result = performMvcGetRequest200AllBills(bearerToken);
+        result = performMvcGetRequest(bearerToken, BILL_ENDPOINT, 200);
         content = result.getResponse().getContentAsString();
         final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
@@ -606,7 +605,7 @@ class BillControllerIT {
         associateBillResource.setId(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -621,7 +620,7 @@ class BillControllerIT {
         associateBillResource.setItemsPerAccount(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -636,7 +635,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).setEmail(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_BLANK);
     }
@@ -651,7 +650,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).setEmail(" ");
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -673,7 +672,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).setEmail("toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com");
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -695,7 +694,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).setItems(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -710,7 +709,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setItemId(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -725,7 +724,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(null);
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -740,7 +739,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(1234.50));
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
@@ -755,7 +754,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(50.12345));
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
@@ -770,7 +769,7 @@ class BillControllerIT {
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(-50));
 
         //When/Then
-        MvcResult result = performMvcPutRequest4xxFailure(bearerToken, associateBillResource);
+        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
@@ -785,9 +784,10 @@ class BillControllerIT {
         final var invalidEmail = "notemailformatcom";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When/Then
-        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
     }
@@ -795,7 +795,7 @@ class BillControllerIT {
     @Test
     @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsBlankInInviteRegisteredResourceGivenPost() throws Exception {
-        //Given the User makes a request for a bill where User is the responsible
+        //Given the User makes a reque st for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
@@ -803,9 +803,10 @@ class BillControllerIT {
         final var invalidEmail = " ";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When/Then
-        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
         final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -828,9 +829,10 @@ class BillControllerIT {
         final var invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When/Then
-        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
         final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -851,9 +853,10 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(new ArrayList<>());
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When/Then
-        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
@@ -867,9 +870,10 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(null);
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When/Then
-        final MvcResult result = performMvcPostRequestBadRequestInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
@@ -884,9 +888,10 @@ class BillControllerIT {
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1000L;
         inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When
-        final var mvcResult = performMvcPostRequest200OKInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
         final String content = mvcResult.getResponse().getContentAsString();
         final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
 
@@ -907,9 +912,10 @@ class BillControllerIT {
         final var secondAccountNotInBill = "user@withABill.com";
         final var existentBillId = 1000L;
         inviteRegisteredResource.setAccounts(List.of(accountNotInBill, secondAccountNotInBill));
+        final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
 
         //When
-        final var mvcResult = performMvcPostRequest200OKInviteRegistered(bearerToken, inviteRegisteredResource, existentBillId);
+        final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
         final String content = mvcResult.getResponse().getContentAsString();
         final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
 
@@ -926,9 +932,10 @@ class BillControllerIT {
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
 
         // When
-        final var mvcResult = performMvcGetRequest200(bearerToken, existentBillId);
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 200);
         final String content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
@@ -944,12 +951,14 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var billCreationResource = BillCreationResourceFixture.getDefault();
 
-        final var result = performMvcPostRequest201Created(bearerToken, billCreationResource);
+        final var result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
         final String content = result.getResponse().getContentAsString();
         final BillResource createdBill = mapper.readValue(content, BillResource.class);
 
+        final var path = String.format(BILL_BILLID_ENDPOINT,  createdBill.getId());
+
         //When/Then
-        final var mvcResult = performMvcGetRequest200(bearerToken, createdBill.getId());
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 200);
         final String getContent = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplitResource = mapper.readValue(getContent, BillSplitResource.class);
 
@@ -963,9 +972,10 @@ class BillControllerIT {
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var nonExistentBillId = 69420L;
+        final var path = String.format(BILL_BILLID_ENDPOINT, nonExistentBillId);
 
         // When
-        final var mvcResult = performMvcGetRequest400Failure(bearerToken, nonExistentBillId);
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 400);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -979,9 +989,10 @@ class BillControllerIT {
         // Given
         final var bearerToken = "tOkEn";
         final var existentBillId = 1000L;
+        final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
 
         // When
-        final var mvcResult = performMvcGetRequest401Failure(bearerToken, existentBillId);
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 401);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -996,9 +1007,10 @@ class BillControllerIT {
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1006L;
+        final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
 
         // When
-        final var mvcResult = performMvcGetRequest403Failure(bearerToken, existentBillId);
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 403);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1006,7 +1018,6 @@ class BillControllerIT {
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
-    @Disabled
     @Test
     @DisplayName("Should return split bill when start bill")
     void shouldReturnSplitBillWhenStartWhenStartBill() throws Exception {
@@ -1017,7 +1028,7 @@ class BillControllerIT {
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
 
         // When
-        final var mvcResult = performMvcPostRequest200OKStartBill(bearerToken, startBillResource);
+        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
         final var content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplitResource = mapper.readValue(content, BillSplitResource.class);
 
@@ -1026,18 +1037,17 @@ class BillControllerIT {
         assertThat(billSplitResource.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
     }
 
-    @Disabled
     @Test
     @DisplayName("Should return error bill id non existent when bill start")
     void shouldReturnErrorBillIdNonExistentWhenBillStart() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var nonExistentBillOId = 694206942069420L;
-        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillOId);
+        final var nonExistentBillId = 694206942069420L;
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillId);
 
         // When
-        final var mvcResult = performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
+        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 400);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1045,7 +1055,6 @@ class BillControllerIT {
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
     }
 
-    @Disabled
     @Test
     @DisplayName("Should return error bill is not open")
     void shouldReturnErrorBillIsNotOpen() throws Exception {
@@ -1056,8 +1065,8 @@ class BillControllerIT {
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
 
         // When
-        performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
-        final var mvcResult = performMvcPostRequest4xxFailureStartBill(bearerToken, startBillResource);
+        performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
+        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 405);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1107,71 +1116,21 @@ class BillControllerIT {
         assertNotNull(response.getId());
     }
 
-    private MvcResult performMvcGetRequest200AllBills(String bearerToken) throws Exception {
-        return mockMvc.perform(get(BILL_ENDPOINT).header(JWT_HEADER, bearerToken))
-                .andExpect(status().isOk()).andReturn();
+    private MvcResult performMvcGetRequest(String bearerToken, String path, int resultCode) throws Exception {
+        return mockMvc.perform(get(path).header(JWT_HEADER, bearerToken))
+                .andExpect(status().is(resultCode)).andReturn();
     }
 
-    private MvcResult performMvcGetRequest200(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
-                .andExpect(status().isOk()).andReturn();
+    private <T> MvcResult performMvcPostRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
+        return mockMvc.perform(post(path).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
+                .andExpect(status().is(resultCode)).andReturn();
     }
 
-    private MvcResult performMvcGetRequest400Failure(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
-                .andExpect(status().isBadRequest()).andReturn();
-    }
-
-    private MvcResult performMvcGetRequest401Failure(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
-                .andExpect(status().isUnauthorized()).andReturn();
-    }
-
-    private MvcResult performMvcGetRequest403Failure(String bearerToken, Long billId) throws Exception {
-        return mockMvc.perform(get(String.format(BILL_BILLID_ENDPOINT, billId)).header(JWT_HEADER, bearerToken))
-                .andExpect(status().isForbidden()).andReturn();
-    }
-
-
-    private MvcResult performMvcPostRequest201Created(String bearerToken, BillCreationResource billCreationResource) throws Exception {
-        return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().isCreated()).andReturn();
-    }
-
-    private MvcResult performMvcPostRequest200OKInviteRegistered(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
-        return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
-                .andExpect(status().isOk()).andReturn();
-    }
-
-    private MvcResult performMvcPostRequest200OKStartBill(String bearerToken, StartBillResource startBillResource) throws Exception {
-        return mockMvc.perform(post(BILL_START_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(startBillResource)))
-                .andExpect(status().isOk()).andReturn();
-    }
-    private MvcResult performMvcPostRequest4xxFailureStartBill(String bearerToken, StartBillResource startBillResource) throws Exception {
-        return mockMvc.perform(post(BILL_START_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(startBillResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
-    }
-
-    private MvcResult performMvcPostRequest4xxFailure(String bearerToken, BillCreationResource billCreationResource) throws Exception {
-        return mockMvc.perform(post(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(billCreationResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
-    }
-
-    private MvcResult performMvcPostRequestBadRequestInviteRegistered(String bearerToken, InviteRegisteredResource inviteRegisteredResource, Long billId) throws Exception {
-        return mockMvc.perform(post(String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, billId)).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(inviteRegisteredResource)))
-                .andExpect(status().isBadRequest()).andReturn();
-    }
-
-    private MvcResult performMvcPutRequest4xxFailure(String bearerToken, AssociateBillResource associateBillResource) throws Exception {
-        return mockMvc.perform(put(BILL_ENDPOINT).header(JWT_HEADER, bearerToken)
-                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(associateBillResource)))
-                .andExpect(status().is4xxClientError()).andReturn();
+    private <T> MvcResult performMvcPutRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
+        return mockMvc.perform(put(path).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
+                .andExpect(status().is(resultCode)).andReturn();
     }
 
     private ApiError verifyInvalidInputs(MvcResult result, int expectedErrorsAmount) throws java.io.IOException {
