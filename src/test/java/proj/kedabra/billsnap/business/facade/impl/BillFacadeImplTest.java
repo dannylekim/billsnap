@@ -7,6 +7,8 @@ import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -329,12 +331,13 @@ class BillFacadeImplTest {
         bill.setResponsible(principal);
         bill.setId(billId);
 
+        doThrow(AccessForbiddenException.class).when(billService).verifyUserIsBillResponsible(any(), any());
         when(billService.getBill(any())).thenReturn(bill);
 
         //When/Then
+        verifyNoInteractions(accountService);
         assertThatExceptionOfType(AccessForbiddenException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
-                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()));
     }
 
     @Test

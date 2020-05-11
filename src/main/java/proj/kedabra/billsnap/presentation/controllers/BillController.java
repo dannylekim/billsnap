@@ -121,6 +121,7 @@ public class BillController {
             @ApiResponse(code = 400, response = ApiError.class, message = "Error modifying bill"),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(code = 405, response = ApiError.class, message = "The bill is not in Open status."),
     })
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource modifyBill(@ApiParam(required = true, name = "Bill modification details", value = "Minimum bill modification details")
@@ -145,6 +146,7 @@ public class BillController {
             @ApiResponse(code = 400, response = ApiError.class, message = "Error inviting registered users to bill."),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(code = 405, response = ApiError.class, message = "The bill is not in Open status."),
     })
     @ResponseStatus(HttpStatus.OK)
     public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "billId", value = "bill ID")

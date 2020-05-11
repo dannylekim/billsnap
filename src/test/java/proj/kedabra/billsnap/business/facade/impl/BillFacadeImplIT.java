@@ -20,6 +20,8 @@ import java.util.stream.StreamSupport;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -242,6 +244,21 @@ class BillFacadeImplIT {
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(10)));
     }
 
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should throw exception if bill is not status open in Associate Bill")
+    void shouldThrowExceptionIfBillIsNotStatusOpenAssociateBill(BillStatusEnum status) {
+        //Given
+        final var dto = AssociateBillDTOFixture.getDefault();
+        final var bill = billRepository.findById(dto.getId()).orElseThrow();
+        bill.setStatus(status);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    }
+
     @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
@@ -379,6 +396,23 @@ class BillFacadeImplIT {
         final List<String> dtoPendingAccounts = pendingRegisteredBillSplitDTO.getPendingAccounts();
         assertThat(dtoPendingAccounts.size()).isEqualTo(1);
         assertThat(dtoPendingAccounts.containsAll(accountsList)).isTrue();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
+    @DisplayName("Should throw exception if bill is not status open in Invite Registered To Bill")
+    void shouldThrowExceptionIfBillIsNotStatusOpenInviteRegistered(BillStatusEnum status) {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
+        final var existentBillId = 1000L;
+        final var bill = billRepository.findById(existentBillId).orElseThrow();
+        bill.setStatus(status);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
     }
 
     @Test
