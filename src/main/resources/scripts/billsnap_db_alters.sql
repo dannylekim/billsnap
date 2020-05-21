@@ -9,3 +9,5 @@ create type payment_status_type as enum ('PAID', 'IN_PROGRESS');
 
 alter table bills_vs_accounts
     add payment_status payment_status_type;
+
+ALTER TYPE bill_status ADD VALUE 'IN_PROGRESS';

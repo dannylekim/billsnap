@@ -82,19 +82,19 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
-        final Bill bill = billService.associateItemsToAccountBill(associateBillDTO);
+        final var bill = billService.getBill(associateBillDTO.getId());
+        billService.verifyBillIsOpen(bill);
+        final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
-        return getBillSplitDTO(bill);
+        return getBillSplitDTO(associatedBill);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
-
         final var bill = billService.getBill(billId);
-        if (!bill.getResponsible().getEmail().equals(userEmail)) {
-            throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
-        }
+        billService.verifyBillIsOpen(bill);
+        billService.verifyUserIsBillResponsible(bill, userEmail);
 
         final List<Account> accountsList = accountService.getAccounts(accounts);
         final List<String> emailsList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
@@ -130,6 +130,11 @@ public class BillFacadeImpl implements BillFacade {
         if (isNotCreator && isNotInBillsAccount) {
             throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
         }
+        return getBillSplitDTO(bill);
+    }
+    @Override
+    public BillSplitDTO startBill(Long billId, String userEmail) {
+        final Bill bill = billService.startBill(billId, userEmail);
         return getBillSplitDTO(bill);
     }
 

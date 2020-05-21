@@ -40,6 +40,7 @@ import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
+import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 
 @RestController
 public class BillController {
@@ -120,6 +121,7 @@ public class BillController {
             @ApiResponse(code = 400, response = ApiError.class, message = "Error modifying bill"),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(code = 405, response = ApiError.class, message = "The bill is not in Open status."),
     })
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource modifyBill(@ApiParam(required = true, name = "Bill modification details", value = "Minimum bill modification details")
@@ -144,6 +146,7 @@ public class BillController {
             @ApiResponse(code = 400, response = ApiError.class, message = "Error inviting registered users to bill."),
             @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
             @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(code = 405, response = ApiError.class, message = "The bill is not in Open status."),
     })
     @ResponseStatus(HttpStatus.OK)
     public PendingRegisteredBillSplitResource inviteRegisteredToBill(@ApiParam(required = true, name = "billId", value = "bill ID")
@@ -160,4 +163,26 @@ public class BillController {
         return billMapper.toResource(pendingRegisteredBillSplitDTO);
     }
 
+    @PostMapping("bills/start")
+    @ApiOperation(value = "Start a bill", notes = "Blocks all modifications on started bill",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiResponses({
+            @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully started bill!"),
+            @ApiResponse(code = 400, response = ApiError.class, message = "Bill doesn't exist"),
+            @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
+            @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(code = 405, response = ApiError.class, message = "The bill is not in Open status."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public BillSplitResource startBill(@ApiParam(required = true, name = "id of bill", value = "id of bill")
+                                             @RequestBody @Valid final StartBillResource startBillResource,
+                                             final BindingResult bindingResult,
+                                             @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+        if (bindingResult.hasErrors()) {
+            throw new FieldValidationException(bindingResult.getAllErrors());
+        }
+
+        final var billSplitDTO = billFacade.startBill(startBillResource.getId(), principal.getName());
+        return billMapper.toResource(billSplitDTO);
+    }
 }

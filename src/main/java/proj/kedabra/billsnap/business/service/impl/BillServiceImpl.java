@@ -19,6 +19,8 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -102,6 +104,22 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
+    public void verifyUserIsBillResponsible(Bill bill, String userEmail) {
+        if (!bill.getResponsible().getEmail().equals(userEmail)) {
+            throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+        }
+    }
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill startBill(Long id, String userEmail) {
+        final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, userEmail);
+        verifyBillIsOpen(bill);
+        bill.setStatus(BillStatusEnum.IN_PROGRESS);
+        return bill;
+    }
+
+    @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill inviteRegisteredToBill(final Bill bill, final List<Account> accounts) {
         accounts.forEach(acc -> {
@@ -110,6 +128,12 @@ public class BillServiceImpl implements BillService {
         });
 
         return bill;
+    }
+    @Override
+    public void verifyBillIsOpen(Bill bill) {
+        if (bill.getStatus() != BillStatusEnum.OPEN) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
