@@ -83,7 +83,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
         final var bill = billService.getBill(associateBillDTO.getId());
-        billService.verifyBillIsOpen(bill);
+        billService.verifyBillStatus(bill);
         final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
         return getBillSplitDTO(associatedBill);
@@ -93,7 +93,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
         final var bill = billService.getBill(billId);
-        billService.verifyBillIsOpen(bill);
+        billService.verifyBillStatus(bill);
         billService.verifyUserIsBillResponsible(bill, userEmail);
 
         final List<Account> accountsList = accountService.getAccounts(accounts);

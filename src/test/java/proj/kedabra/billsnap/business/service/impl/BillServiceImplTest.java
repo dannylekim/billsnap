@@ -268,7 +268,7 @@ class BillServiceImplTest {
         bill.setStatus(status);
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillStatus(bill))
                 .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
     }
 
@@ -280,7 +280,7 @@ class BillServiceImplTest {
         bill.setStatus(BillStatusEnum.OPEN);
 
         //When/Then
-        assertThatCode(() -> billService.verifyBillIsOpen(bill)).doesNotThrowAnyException();
+        assertThatCode(() -> billService.verifyBillStatus(bill)).doesNotThrowAnyException();
     }
 
     @Test

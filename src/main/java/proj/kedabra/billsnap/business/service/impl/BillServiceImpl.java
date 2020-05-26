@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
@@ -109,13 +110,41 @@ public class BillServiceImpl implements BillService {
             throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
         }
     }
+
+    @Override
+    public void verifyAccountInvitationStatus(AccountBill account, InvitationStatusEnum expectedStatus) {
+        if (!account.getStatus().equals(expectedStatus)) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.WRONG_INVITATION_STATUS.getMessage());
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill startBill(Long id, String userEmail) {
         final Bill bill = getBill(id);
         verifyUserIsBillResponsible(bill, userEmail);
-        verifyBillIsOpen(bill);
+        verifyBillStatus(bill, BillStatusEnum.OPEN);
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
+        return bill;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill editBill(Long id, EditBillDTO editBill) {
+        final Bill bill = getBill(id);
+        verifyBillStatus(bill, BillStatusEnum.OPEN);
+
+        if (!bill.getResponsible().getEmail().equals(editBill.getResponsible().getEmail())) {
+            verifyExistenceOfAccountsInBill(bill, editBill.getItems());
+
+            final AccountBill account = (AccountBill) bill.getAccounts()
+                                                    .stream()
+                                                    .filter(x -> x.getAccount().getEmail().equals(editBill.getResponsible().getEmail()));
+            verifyAccountInvitationStatus(account, InvitationStatusEnum.ACCEPTED);
+        }
+
+        billMapper.editBillToBill(bill, editBill);
+
         return bill;
     }
 
@@ -130,9 +159,9 @@ public class BillServiceImpl implements BillService {
         return bill;
     }
     @Override
-    public void verifyBillIsOpen(Bill bill) {
-        if (bill.getStatus() != BillStatusEnum.OPEN) {
-            throw new FunctionalWorkflowException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    public void verifyBillStatus(Bill bill, BillStatusEnum status) {
+        if (bill.getStatus() != status) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
         }
     }
 
