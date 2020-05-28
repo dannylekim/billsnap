@@ -35,6 +35,6 @@ public interface BillService {
 
     Bill startBill(Long id, String userEmail);
 
-    Bill editBill(Long id, EditBillDTO editBill);
+    Bill editBill(Long id, Account account, EditBillDTO editBill);
 
 }

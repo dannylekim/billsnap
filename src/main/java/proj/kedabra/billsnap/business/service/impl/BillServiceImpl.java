@@ -18,11 +18,14 @@ import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
+import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -52,6 +55,10 @@ public class BillServiceImpl implements BillService {
 
     private final BillMapper billMapper;
 
+    private final AccountMapper accountMapper;
+
+    private final ItemMapper itemMapper;
+
     private final PaymentMapper paymentMapper;
 
     private final NotificationService notificationService;
@@ -62,13 +69,17 @@ public class BillServiceImpl implements BillService {
             final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
-            final NotificationService notificationService) {
+            final NotificationService notificationService,
+            final AccountMapper accountMapper,
+            final ItemMapper itemMapper) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
+        this.accountMapper = accountMapper;
+        this.itemMapper = itemMapper;
     }
 
 
@@ -130,20 +141,30 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Bill editBill(Long id, EditBillDTO editBill) {
+    public Bill editBill(Long id, Account account, EditBillDTO editBill) {
         final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, account.getEmail());
         verifyBillStatus(bill, BillStatusEnum.OPEN);
+        verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
 
-        if (!bill.getResponsible().getEmail().equals(editBill.getResponsible().getEmail())) {
-            verifyExistenceOfAccountsInBill(bill, editBill.getItems());
+        bill.setName(editBill.getName());
+        bill.setResponsible(accountMapper.toEntity(editBill.getResponsible()));
+        bill.setCompany(editBill.getCompany());
+        bill.setCategory(editBill.getCategory());
+        bill.setTipPercent(editBill.getTipPercent());
 
-            final AccountBill account = (AccountBill) bill.getAccounts()
-                                                    .stream()
-                                                    .filter(x -> x.getAccount().getEmail().equals(editBill.getResponsible().getEmail()));
-            verifyAccountInvitationStatus(account, InvitationStatusEnum.ACCEPTED);
-        }
+        Set<Item> items = new HashSet<>();
+        editBill.getItems().forEach(it -> {
+            if (it.getId() == null) {
+                var item = itemMapper.toEntity(it);
+                mapItems(item, bill, account, 100);
+                items.add(item);
+            } else {
+                items.add(itemMapper.toEntity(it));
+            }
+        });
 
-        billMapper.editBillToBill(bill, editBill);
+        bill.setItems(items);
 
         return bill;
     }
@@ -158,6 +179,7 @@ public class BillServiceImpl implements BillService {
 
         return bill;
     }
+
     @Override
     public void verifyBillStatus(Bill bill, BillStatusEnum status) {
         if (bill.getStatus() != status) {
@@ -175,7 +197,7 @@ public class BillServiceImpl implements BillService {
     public Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO) {
         final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage()));
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
-        verifyExistenceOfAccountsInBill(bill, items);
+        verifyExistenceOfAssociateItemInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
         removeReferencedAccountItems(bill, items);
         addNewAssociations(bill, items);
@@ -223,7 +245,7 @@ public class BillServiceImpl implements BillService {
         }
 
     }
-    private void verifyExistenceOfAccountsInBill(Bill bill, List<ItemAssociationDTO> items) {
+    private void verifyExistenceOfAssociateItemInBill(Bill bill, List<ItemAssociationDTO> items) {
         final List<String> existingEmailsInList = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         final String[] nonExistentAccounts = items.stream()
                 .map(ItemAssociationDTO::getEmail)
@@ -232,6 +254,13 @@ public class BillServiceImpl implements BillService {
 
         if (nonExistentAccounts.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentAccounts)));
+        }
+    }
+
+    private void verifyIfAccountInBill(Bill bill, String email) {
+        final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+        if (billEmails.contains(email)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
         }
     }
 
