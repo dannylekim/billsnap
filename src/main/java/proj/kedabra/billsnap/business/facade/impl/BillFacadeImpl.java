@@ -31,6 +31,7 @@ import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
@@ -83,7 +84,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
         final var bill = billService.getBill(associateBillDTO.getId());
-        billService.verifyBillStatus(bill);
+        billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
         return getBillSplitDTO(associatedBill);
@@ -93,7 +94,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
         final var bill = billService.getBill(billId);
-        billService.verifyBillStatus(bill);
+        billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         billService.verifyUserIsBillResponsible(bill, userEmail);
 
         final List<Account> accountsList = accountService.getAccounts(accounts);

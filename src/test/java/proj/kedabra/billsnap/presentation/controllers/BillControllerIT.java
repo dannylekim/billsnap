@@ -797,7 +797,7 @@ class BillControllerIT {
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
-        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
     }
 
     @ParameterizedTest
@@ -820,7 +820,7 @@ class BillControllerIT {
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
-        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
     }
 
     @Test
@@ -1121,7 +1121,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {

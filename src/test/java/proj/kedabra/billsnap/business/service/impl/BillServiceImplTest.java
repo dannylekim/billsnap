@@ -27,7 +27,9 @@ import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -71,12 +73,18 @@ class BillServiceImplTest {
     @Mock
     private NotificationService notificationService;
 
+    @Mock
+    private AccountMapper accountMapper;
+
+    @Mock
+    private ItemMapper itemMapper;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, accountMapper, itemMapper);
     }
 
     @Test
@@ -268,8 +276,8 @@ class BillServiceImplTest {
         bill.setStatus(status);
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillStatus(bill))
-                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillStatus(bill, BillStatusEnum.OPEN))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
     }
 
     @Test
@@ -280,7 +288,7 @@ class BillServiceImplTest {
         bill.setStatus(BillStatusEnum.OPEN);
 
         //When/Then
-        assertThatCode(() -> billService.verifyBillStatus(bill)).doesNotThrowAnyException();
+        assertThatCode(() -> billService.verifyBillStatus(bill, BillStatusEnum.OPEN)).doesNotThrowAnyException();
     }
 
     @Test
@@ -322,7 +330,7 @@ class BillServiceImplTest {
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.startBill(billId, billResponsible))
-                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
     }
 
     @Test
