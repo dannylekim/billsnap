@@ -10,6 +10,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -55,19 +58,24 @@ public class BillServiceImpl implements BillService {
 
     private final NotificationService notificationService;
 
+    private final EntityManager entityManager;
+
+    @Autowired
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
             final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
-            final NotificationService notificationService) {
+            final NotificationService notificationService,
+            final EntityManager entityManager) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
+        this.entityManager = entityManager;
     }
 
 
@@ -144,7 +152,9 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO) {
-        final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage()));
+        verifyPercentagesAreIntegerValued(associateBillDTO);
+        verifyNoDuplicateEmails(associateBillDTO);
+        final var bill = getBill(associateBillDTO.getId());
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAccountsInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
@@ -175,6 +185,7 @@ public class BillServiceImpl implements BillService {
                 .collect(Collectors.toList());
 
         bill.getItems().stream().filter(i -> list.contains(i.getId())).map(Item::getAccounts).forEach(Set::clear);
+        entityManager.flush();
     }
 
     private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
@@ -203,6 +214,32 @@ public class BillServiceImpl implements BillService {
 
         if (nonExistentAccounts.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentAccounts)));
+        }
+    }
+
+    private void verifyPercentagesAreIntegerValued(AssociateBillDTO associateBillDTO) {
+        final var nonIntegerList = associateBillDTO.getItems()
+                .stream()
+                .map(ItemAssociationDTO::getItems)
+                .flatMap(List::stream)
+                .map(ItemPercentageDTO::getPercentage)
+                .filter(bd -> bd.stripTrailingZeros().scale() > 0)
+                .collect(Collectors.toList());
+
+        if (!nonIntegerList.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.GIVEN_VALUES_NOT_INTEGER_VALUED.getMessage(nonIntegerList.toString()));
+        }
+    }
+
+    private void verifyNoDuplicateEmails(AssociateBillDTO associateBillDTO) {
+        final HashSet<String> allEmails = new HashSet<>();
+        final Set<String> duplicateSet = associateBillDTO.getItems().stream()
+                .map(ItemAssociationDTO::getEmail)
+                .filter(email -> !allEmails.add(email)) //Set.add() returns false if the item was already in the set
+                .collect(Collectors.toSet());
+
+        if (!duplicateSet.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(duplicateSet.toString()));
         }
     }
 

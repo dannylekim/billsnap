@@ -26,6 +26,8 @@ public enum ErrorMessageEnum {
     SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: {}"),
     LIST_ACCOUNT_ALREADY_IN_BILL("One or more accounts is already invited or part of the bill: {}"),
     USER_IS_NOT_BILL_RESPONSIBLE("The user making the request is not the Bill responsible"),
+    GIVEN_VALUES_NOT_INTEGER_VALUED("The given percentages are not integer valued: {}"),
+    DUPLICATE_EMAILS_IN_ASSOCIATE_USERS("There are duplicate emails being called: {}"),
     BILL_IS_NOT_OPEN("The bill is not in Open status."),
 
     //=========================================TESTING ONLY===============================================
