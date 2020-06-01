@@ -16,12 +16,11 @@ public enum ErrorMessageEnum {
     WRONG_REQ_METHOD("Incorrect login request method."),
     BAD_CREDENTIALS("Username or password is incorrect."),
     INTERNAL_SERVER_ERROR("Server error has occurred, please try again later."),
-    BILL_DOES_NOT_EXIST("Bill does not exist."),
     CANNOT_PAY_MORE_THAN_OWED("Cannot pay more than the amount owed."),
     ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL("Account does not have the bill specified."),
     BILL_ALREADY_RESOLVED("Bill is already resolved. Cannot perform action."),
     BILL_ALREADY_PAID_FOR("The user has already paid their bill."),
-    BILL_ID_DOES_NOT_EXIST("No bill with that id exists"),
+    BILL_ID_DOES_NOT_EXIST("No bill exists with id: {}"),
     SOME_ACCOUNTS_NONEXISTENT_IN_BILL("Not all accounts are in the bill: {}"),
     SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: {}"),
     LIST_ACCOUNT_ALREADY_IN_BILL("One or more accounts is already invited or part of the bill: {}"),
@@ -29,6 +28,7 @@ public enum ErrorMessageEnum {
     GIVEN_VALUES_NOT_INTEGER_VALUED("The given percentages are not integer valued: {}"),
     DUPLICATE_EMAILS_IN_ASSOCIATE_USERS("There are duplicate emails being called: {}"),
     BILL_IS_NOT_OPEN("The bill is not in Open status."),
+    LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

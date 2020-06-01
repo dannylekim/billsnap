@@ -29,8 +29,10 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
+import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
@@ -49,6 +51,7 @@ import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
+import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
@@ -260,6 +263,25 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should throw exception if associated items contain a declined email")
+    void shouldThrowExceptionForDeclinedEmailAssociation() {
+        //given
+        final var associateBillDTO = new AssociateBillDTO();
+        associateBillDTO.setId(2000L);
+        final var itemAssociationDTO = new ItemAssociationDTO();
+        final var email = "user@withADeclinedBill.com";
+        itemAssociationDTO.setEmail(email);
+        itemAssociationDTO.setItems(List.of(ItemPercentageDTOFixture.getDefaultWithId(1012L)));
+        associateBillDTO.setItems(List.of(itemAssociationDTO));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(List.of(email).toString()));
+
+    }
+
+    @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
         //Given
@@ -304,7 +326,7 @@ class BillFacadeImplIT {
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
-                .withMessage(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+                .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(String.valueOf(nonExistentBillId)));
     }
 
     @Test

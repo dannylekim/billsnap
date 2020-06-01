@@ -212,6 +212,19 @@ class BillServiceImplIT {
         assertThat(bill.getId()).isEqualTo(id);
     }
 
+
+    @Test
+    @DisplayName("Should throw error if referenced bill does not exist")
+    void shouldThrowErrorIfBillDoesNotExist() {
+        //Given
+        final var associateBill = AssociateBillDTOFixture.getDefault();
+        final Long id = 185102L;
+        associateBill.setId(id);
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> billService.associateItemsToAccountBill(associateBill)).withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(id.toString()));
+    }
+
     @Test
     @DisplayName("Should throw error on specific item/s if does not exist")
     void shouldThrowErrorIfItemDoesNotExistInBill() {
@@ -482,7 +495,6 @@ class BillServiceImplIT {
         //Given bill with 2 users
         final String billResponsible = "user@withABill.com";
         final BigDecimal fifty = BigDecimal.valueOf(50);
-        final long existentBillId = 1003L;
 
         final var itemAssociationDTO1 = ItemAssociationDTOFixture.getDefault();
         itemAssociationDTO1.setEmail(billResponsible);
