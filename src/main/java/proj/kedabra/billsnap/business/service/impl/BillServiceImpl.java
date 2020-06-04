@@ -10,6 +10,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.persistence.EntityManager;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,6 +66,9 @@ public class BillServiceImpl implements BillService {
 
     private final NotificationService notificationService;
 
+    private final EntityManager entityManager;
+
+    @Autowired
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
@@ -70,6 +76,7 @@ public class BillServiceImpl implements BillService {
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
             final NotificationService notificationService,
+            final EntityManager entityManager,
             final AccountMapper accountMapper,
             final ItemMapper itemMapper) {
         this.billRepository = billRepository;
@@ -78,6 +85,7 @@ public class BillServiceImpl implements BillService {
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
+        this.entityManager = entityManager;
         this.accountMapper = accountMapper;
         this.itemMapper = itemMapper;
     }
@@ -112,7 +120,7 @@ public class BillServiceImpl implements BillService {
     }
     @Override
     public Bill getBill(Long id) {
-        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+        return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(id.toString())));
     }
 
     @Override
@@ -195,10 +203,13 @@ public class BillServiceImpl implements BillService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO) {
-        final var bill = billRepository.findById(associateBillDTO.getId()).orElseThrow(() -> new IllegalArgumentException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage()));
+        verifyPercentagesAreIntegerValued(associateBillDTO);
+        verifyNoDuplicateEmails(associateBillDTO);
+        final var bill = getBill(associateBillDTO.getId());
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
         verifyExistenceOfAssociateItemInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
+        verifyInvitationStatus(bill, items);
         removeReferencedAccountItems(bill, items);
         addNewAssociations(bill, items);
         return bill;
@@ -207,7 +218,6 @@ public class BillServiceImpl implements BillService {
     private void addNewAssociations(Bill bill, List<ItemAssociationDTO> items) {
         final var itemMap = bill.getItems().stream().collect(Collectors.toMap(Item::getId, Function.identity()));
         final var accountMap = bill.getAccounts().stream().map(AccountBill::getAccount).collect(Collectors.toMap(Account::getEmail, Function.identity()));
-
 
         items.forEach(item -> {
             final var account = accountMap.get(item.getEmail());
@@ -226,10 +236,21 @@ public class BillServiceImpl implements BillService {
                 .collect(Collectors.toList());
 
         bill.getItems().stream().filter(i -> list.contains(i.getId())).map(Item::getAccounts).forEach(Set::clear);
+        entityManager.flush();
+    }
+
+    private void verifyInvitationStatus(final Bill bill, final List<ItemAssociationDTO> items) {
+        final var declinedEmails = bill.getAccounts().stream().filter(accountBill -> InvitationStatusEnum.DECLINED.equals(accountBill.getStatus())).map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+        final var associatedDeclinedEmails = items.stream().map(ItemAssociationDTO::getEmail).filter(declinedEmails::contains).collect(Collectors.toList());
+
+        if (!associatedDeclinedEmails.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
+        }
+
+
     }
 
     private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
-
         final Set<Item> billItems = bill.getItems();
         final Set<Long> billItemsId = billItems.stream().map(Item::getId).collect(HashSet::new, HashSet::add, HashSet::addAll);
 
@@ -254,6 +275,32 @@ public class BillServiceImpl implements BillService {
 
         if (nonExistentAccounts.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentAccounts)));
+        }
+    }
+
+    private void verifyPercentagesAreIntegerValued(AssociateBillDTO associateBillDTO) {
+        final var nonIntegerList = associateBillDTO.getItems()
+                .stream()
+                .map(ItemAssociationDTO::getItems)
+                .flatMap(List::stream)
+                .map(ItemPercentageDTO::getPercentage)
+                .filter(bd -> bd.stripTrailingZeros().scale() > 0)
+                .collect(Collectors.toList());
+
+        if (!nonIntegerList.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.GIVEN_VALUES_NOT_INTEGER_VALUED.getMessage(nonIntegerList.toString()));
+        }
+    }
+
+    private void verifyNoDuplicateEmails(AssociateBillDTO associateBillDTO) {
+        final HashSet<String> allEmails = new HashSet<>();
+        final Set<String> duplicateSet = associateBillDTO.getItems().stream()
+                .map(ItemAssociationDTO::getEmail)
+                .filter(email -> !allEmails.add(email)) //Set.add() returns false if the item was already in the set
+                .collect(Collectors.toSet());
+
+        if (!duplicateSet.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(duplicateSet.toString()));
         }
     }
 

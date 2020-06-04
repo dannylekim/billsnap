@@ -306,15 +306,15 @@ class BillFacadeImplTest {
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var principal = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
-        final var nonExistentBillId = 90019001L;
+        final Long nonExistentBillId = 90019001L;
         inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
 
-        when(billService.getBill(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage()));
+        when(billService.getBill(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString())));
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
-                .withMessage(ErrorMessageEnum.BILL_DOES_NOT_EXIST.getMessage());
+                .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
     }
 
     @Test
@@ -441,7 +441,7 @@ class BillFacadeImplTest {
                     accountBill.setBill(bill);
                     accountBill.setPercentage(null);
                     accountBill.setStatus(InvitationStatusEnum.PENDING);
-                    final var accounts = new HashSet<AccountBill>(billInput.getAccounts());
+                    final var accounts = new HashSet<>(billInput.getAccounts());
                     accounts.add(accountBill);
                     billInput.setAccounts(accounts);
                     return billInput;
