@@ -18,6 +18,8 @@ public class EditBillDTO {
 
     private BigDecimal tipPercent;
 
+    private BigDecimal tipAmount;
+
     private List<ItemDTO> items;
 
 }

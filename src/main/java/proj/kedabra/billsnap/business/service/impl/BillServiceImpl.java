@@ -155,11 +155,11 @@ public class BillServiceImpl implements BillService {
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
 
+        setBillTip(bill, editBill);
         bill.setName(editBill.getName());
         bill.setResponsible(accountMapper.toEntity(editBill.getResponsible()));
         bill.setCompany(editBill.getCompany());
         bill.setCategory(editBill.getCategory());
-        bill.setTipPercent(editBill.getTipPercent());
 
         Set<Item> items = new HashSet<>();
         editBill.getItems().forEach(it -> {
@@ -308,6 +308,18 @@ public class BillServiceImpl implements BillService {
         final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         if (billEmails.contains(email)) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
+        }
+    }
+
+    private void setBillTip(Bill bill , EditBillDTO editBill) {
+        if ((bill.getTipAmount() == null && editBill.getTipPercent() == null) || (bill.getTipPercent() == null && editBill.getTipAmount() == null)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+        }
+
+        if (bill.getTipAmount() == null) {
+            bill.setTipPercent(editBill.getTipPercent());
+        } else {
+            bill.setTipAmount(editBill.getTipAmount());
         }
     }
 

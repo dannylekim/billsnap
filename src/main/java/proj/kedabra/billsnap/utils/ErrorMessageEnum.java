@@ -31,6 +31,7 @@ public enum ErrorMessageEnum {
     LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
     WRONG_BILL_STATUS("Bill status is incorrect."),
     WRONG_INVITATION_STATUS("Invitation status is incorrect."),
+    WRONG_TIP_FORMAT("Tip format is incorrect."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

@@ -27,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
@@ -56,6 +57,7 @@ import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
+import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -568,6 +570,30 @@ class BillServiceImplTest {
         assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billService.startBill(billId, notBillResponsible))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should edit bill successfully")
+    void shouldEditBillSuccessfully() {
+        //Given
+        final long billId = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(accountMapper.toEntity(any())).thenReturn();
+
+        //When
+        final Bill result = billService.editBill(billId, account, editBill);
+
+        //Then
+        assertThat(result.getName()).isEqualTo(editBill.getName());
+        assertThat(result.getResponsible()).isEqualTo(editBill.getResponsible());
+        assertThat(result.getCompany()).isEqualTo(editBill.getCompany());
+        assertThat(result.getCategory()).isEqualTo(editBill.getCategory());
+        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
+        assertThat(result.getItems()).isEqualTo(editBill.getItems());
     }
 
 }
