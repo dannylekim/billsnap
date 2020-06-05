@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -17,18 +18,17 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import lombok.SneakyThrows;
+
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
-import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
-import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
-import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -58,10 +58,6 @@ public class BillServiceImpl implements BillService {
 
     private final BillMapper billMapper;
 
-    private final AccountMapper accountMapper;
-
-    private final ItemMapper itemMapper;
-
     private final PaymentMapper paymentMapper;
 
     private final NotificationService notificationService;
@@ -76,9 +72,7 @@ public class BillServiceImpl implements BillService {
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
             final NotificationService notificationService,
-            final EntityManager entityManager,
-            final AccountMapper accountMapper,
-            final ItemMapper itemMapper) {
+            final EntityManager entityManager) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
@@ -86,8 +80,6 @@ public class BillServiceImpl implements BillService {
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
         this.entityManager = entityManager;
-        this.accountMapper = accountMapper;
-        this.itemMapper = itemMapper;
     }
 
 
@@ -147,6 +139,7 @@ public class BillServiceImpl implements BillService {
         return bill;
     }
 
+    @SneakyThrows
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill editBill(Long id, Account account, EditBillDTO editBill) {
@@ -156,23 +149,8 @@ public class BillServiceImpl implements BillService {
         verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
 
         setBillTip(bill, editBill);
-        bill.setName(editBill.getName());
-        bill.setResponsible(accountMapper.toEntity(editBill.getResponsible()));
-        bill.setCompany(editBill.getCompany());
-        bill.setCategory(editBill.getCategory());
-
-        Set<Item> items = new HashSet<>();
-        editBill.getItems().forEach(it -> {
-            if (it.getId() == null) {
-                var item = itemMapper.toEntity(it);
-                mapItems(item, bill, account, 100);
-                items.add(item);
-            } else {
-                items.add(itemMapper.toEntity(it));
-            }
-        });
-
-        bill.setItems(items);
+        final Method mapItems = this.getClass().getMethod("mapItems", Item.class, Bill.class, Account.class, int.class);
+        billMapper.editBillToBill(bill, editBill, account, mapItems);
 
         return bill;
     }
@@ -246,8 +224,6 @@ public class BillServiceImpl implements BillService {
         if (!associatedDeclinedEmails.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
         }
-
-
     }
 
     private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
@@ -264,8 +240,8 @@ public class BillServiceImpl implements BillService {
         if (nonExistentListIds.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentListIds)));
         }
-
     }
+
     private void verifyExistenceOfAssociateItemInBill(Bill bill, List<ItemAssociationDTO> items) {
         final List<String> existingEmailsInList = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         final String[] nonExistentAccounts = items.stream()
