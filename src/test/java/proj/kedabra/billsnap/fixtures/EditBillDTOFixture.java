@@ -18,12 +18,14 @@ public class EditBillDTOFixture {
         editBill.setResponsible(AccountDTOFixture.getCreationDTO());
         editBill.setCompany("editCompany");
         editBill.setCategory("editCategory");
-        editBill.setTipAmount(BigDecimal.valueOf(15));
+        editBill.setTipPercent(BigDecimal.valueOf(15));
 
         List<ItemDTO> list = new ArrayList<>();
-        list.add(ItemDTOFixture.getItemCustom(10l));
-        list.add(ItemDTOFixture.getItemCustom(15l));
-        list.add(ItemDTOFixture.getItemCustom(20l));
+        final var item1 = new ItemDTO();
+        item1.setId(1000L);
+        final var item2 = ItemDTOFixture.getItemCustom(null);
+        list.add(item1);
+        list.add(item2);
         editBill.setItems(list);
 
         return editBill;

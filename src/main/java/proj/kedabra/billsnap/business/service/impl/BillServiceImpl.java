@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import java.lang.reflect.Method;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -18,8 +17,6 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import lombok.SneakyThrows;
-
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
@@ -29,6 +26,7 @@ import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -38,6 +36,7 @@ import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.ItemRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.service.NotificationService;
@@ -45,7 +44,6 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
-
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -56,7 +54,11 @@ public class BillServiceImpl implements BillService {
 
     private final PaymentRepository paymentRepository;
 
+    private final ItemRepository itemRepository;
+
     private final BillMapper billMapper;
+
+    private final ItemMapper itemMapper;
 
     private final PaymentMapper paymentMapper;
 
@@ -72,7 +74,9 @@ public class BillServiceImpl implements BillService {
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
             final NotificationService notificationService,
-            final EntityManager entityManager) {
+            final EntityManager entityManager,
+            final ItemRepository itemRepository,
+            final ItemMapper itemMapper) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
         this.accountBillRepository = accountBillRepository;
@@ -80,6 +84,8 @@ public class BillServiceImpl implements BillService {
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
         this.entityManager = entityManager;
+        this.itemRepository = itemRepository;
+        this.itemMapper = itemMapper;
     }
 
 
@@ -116,6 +122,11 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
+    public Item getItem(Long id) {
+        return itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(id.toString())));
+    }
+
+    @Override
     public void verifyUserIsBillResponsible(Bill bill, String userEmail) {
         if (!bill.getResponsible().getEmail().equals(userEmail)) {
             throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
@@ -139,7 +150,6 @@ public class BillServiceImpl implements BillService {
         return bill;
     }
 
-    @SneakyThrows
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill editBill(Long id, Account account, EditBillDTO editBill) {
@@ -148,9 +158,22 @@ public class BillServiceImpl implements BillService {
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
 
+        billMapper.editBillToBill(bill, editBill);
         setBillTip(bill, editBill);
-        final Method mapItems = this.getClass().getMethod("mapItems", Item.class, Bill.class, Account.class, int.class);
-        billMapper.editBillToBill(bill, editBill, account, mapItems);
+
+        final Set<Item> items = new HashSet<>();
+        editBill.getItems().forEach(it -> {
+            if (it.getId() == null) {
+                final var item = itemMapper.toEntity(it);
+                item.setBill(bill);
+                mapItems(item, bill, account, 100);
+                items.add(item);
+            } else {
+                items.add(getItem(it.getId()));
+            }
+        });
+
+        bill.setItems(items);
 
         return bill;
     }
@@ -282,7 +305,7 @@ public class BillServiceImpl implements BillService {
 
     private void verifyIfAccountInBill(Bill bill, String email) {
         final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
-        if (billEmails.contains(email)) {
+        if (!billEmails.contains(email)) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
         }
     }

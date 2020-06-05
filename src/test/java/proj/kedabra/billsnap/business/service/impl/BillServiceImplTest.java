@@ -32,7 +32,6 @@ import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
-import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
@@ -45,6 +44,7 @@ import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.repository.ItemRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -87,12 +87,18 @@ class BillServiceImplTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private ItemRepository itemRepository;
+
+    @Mock
+    private ItemMapper itemMapper;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, entityManager);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, entityManager, itemRepository, itemMapper);
     }
 
     @Test
@@ -566,28 +572,27 @@ class BillServiceImplTest {
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
-//    @Test
-//    @DisplayName("Should edit bill successfully")
-//    void shouldEditBillSuccessfully() {
-//        //Given
-//        final long billId = 123L;
-//        final Bill bill = BillEntityFixture.getDefault();
-//        final Account account = AccountEntityFixture.getDefaultAccount();
-//        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-//
-//        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
-//        when(accountMapper.toEntity(any())).thenReturn();
-//
-//        //When
-//        final Bill result = billService.editBill(billId, account, editBill);
-//
-//        //Then
+    @Test
+    @DisplayName("Should edit bill successfully")
+    void shouldEditBillSuccessfully() {
+        //Given
+        final long billId = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When
+        final Bill result = billService.editBill(billId, account, editBill);
+
+        //Then
 //        assertThat(result.getName()).isEqualTo(editBill.getName());
 //        assertThat(result.getResponsible()).isEqualTo(editBill.getResponsible());
 //        assertThat(result.getCompany()).isEqualTo(editBill.getCompany());
 //        assertThat(result.getCategory()).isEqualTo(editBill.getCategory());
 //        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
 //        assertThat(result.getItems()).isEqualTo(editBill.getItems());
-//    }
+    }
 
 }

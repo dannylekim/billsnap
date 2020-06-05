@@ -21,6 +21,7 @@ public enum ErrorMessageEnum {
     BILL_ALREADY_RESOLVED("Bill is already resolved. Cannot perform action."),
     BILL_ALREADY_PAID_FOR("The user has already paid their bill."),
     BILL_ID_DOES_NOT_EXIST("No bill exists with id: {}"),
+    ITEM_ID_DOES_NOT_EXIST("No item exists with id: {}"),
     SOME_ACCOUNTS_NONEXISTENT_IN_BILL("Not all accounts are in the bill: {}"),
     SOME_ITEMS_NONEXISTENT_IN_BILL("Not all items exist in the bill: {}"),
     LIST_ACCOUNT_ALREADY_IN_BILL("One or more accounts is already invited or part of the bill: {}"),
@@ -32,6 +33,7 @@ public enum ErrorMessageEnum {
     WRONG_BILL_STATUS("Bill status is incorrect."),
     WRONG_INVITATION_STATUS("Invitation status is incorrect."),
     WRONG_TIP_FORMAT("Tip format is incorrect."),
+    INTERNAL_ERROR("Internal Error."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
