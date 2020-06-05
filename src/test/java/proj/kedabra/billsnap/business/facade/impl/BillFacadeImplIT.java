@@ -282,6 +282,25 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should throw exception if associated items contain a declined email")
+    void shouldThrowExceptionForDeclinedEmailAssociation() {
+        //given
+        final var associateBillDTO = new AssociateBillDTO();
+        associateBillDTO.setId(2000L);
+        final var itemAssociationDTO = new ItemAssociationDTO();
+        final var email = "user@withADeclinedBill.com";
+        itemAssociationDTO.setEmail(email);
+        itemAssociationDTO.setItems(List.of(ItemPercentageDTOFixture.getDefaultWithId(1012L)));
+        associateBillDTO.setItems(List.of(itemAssociationDTO));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO))
+                .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(List.of(email).toString()));
+
+    }
+
+    @Test
     @DisplayName("Should return BillSplitDTO with each account's total items cost sum and mapped to input Bill")
     void shouldReturnBillSplitDTOWithAccountItemsCostSum() {
         //Given

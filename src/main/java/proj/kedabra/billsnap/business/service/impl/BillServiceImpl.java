@@ -247,6 +247,10 @@ public class BillServiceImpl implements BillService {
         if (!associatedDeclinedEmails.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
         }
+
+        if (!associatedDeclinedEmails.isEmpty()) {
+            throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
+        }
     }
 
     private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
