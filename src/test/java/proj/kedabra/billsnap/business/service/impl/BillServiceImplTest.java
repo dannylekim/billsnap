@@ -577,22 +577,156 @@ class BillServiceImplTest {
     void shouldEditBillSuccessfully() {
         //Given
         final long billId = 123L;
-        final Bill bill = BillEntityFixture.getDefault();
         final Account account = AccountEntityFixture.getDefaultAccount();
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail(account.getEmail());
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+        final Item item2 = ItemEntityFixture.getDefault();
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(itemRepository.findById(any())).thenReturn(Optional.of(item1));
+        when(itemMapper.toEntity(any())).thenReturn(item2);
 
         //When
         final Bill result = billService.editBill(billId, account, editBill);
 
         //Then
-//        assertThat(result.getName()).isEqualTo(editBill.getName());
-//        assertThat(result.getResponsible()).isEqualTo(editBill.getResponsible());
-//        assertThat(result.getCompany()).isEqualTo(editBill.getCompany());
-//        assertThat(result.getCategory()).isEqualTo(editBill.getCategory());
-//        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
-//        assertThat(result.getItems()).isEqualTo(editBill.getItems());
+        final var items = new ArrayList<>(result.getItems());
+        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
+        if (items.get(0).getId() == 9999L) {
+            assertThat(items.get(0).getId()).isEqualTo(9999L);
+            assertThat(items.get(0).getCost().toString()).isEqualTo("90");
+            assertThat(items.get(1).getId()).isNotNull();
+            assertThat(items.get(1).getCost().toString()).isEqualTo("10");
+        } else {
+            assertThat(items.get(0).getId()).isEqualTo(4000L);
+            assertThat(items.get(0).getCost().toString()).isEqualTo("10");
+            assertThat(items.get(1).getId()).isNotNull();
+            assertThat(items.get(1).getCost().toString()).isEqualTo("90");
+        }
+    }
+
+    @Test
+    @DisplayName("Should throw exception when user is not responsible of bill")
+    void shouldThrowExceptionWhenUserIsNotResponsibleOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        account.setEmail("someEmail@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        final Bill bill = BillEntityFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when bill already started")
+    void shouldThrowExceptionWhenBillAlreadyStarted() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.IN_PROGRESS);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if account is not part of bill")
+    void shouldThrowIfAccountIsNotPartOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(editBill.getResponsible().getEmail()));
+    }
+
+    @Test
+    @DisplayName("Should throw if edit bill with wrong tip format")
+    void shouldThrowIfEditBillWithWrongTipFormat() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setTipAmount(BigDecimal.valueOf(20));
+        editBill.setTipPercent(null);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+        bill.setTipAmount(null);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when edit bill with non-existent item")
+    void shouldThrowExceptionWhenEditBillWithNonExistentItem() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail(account.getEmail());
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+        final Item item2 = ItemEntityFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(itemRepository.findById(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage("123")));
+        when(itemMapper.toEntity(any())).thenReturn(item2);
+
+        //When/then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage("123"));
     }
 
 }

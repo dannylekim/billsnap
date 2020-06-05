@@ -649,12 +649,19 @@ class BillServiceImplIT {
 
         final var items = new ArrayList<>(editedBill.getItems());
         assertThat(items.size()).isEqualTo(editBill.getItems().size());
-//        assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
-//        assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
-//        assertThat(items.get(1).getId()).isNotNull(); // id is not generating
-//        assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+        if (items.get(0).getId() == editBill.getItems().get(0).getId()) {
+            assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
+            assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
+//            assertThat(items.get(1).getId()).isNotNull(); // id is not generating
+            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+        } else {
+            assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
+            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+//            assertThat(items.get(1).getId()).isNotNull(); // id is not generating
+            assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
+        }
     }
-
+ // add item not exist
     @Test
     @DisplayName("Should throw exception when account is not part of the bill")
     void shouldThrowExceptionWhenAccountIsNotPartOfTheBill() {
@@ -711,5 +718,20 @@ class BillServiceImplIT {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when edit bill does not have referenced item")
+    void shouldThrowExceptionWhenEditBillDoesNotHaveReferencedItem() {
+        //Given
+        final Account account = accountRepository.getAccountByEmail("test@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getItems().get(0).setId(1L);
+        final var existentBillId = 1000L;
+
+        //When/then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
+                .withMessage(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage("1"));
     }
 }
