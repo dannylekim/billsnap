@@ -655,9 +655,9 @@ class BillServiceImplIT {
 //            assertThat(items.get(1).getId()).isNotNull(); // id is not generating
             assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
         } else {
-            assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
+//            assertThat(items.get(0).getId()).isNotNull(); // id is not generating
             assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-//            assertThat(items.get(1).getId()).isNotNull(); // id is not generating
+            assertThat(items.get(1).getId()).isEqualTo(editBill.getItems().get(0).getId());
             assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
         }
     }
