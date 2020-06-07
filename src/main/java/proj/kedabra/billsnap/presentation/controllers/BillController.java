@@ -37,6 +37,7 @@ import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
@@ -183,6 +184,35 @@ public class BillController {
         }
 
         final var billSplitDTO = billFacade.startBill(startBillResource.getId(), principal.getName());
+        return billMapper.toResource(billSplitDTO);
+    }
+
+    @PutMapping("bills/{billId}")
+    @ApiOperation(value = "Edit bill", notes = "Edit an unstarted bill",
+            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @ApiResponses({
+            @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully edited bill!"),
+            @ApiResponse(code = 400, response = ApiError.class, message = "Bill doesn't exist. \t\n" +
+                                                                          "Bill already started. \t\n" +
+                                                                          "Item doesn't exists. \t\n" +
+                                                                          "Account does not have the bill specified. \t\n" +
+                                                                          "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set."),
+            @ApiResponse(code = 403, response = ApiError.class, message = "The user making the request is not the Bill responsible."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public BillSplitResource editBill(    @ApiParam(required = true, name = "billId", value = "bill ID")
+                                          @PathVariable("billId") final Long billId,
+                                          @RequestBody @Valid final EditBillResource editBillResource,
+                                          final BindingResult bindingResult,
+                                          @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+
+        if (bindingResult.hasErrors()) {
+            throw new FieldValidationException(bindingResult.getAllErrors());
+        }
+
+        final var editBillDTO = billMapper.toDTO(editBillResource);
+        final var billSplitDTO = billFacade.editBill(billId, principal.getName(), editBillDTO);
+
         return billMapper.toResource(billSplitDTO);
     }
 }
