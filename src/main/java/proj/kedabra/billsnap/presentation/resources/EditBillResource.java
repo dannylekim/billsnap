@@ -8,12 +8,12 @@ import javax.validation.constraints.Digits;
 import org.hibernate.validator.constraints.Range;
 
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class EditBillResource {
-
-    private static final long serialVersionUID = -9069248187666878076L;
 
     @ApiModelProperty(name = "Name of the bill", position = 1)
     private String name;

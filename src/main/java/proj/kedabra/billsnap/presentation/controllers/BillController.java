@@ -46,9 +46,9 @@ import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 @RestController
 public class BillController {
 
-    private BillMapper billMapper;
+    private final BillMapper billMapper;
 
-    private BillFacade billFacade;
+    private final BillFacade billFacade;
 
     public BillController(final BillMapper billMapper, final BillFacade billFacade) {
         this.billMapper = billMapper;
@@ -176,9 +176,9 @@ public class BillController {
     })
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource startBill(@ApiParam(required = true, name = "id of bill", value = "id of bill")
-                                             @RequestBody @Valid final StartBillResource startBillResource,
-                                             final BindingResult bindingResult,
-                                             @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+                                       @RequestBody @Valid final StartBillResource startBillResource,
+                                       final BindingResult bindingResult,
+                                       @ApiIgnore @AuthenticationPrincipal final Principal principal) {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
@@ -193,18 +193,18 @@ public class BillController {
     @ApiResponses({
             @ApiResponse(code = 200, response = BillSplitResource.class, message = "Successfully edited bill!"),
             @ApiResponse(code = 400, response = ApiError.class, message = "Bill doesn't exist. \t\n" +
-                                                                          "Bill already started. \t\n" +
-                                                                          "Item doesn't exists. \t\n" +
-                                                                          "Account does not have the bill specified. \t\n" +
-                                                                          "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set."),
+                    "Bill already started. \t\n" +
+                    "Item doesn't exists. \t\n" +
+                    "Account does not have the bill specified. \t\n" +
+                    "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set."),
             @ApiResponse(code = 403, response = ApiError.class, message = "The user making the request is not the Bill responsible."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public BillSplitResource editBill(    @ApiParam(required = true, name = "billId", value = "bill ID")
-                                          @PathVariable("billId") final Long billId,
-                                          @RequestBody @Valid final EditBillResource editBillResource,
-                                          final BindingResult bindingResult,
-                                          @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+    public BillSplitResource editBill(@ApiParam(required = true, name = "billId", value = "bill ID")
+                                      @PathVariable("billId") final Long billId,
+                                      @RequestBody @Valid final EditBillResource editBillResource,
+                                      final BindingResult bindingResult,
+                                      @ApiIgnore @AuthenticationPrincipal final Principal principal) {
 
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
