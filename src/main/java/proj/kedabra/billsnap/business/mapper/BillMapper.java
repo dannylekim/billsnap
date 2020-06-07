@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.business.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.factory.Mappers;
 
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
@@ -42,13 +43,13 @@ public interface BillMapper {
     @Mapping(target = "items", source = "itemsPerAccount")
     AssociateBillDTO toAssociateBillDTO(AssociateBillResource associateBillResource);
 
-    default void editBillToBill(Bill bill, EditBillDTO editBill) {
-        final AccountMapper accountMapper = Mappers.getMapper(AccountMapper.class);
+    @Mapping(source = "editBillDTO.name", target = "name")
+    @Mapping(source = "editBillDTO.responsible", target = "responsible")
+    @Mapping(source = "editBillDTO.company", target = "company")
+    @Mapping(source = "editBillDTO.category", target = "category")
+    @Mapping(source = "editBillDTO.tipPercent", target = "tipPercent", ignore = true)
+    @Mapping(source = "editBillDTO.tipAmount", target = "tipAmount", ignore = true)
+    @Mapping(source = "editBillDTO.items", target = "items", ignore = true)
+    void updatebill(@MappingTarget Bill bill, EditBillDTO editBillDTO);
 
-        bill.setName(editBill.getName());
-        bill.setResponsible(accountMapper.toEntity(editBill.getResponsible()));
-        bill.setCompany(editBill.getCompany());
-        bill.setCategory(editBill.getCategory());
-        bill.setTipPercent(editBill.getTipPercent());
-    }
 }

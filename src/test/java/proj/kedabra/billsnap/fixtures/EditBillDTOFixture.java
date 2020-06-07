@@ -18,7 +18,7 @@ public class EditBillDTOFixture {
         editBill.setResponsible(AccountDTOFixture.getCreationDTO());
         editBill.setCompany("editCompany");
         editBill.setCategory("editCategory");
-        editBill.setTipPercent(BigDecimal.valueOf(15));
+        editBill.setTipPercent(BigDecimal.valueOf(25));
 
         List<ItemDTO> list = new ArrayList<>();
         final var item1 = new ItemDTO();

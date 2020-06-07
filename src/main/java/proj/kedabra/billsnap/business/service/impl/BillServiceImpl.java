@@ -158,7 +158,7 @@ public class BillServiceImpl implements BillService {
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
 
-        billMapper.editBillToBill(bill, editBill);
+        billMapper.updatebill(bill, editBill);
         setBillTip(bill, editBill);
 
         final Set<Item> items = new HashSet<>();
