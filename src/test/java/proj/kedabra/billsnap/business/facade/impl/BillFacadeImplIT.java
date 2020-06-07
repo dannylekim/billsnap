@@ -10,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -50,6 +51,7 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -529,6 +531,144 @@ class BillFacadeImplIT {
         assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billFacade.startBill(billId, notBillResponsible))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return BillSplitDTO when edit bill")
+    void shouldReturnBillSplitDTOWhenEditBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.getItems().get(0).setId(1013L);
+
+        //When
+        final BillSplitDTO billSplit = billFacade.editBill(billId, userEmail, editBill);
+
+        //Then
+        assertThat(billSplit.getName()).isEqualTo(editBill.getName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
+        assertThat(billSplit.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
+        assertThat(billSplit.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
+        assertThat(billSplit.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
+        assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
+
+        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        if (items.get(0).getName().equals("notEditedItem")) {
+            assertThat(items.get(0).getName()).isEqualTo("notEditedItem");
+            assertThat(items.get(0).getCost().toString()).isEqualTo("123.00");
+            assertThat(items.get(0).getItemId()).isEqualTo(1013L);
+            assertThat(items.get(1).getName()).isEqualTo(editBill.getItems().get(1).getName());
+            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(1).getItemId()).isNotNull();
+        } else {
+            assertThat(items.get(1).getName()).isEqualTo("notEditedItem");
+            assertThat(items.get(1).getCost().toString()).isEqualTo("123.00");
+            assertThat(items.get(1).getItemId()).isEqualTo(1013L);
+            assertThat(items.get(0).getName()).isEqualTo(editBill.getItems().get(1).getName());
+            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(0).getItemId()).isNotNull();
+        }
+    }
+
+    @Test
+    @DisplayName("Should throw exception when account does not exist when editing bill")
+    void shouldThrowExceptionWhenAccountDoesNotExistWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var nonExistentEmail = "nonExistingEmail@user.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, nonExistentEmail, editBill))
+                .withMessage(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("Should throw exception when account is not part of the bill when editing bill")
+    void shouldThrowExceptionWhenAccountIsNotPartOfTheBillWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var emailNotInBill = "user@user.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getItems().get(0).setId(1013L);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, emailNotInBill, editBill))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage(List.of(billId).toString()));
+
+    }
+
+    @Test
+    @DisplayName("Should throw exception when bill already started when editing bill")
+    void shouldThrowExceptionWhenBillAlreadyStartedWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editBill@email.com");
+        billFacade.startBill(billId, userEmail);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when responsible is not part of bill when editing bill")
+    void shouldThrowExceptionWhenResponsibleIsNotPartOfBillWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var emailNotInBill = "user@user.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+
+        editBill.getResponsible().setEmail(emailNotInBill);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(emailNotInBill));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if tip format is incorrect when editing bill")
+    void shouldThrowExceptionWhenResponsibleIsNotPartOfBillWhenEditingBillWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.valueOf(69));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when edit bill does not have referenced item when editing bill")
+    void shouldThrowExceptionWhenEditBillDoesNotHaveReferencedItemWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var nonExistentItem = 6969L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.getItems().get(0).setId(nonExistentItem);
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
