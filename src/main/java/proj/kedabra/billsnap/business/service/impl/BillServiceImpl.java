@@ -167,6 +167,7 @@ public class BillServiceImpl implements BillService {
                 final var item = itemMapper.toEntity(it);
                 item.setBill(bill);
                 mapItems(item, bill, account, 100);
+                itemRepository.save(item);
                 items.add(item);
             } else {
                 items.add(getItem(it.getId()));
