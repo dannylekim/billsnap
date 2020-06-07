@@ -38,6 +38,6 @@ public interface BillService {
 
     Bill startBill(Long id, String userEmail);
 
-    Bill editBill(Long id, Account account, EditBillDTO editBill) throws NoSuchMethodException;
+    Bill editBill(Long id, Account account, EditBillDTO editBill);
 
 }
