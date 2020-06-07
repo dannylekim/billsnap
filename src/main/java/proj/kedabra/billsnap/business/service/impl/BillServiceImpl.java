@@ -174,7 +174,8 @@ public class BillServiceImpl implements BillService {
             }
         });
 
-        bill.setItems(items);
+        bill.getItems().clear();
+        bill.getItems().addAll(items);
 
         return bill;
     }

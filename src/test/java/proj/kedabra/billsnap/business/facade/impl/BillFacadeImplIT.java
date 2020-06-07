@@ -574,6 +574,47 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should return BillSplitDTO when edit bill twice")
+    void shouldReturnBillSplitDTOWhenEditBillTwice() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.getItems().get(0).setId(1013L);
+        billFacade.editBill(billId, userEmail, editBill);
+        
+        //When
+        final BillSplitDTO billSplit = billFacade.editBill(billId, userEmail, editBill);
+
+        //Then
+        assertThat(billSplit.getName()).isEqualTo(editBill.getName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
+        assertThat(billSplit.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
+        assertThat(billSplit.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
+        assertThat(billSplit.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
+        assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
+
+        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        if (items.get(0).getName().equals("notEditedItem")) {
+            assertThat(items.get(0).getName()).isEqualTo("notEditedItem");
+            assertThat(items.get(0).getCost().toString()).isEqualTo("123.00");
+            assertThat(items.get(0).getItemId()).isEqualTo(1013L);
+            assertThat(items.get(1).getName()).isEqualTo(editBill.getItems().get(1).getName());
+            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(1).getItemId()).isNotNull();
+        } else {
+            assertThat(items.get(1).getName()).isEqualTo("notEditedItem");
+            assertThat(items.get(1).getCost().toString()).isEqualTo("123.00");
+            assertThat(items.get(1).getItemId()).isEqualTo(1013L);
+            assertThat(items.get(0).getName()).isEqualTo(editBill.getItems().get(1).getName());
+            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(0).getItemId()).isNotNull();
+        }
+    }
+
+    @Test
     @DisplayName("Should throw exception when account does not exist when editing bill")
     void shouldThrowExceptionWhenAccountDoesNotExistWhenEditingBill() {
         //Given
