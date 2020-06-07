@@ -15,6 +15,7 @@ import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 
@@ -41,6 +42,8 @@ public interface BillMapper {
 
     @Mapping(target = "items", source = "itemsPerAccount")
     AssociateBillDTO toAssociateBillDTO(AssociateBillResource associateBillResource);
+
+    EditBillDTO toDTO(EditBillResource editBillResource);
 
     @Mapping(source = "editBillDTO.name", target = "name")
     @Mapping(source = "editBillDTO.responsible", target = "responsible")
