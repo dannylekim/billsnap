@@ -1,31 +1,50 @@
 -- noinspection SqlResolveForFile
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (1001, 'nobills@inthisemail.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '5417894561', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (1001, 'nobills@inthisemail.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '5417894561',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (1000, 'test@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (1000, 'test@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (1002, 'editbill@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (1002, 'editbill@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (2000, 'userdetails@service.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
-                    'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (2000, 'userdetails@service.com',
+        '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+        'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp,
+        current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (3000, 'user@user.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', 'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (3000, 'user@user.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', 'firstName',
+        'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp,
+        null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (4000, 'paymentowed@test.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (4000, 'paymentowed@test.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (5000, 'user@hasbills.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
-                    'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (5000, 'user@hasbills.com',
+        '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+        'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp,
+        current_timestamp, null);
 
-INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
-             VALUES (6000, 'user@withABill.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
-                     'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED',
-                     current_timestamp, current_timestamp, null);
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (6000, 'user@withABill.com',
+        '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+        'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED',
+        current_timestamp, current_timestamp, null);
 
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
                      created, updated, location_id)
