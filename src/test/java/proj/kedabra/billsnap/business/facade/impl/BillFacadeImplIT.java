@@ -259,7 +259,7 @@ class BillFacadeImplIT {
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
-                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -434,7 +434,7 @@ class BillFacadeImplIT {
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
-                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -503,7 +503,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
-                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -515,7 +515,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
-                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test

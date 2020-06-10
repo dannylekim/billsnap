@@ -7,12 +7,9 @@ import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
-import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
-import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
-import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 
 public interface BillService {
 
@@ -26,13 +23,9 @@ public interface BillService {
 
     Bill getBill(Long id);
 
-    Item getItem(Long id);
-
     Bill inviteRegisteredToBill(Bill bill, List<Account> accounts);
 
     void verifyBillStatus(Bill bill, BillStatusEnum status);
-
-    void verifyAccountInvitationStatus(AccountBill account, InvitationStatusEnum expectedStatus);
 
     void verifyUserIsBillResponsible(Bill bill, String userEmail);
 

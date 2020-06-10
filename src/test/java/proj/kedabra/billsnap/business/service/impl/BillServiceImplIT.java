@@ -51,7 +51,6 @@ import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
-import proj.kedabra.billsnap.fixtures.ItemDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
@@ -627,12 +626,15 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should edit bill successfully")
-    void shouldEditBillSuccessfully() {
+    @DisplayName("Should edit bill successfully with tip percentage")
+    void shouldEditBillSuccessfullyWithTipPercentage() {
         //Given
-        final Account account = accountRepository.getAccountByEmail("test@email.com");
+        final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        final var existentBillId = 1000L;
+        editBill.getResponsible().setEmail("editbill@email.com");
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.valueOf(15));
+        final var existentBillId = 2001L;
 
         //When
         final Bill editedBill = billService.editBill(existentBillId, account, editBill);
@@ -661,7 +663,46 @@ class BillServiceImplIT {
             assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
         }
     }
- // add item not exist
+
+    @Test
+    @DisplayName("Should edit bill successfully with tip amount")
+    void shouldEditBillSuccessfullyTipAmount() {
+        //Given
+        final Account account = accountRepository.getAccountByEmail("editbill@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editbill@email.com");
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.valueOf(15));
+        final var existentBillId = 2001L;
+
+        //When
+        final Bill editedBill = billService.editBill(existentBillId, account, editBill);
+
+        //Then
+        assertThat(editedBill.getName()).isEqualTo(editBill.getName());
+        assertThat(editedBill.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
+        assertThat(editedBill.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
+        assertThat(editedBill.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
+        assertThat(editedBill.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(editedBill.getCompany()).isEqualTo(editBill.getCompany());
+        assertThat(editedBill.getCategory()).isEqualTo(editBill.getCategory());
+        assertThat(editedBill.getTipAmount()).isEqualTo(editBill.getTipAmount());
+
+        final var items = new ArrayList<>(editedBill.getItems());
+        assertThat(items.size()).isEqualTo(editBill.getItems().size());
+        if (items.get(0).getId() == editBill.getItems().get(0).getId()) {
+            assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
+            assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
+            assertThat(items.get(1).getId()).isNotNull();
+            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+        } else {
+            assertThat(items.get(0).getId()).isNotNull();
+            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(1).getId()).isEqualTo(editBill.getItems().get(0).getId());
+            assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
+        }
+    }
+
     @Test
     @DisplayName("Should throw exception when account is not part of the bill")
     void shouldThrowExceptionWhenAccountIsNotPartOfTheBill() {
@@ -688,7 +729,7 @@ class BillServiceImplIT {
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -707,13 +748,26 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should throw exception if tip format is incorrect")
-    void shouldThrowExceptionIfTipFormatIsIncorrect() {
+    @DisplayName("Should throw exception if tip format is incorrect tip percentage")
+    void shouldThrowExceptionIfTipFormatIsIncorrectTipPercentage() {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(69));
         final var existentBillId = 1000L;
+
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if tip format is incorrectTipAmount")
+    void shouldThrowExceptionIfTipFormatIsIncorrectTipAmount() {
+        final Account account = accountRepository.getAccountByEmail("editbill@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail("editbill@email.com");
+        final var existentBillId = 2001L;
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))

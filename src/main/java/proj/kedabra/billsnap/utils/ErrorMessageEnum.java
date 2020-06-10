@@ -28,12 +28,9 @@ public enum ErrorMessageEnum {
     USER_IS_NOT_BILL_RESPONSIBLE("The user making the request is not the Bill responsible"),
     GIVEN_VALUES_NOT_INTEGER_VALUED("The given percentages are not integer valued: {}"),
     DUPLICATE_EMAILS_IN_ASSOCIATE_USERS("There are duplicate emails being called: {}"),
-    BILL_IS_NOT_OPEN("The bill is not in Open status."),
     LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
-    WRONG_BILL_STATUS("Bill status is incorrect."),
-    WRONG_INVITATION_STATUS("Invitation status is incorrect."),
+    WRONG_BILL_STATUS("The bill is not in {} status."),
     WRONG_TIP_FORMAT("Tip format is incorrect."),
-    INTERNAL_ERROR("Internal Error."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
