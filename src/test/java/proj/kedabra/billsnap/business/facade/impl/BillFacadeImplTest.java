@@ -40,6 +40,7 @@ import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
@@ -567,6 +568,63 @@ class BillFacadeImplTest {
                 .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
+    @Test
+    @DisplayName("Should calculate balance properly by creating Bill")
+    void shouldCalculateBalanceWithTipAndTaxesByCreatingBill() {
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final var userEmail = "hellomotto@cell.com";
+
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var tax = new Tax();
+        tax.setName("Tax 2");
+        tax.setPercentage(new BigDecimal("20"));
+        bill.getTaxes().add(tax);
+
+        when(billService.createBillToAccount(any(), any(), any())).thenReturn(bill);
+        when(billMapper.toBillCompleteDTO(any(Bill.class))).thenReturn(BillCompleteDTOFixture.getDefault());
+
+        // When
+        final var billCompleteDTO = billFacade.addPersonalBill(userEmail, billDTO);
+
+        // Then
+        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.8"));
+    }
+
+    @Test
+    @DisplayName("Should calculate balance properly by get Bill")
+    void shouldCalculateBalanceWithTipAndTaxes() {
+        // Given
+        final var userEmail = "hellomotto@cell.com";
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.setTipAmount(BigDecimal.TEN);
+        final var tax = new Tax();
+        tax.setName("Tax 2");
+        tax.setPercentage(new BigDecimal("20"));
+        bill.getTaxes().add(tax);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(bill)).thenReturn(BillSplitDTOFixture.getDefault());
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+
+        // When
+        final var billCompleteDTO = billFacade.getDetailedBill(bill.getId(), userEmail);
+
+        // Then
+        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.8"));
+    }
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
@@ -581,6 +639,9 @@ class BillFacadeImplTest {
         assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
         assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
         assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(500, ChronoUnit.MILLIS));
+        assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
+        assertThat(bill.getTaxes().size()).isEqualTo(dto.getTaxes().size());
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
         if (!(dto instanceof PendingRegisteredBillSplitDTO)) {

@@ -30,6 +30,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -149,7 +150,6 @@ public class BillFacadeImpl implements BillFacade {
 
     //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
-        final BigDecimal balance = calculateBalance(bill);
         final BillCompleteDTO billCompleteDTO = billMapper.toBillCompleteDTO(bill);
 
         final List<AccountStatusPair> accountStatusList = new ArrayList<>();
@@ -158,6 +158,7 @@ public class BillFacadeImpl implements BillFacade {
             accountStatusList.add(pair);
         });
 
+        final BigDecimal balance = calculateBalance(bill);
         billCompleteDTO.setBalance(balance);
         billCompleteDTO.setAccountsList(accountStatusList);
 
@@ -242,24 +243,37 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private BigDecimal calculateTip(final Bill bill, BigDecimal subTotal) {
+    private BigDecimal calculateTip(final Bill bill, BigDecimal total) {
         final BigDecimal tipAmount = Optional.ofNullable(bill.getTipAmount()).orElse(BigDecimal.ZERO);
 
         final BigDecimal tipPercentAmount = Optional.ofNullable(bill.getTipPercent())
                 .map(tipPercent -> tipPercent.divide(PERCENTAGE_DIVISOR))
-                .map(subTotal::multiply)
+                .map(total::multiply)
                 .orElse(BigDecimal.ZERO);
 
         return tipAmount.add(tipPercentAmount);
     }
 
-    //TODO decide on what rounding we want to use
+    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
+    private BigDecimal calculateTaxes(final Bill bill, final BigDecimal subTotal) {
+
+        final var total = bill.getTaxes()
+                .stream()
+                .map(Tax::getPercentage)
+                .map(taxPercent -> taxPercent.divide(PERCENTAGE_DIVISOR)
+                        .add(BigDecimal.ONE)).reduce(subTotal, BigDecimal::multiply);
+
+        return total.subtract(subTotal);
+
+    }
+
     private BigDecimal calculateBalance(final Bill bill) {
         final BigDecimal subTotal = bill.getItems().stream().map(Item::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
+        final var taxes = calculateTaxes(bill, subTotal);
+        final var total = subTotal.add(taxes);
+        final BigDecimal tipTotal = calculateTip(bill, total);
 
-        final BigDecimal tipTotal = calculateTip(bill, subTotal);
-
-        return subTotal.add(tipTotal);
+        return total.add(tipTotal);
     }
 
 

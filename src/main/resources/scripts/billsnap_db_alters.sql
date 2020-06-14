@@ -21,6 +21,11 @@ alter table tax
 alter table tax
     add name varchar(10);
 alter table tax
+    add id integer;
+alter table tax
     add constraint tax_pk
-        primary key (bill_id);
+        primary key (id);
+
+create sequence tax_id_seq start with 1 increment by 1;
+
 

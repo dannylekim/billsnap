@@ -125,6 +125,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(bill.getTaxes().size()).isEqualTo(billDTO.getTaxes().size());
         assertThat(accountBill.getPercentage()).isNull();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
 
@@ -175,6 +176,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(bill.getTaxes().size()).isEqualTo(billDTO.getTaxes().size());
         assertThat(creatorAccountBill.getPercentage()).isNull();
         assertThat(creatorAccountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
         assertThat(bill).isEqualTo(creatorAccountBill.getBill());

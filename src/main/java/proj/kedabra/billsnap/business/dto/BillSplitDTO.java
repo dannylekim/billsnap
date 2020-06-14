@@ -36,7 +36,7 @@ public class BillSplitDTO {
 
     private BigDecimal totalTip;
 
-    private TaxDTO taxes;
+    private List<TaxDTO> taxes;
 
     private BigDecimal balance;
 }
