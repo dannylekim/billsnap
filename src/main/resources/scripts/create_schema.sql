@@ -94,16 +94,13 @@ comment on column bill.occurrence is 'repeat every x days where x = occurrence';
 
 create table if not exists tax
 (
-    bill_id    integer        not null
+    bill_id    integer       not null
+        constraint tax_pk
+            primary key
         constraint "TAX_bill_id_fkey"
             references bill,
-    tax_order  integer        not null,
-    amount     numeric(14, 2) null,
-    percentage numeric(7, 4)  null,
-    constraint unique_orders_to_bill
-        primary key (bill_id, tax_order),
-    constraint one_of_amount_or_percentage
-        check ((amount IS NULL) <> (percentage IS NULL))
+    name       varchar(10),
+    percentage numeric(7, 4) null
 );
 
 create table if not exists "group"
