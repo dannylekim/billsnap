@@ -51,4 +51,7 @@ public class BillCreationResource implements Serializable {
     @Digits(integer = 3, fraction = 4)
     @Range(message = "the number must be positive")
     private BigDecimal tipPercent;
+
+    @ApiModelProperty(name = "The taxes for the specific bill", position = 5)
+    private List<@Valid TaxResource> taxes;
 }
