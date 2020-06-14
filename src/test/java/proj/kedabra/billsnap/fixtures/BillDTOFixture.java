@@ -5,6 +5,7 @@ import java.util.ArrayList;
 
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
+import proj.kedabra.billsnap.business.dto.TaxDTO;
 
 public final class BillDTOFixture {
 
@@ -24,6 +25,14 @@ public final class BillDTOFixture {
         itemDTO.setCost(BigDecimal.valueOf(300));
         items.add(itemDTO);
         billDTO.setItems(items);
+
+        final var tax = new TaxDTO();
+        tax.setName("Tax 1");
+        tax.setPercentage(BigDecimal.TEN);
+
+        final ArrayList<TaxDTO> taxes = new ArrayList<>();
+        taxes.add(tax);
+        billDTO.setTaxes(taxes);
 
         billDTO.setAccountsList(new ArrayList<>());
 

@@ -25,5 +25,5 @@ public class BillDTO {
 
     private BigDecimal tipPercent;
 
-    private TaxDTO taxes;
+    private List<TaxDTO> taxes;
 }

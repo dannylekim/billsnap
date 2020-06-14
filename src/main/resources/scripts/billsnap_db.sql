@@ -108,9 +108,9 @@ comment on column bill.occurrence is 'repeat every x days where x = occurrence';
 
 create table if not exists tax
 (
+    id         serial  not null
+        constraint "tax_pk" primary key,
     bill_id    integer not null
-        constraint tax_pk
-            primary key
         constraint "TAX_bill_id_fkey"
             references bill,
     name       varchar(10),

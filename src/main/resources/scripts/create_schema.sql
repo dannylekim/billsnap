@@ -29,6 +29,9 @@ create sequence if not exists location_id_seq start with 1 increment by 1;
 
 create sequence if not exists notifications_id_seq start with 1 increment by 1;
 
+create sequence if not exists tax_id_seq start with 1 increment by 1;
+
+
 create table if not exists location
 (
     id          int primary key,
@@ -94,9 +97,8 @@ comment on column bill.occurrence is 'repeat every x days where x = occurrence';
 
 create table if not exists tax
 (
+    id         int primary key,
     bill_id    integer       not null
-        constraint tax_pk
-            primary key
         constraint "TAX_bill_id_fkey"
             references bill,
     name       varchar(10),
