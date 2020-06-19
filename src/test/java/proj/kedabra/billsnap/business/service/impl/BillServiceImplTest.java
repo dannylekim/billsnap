@@ -586,7 +586,6 @@ class BillServiceImplTest {
         final Item item1 = ItemEntityFixture.getDefault();
         item1.setId(9999L);
         item1.setCost(BigDecimal.valueOf(90));
-        final Item item2 = ItemEntityFixture.getDefault();
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 
@@ -596,6 +595,39 @@ class BillServiceImplTest {
         //Then
         assertThat(result.getResponsible().getId()).isEqualTo(bill.getResponsible().getId());
         assertThat(result.getTipPercent()).isEqualTo(bill.getTipPercent());
+        assertThat(result.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(result.getCompany()).isEqualTo(bill.getCompany());
+    }
+
+    @Test
+    @DisplayName("Should edit bill successfully")
+    void shouldEditBillSuccessfullyByTipAmount() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.TEN);
+        editBill.getResponsible().setEmail(account.getEmail());
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When
+        final Bill result = billService.editBill(billId, account, editBill);
+
+        //Then
+        assertThat(result.getResponsible().getId()).isEqualTo(bill.getResponsible().getId());
+        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
         assertThat(result.getCategory()).isEqualTo(bill.getCategory());
         assertThat(result.getCompany()).isEqualTo(bill.getCompany());
     }
@@ -675,6 +707,32 @@ class BillServiceImplTest {
         final Bill bill = BillEntityFixture.getDefault();
         bill.setAccounts(Set.of(accountBill));
         bill.setTipAmount(null);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if edit bill with wrong tip format")
+    void shouldThrowIfEditBillWithWrongTipFormatType2() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setTipAmount(BigDecimal.valueOf(20));
+        editBill.setTipAmount(null);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+        bill.setTipPercent(null);
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 

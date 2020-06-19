@@ -2,40 +2,24 @@ package proj.kedabra.billsnap.business.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 import java.time.temporal.ChronoUnit;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mapstruct.factory.Mappers;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import proj.kedabra.billsnap.business.facade.impl.PaymentFacadeImpl;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
 import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 
-@RunWith(MockitoJUnitRunner.class)
+@SpringBootTest(classes = {AccountMapperImpl.class, ItemMapperImpl.class, BillMapperImpl.class})
 class BillMapperTest {
 
-    @Mock
-    private AccountMapper accountMapper;
-
-    private BillMapper billMapper = Mappers.getMapper(BillMapper.class);
-
-    @BeforeEach
-    void setup() {
-        MockitoAnnotations.initMocks(this);
-        billMapper = Mappers.getMapper(BillMapper.class);
-    }
+    @Autowired
+    private BillMapper billMapper;
 
     @Test
     @DisplayName("Should map BillSplitDTO to PendingRegisteredBillSplitDTO")
@@ -67,7 +51,6 @@ class BillMapperTest {
     }
 
     @Test
-    @Disabled
     @DisplayName("Should map editbillDTO to bill")
     void shouldMapEditBillDtoToBill() {
         //Given
@@ -78,8 +61,6 @@ class BillMapperTest {
         accountEntity.setId(editbill.getResponsible().getId());
         accountEntity.setFirstName(editbill.getResponsible().getFirstName());
         accountEntity.setLastName(editbill.getResponsible().getLastName());
-
-        when(accountMapper.toEntity(any())).thenReturn(accountEntity);
 
         //When
         billMapper.updatebill(bill, editbill);

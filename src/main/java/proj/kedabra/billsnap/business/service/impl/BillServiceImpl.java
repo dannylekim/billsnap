@@ -160,7 +160,7 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    public void verifyBillStatus(Bill bill, BillStatusEnum status) {
+    public void verifyBillStatus(final Bill bill, final BillStatusEnum status) {
         if (bill.getStatus() != status) {
             throw new FunctionalWorkflowException(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(status.toString()));
         }
@@ -235,7 +235,7 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyExistenceOfAssociateItemInBill(Bill bill, List<ItemAssociationDTO> items) {
+    private void verifyExistenceOfAssociateItemInBill(final Bill bill, final List<ItemAssociationDTO> items) {
         final List<String> existingEmailsInList = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         final String[] nonExistentAccounts = items.stream()
                 .map(ItemAssociationDTO::getEmail)
@@ -247,7 +247,7 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyPercentagesAreIntegerValued(AssociateBillDTO associateBillDTO) {
+    private void verifyPercentagesAreIntegerValued(final AssociateBillDTO associateBillDTO) {
         final var nonIntegerList = associateBillDTO.getItems()
                 .stream()
                 .map(ItemAssociationDTO::getItems)
@@ -261,7 +261,7 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyNoDuplicateEmails(AssociateBillDTO associateBillDTO) {
+    private void verifyNoDuplicateEmails(final AssociateBillDTO associateBillDTO) {
         final HashSet<String> allEmails = new HashSet<>();
         final Set<String> duplicateSet = associateBillDTO.getItems().stream()
                 .map(ItemAssociationDTO::getEmail)
@@ -273,14 +273,14 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyIfAccountInBill(Bill bill, String email) {
+    private void verifyIfAccountInBill(final Bill bill, final String email) {
         final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         if (!billEmails.contains(email)) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
         }
     }
 
-    private void setBillTip(Bill bill , EditBillDTO editBill) {
+    private void setBillTip(final Bill bill, final EditBillDTO editBill) {
         if ((bill.getTipAmount() == null && editBill.getTipPercent() == null) || (bill.getTipPercent() == null && editBill.getTipAmount() == null)) {
             throw new IllegalArgumentException(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
         }

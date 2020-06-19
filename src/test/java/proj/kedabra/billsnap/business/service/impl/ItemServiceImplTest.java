@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -81,6 +80,7 @@ public class ItemServiceImplTest {
         final var newItem = ItemEntityFixture.getDefault();
         newItem.setId(1L);
         final var repoItem = ItemEntityFixture.getDefault();
+        repoItem.setId(1000L);
         repoItem.setCost(BigDecimal.valueOf(69));
 
         when(itemMapper.toEntity(any())).thenReturn(newItem);

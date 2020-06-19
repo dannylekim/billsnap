@@ -651,7 +651,7 @@ class BillServiceImplIT {
 
         final var items = new ArrayList<>(editedBill.getItems());
         assertThat(items.size()).isEqualTo(editBill.getItems().size());
-        if (items.get(0).getId() == editBill.getItems().get(0).getId()) {
+        if (items.get(0).getId().equals(editBill.getItems().get(0).getId())) {
             assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
             assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
             assertThat(items.get(1).getId()).isNotNull();
@@ -690,7 +690,7 @@ class BillServiceImplIT {
 
         final var items = new ArrayList<>(editedBill.getItems());
         assertThat(items.size()).isEqualTo(editBill.getItems().size());
-        if (items.get(0).getId() == editBill.getItems().get(0).getId()) {
+        if (items.get(0).getId().equals(editBill.getItems().get(0).getId())) {
             assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
             assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
             assertThat(items.get(1).getId()).isNotNull();
