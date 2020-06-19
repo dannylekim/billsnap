@@ -6,6 +6,9 @@ INSERT INTO account (id, email, password, first_name, middle_name, last_name, ge
              VALUES (1000, 'test@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
+             VALUES (1002, 'editbill@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status, created, updated, location_id)
              VALUES (2000, 'userdetails@service.com', '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
                     'firstName', 'middleName', 'lastName', 'MALE', '123456789', current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
@@ -110,6 +113,11 @@ VALUES (2000, 'test', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, 
 
 INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
                   tip_amount, split_by, location_id, active)
+VALUES (2001, 'editbill', 1002, 1002, 'OPEN', current_timestamp, current_timestamp, null, null, 0, null, 15, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
 VALUES (1101, 'test', 5000, 5000, 'IN_PROGRESS', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
 
@@ -148,6 +156,8 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 2000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1101, 5000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (2001, 1002, 100, 'ACCEPTED');
 
 INSERT INTO item (id, bill_id, name, cost)
 VALUES (1000, 1004, 'potatoes', 69.00);

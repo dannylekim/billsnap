@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
@@ -36,12 +37,12 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.service.ItemService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
-
 
 @Service
 public class BillServiceImpl implements BillService {
@@ -60,6 +61,8 @@ public class BillServiceImpl implements BillService {
 
     private final EntityManager entityManager;
 
+    private final ItemService itemService;
+
     @Autowired
     public BillServiceImpl(
             final BillRepository billRepository,
@@ -68,6 +71,7 @@ public class BillServiceImpl implements BillService {
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
             final NotificationService notificationService,
+            final ItemService itemService,
             final EntityManager entityManager) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
@@ -76,6 +80,7 @@ public class BillServiceImpl implements BillService {
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
         this.entityManager = entityManager;
+        this.itemService = itemService;
     }
 
 
@@ -117,13 +122,29 @@ public class BillServiceImpl implements BillService {
             throw new AccessForbiddenException(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
         }
     }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Bill startBill(Long id, String userEmail) {
         final Bill bill = getBill(id);
         verifyUserIsBillResponsible(bill, userEmail);
-        verifyBillIsOpen(bill);
+        verifyBillStatus(bill, BillStatusEnum.OPEN);
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
+        return bill;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill editBill(Long id, Account account, EditBillDTO editBill) {
+        final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, account.getEmail());
+        verifyBillStatus(bill, BillStatusEnum.OPEN);
+        verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
+
+        billMapper.updatebill(bill, editBill);
+        setBillTip(bill, editBill);
+        itemService.editNewItems(bill, account, editBill);
+
         return bill;
     }
 
@@ -137,10 +158,11 @@ public class BillServiceImpl implements BillService {
 
         return bill;
     }
+
     @Override
-    public void verifyBillIsOpen(Bill bill) {
-        if (bill.getStatus() != BillStatusEnum.OPEN) {
-            throw new FunctionalWorkflowException(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+    public void verifyBillStatus(final Bill bill, final BillStatusEnum status) {
+        if (bill.getStatus() != status) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(status.toString()));
         }
     }
 
@@ -156,7 +178,7 @@ public class BillServiceImpl implements BillService {
         verifyNoDuplicateEmails(associateBillDTO);
         final var bill = getBill(associateBillDTO.getId());
         final List<ItemAssociationDTO> items = associateBillDTO.getItems();
-        verifyExistenceOfAccountsInBill(bill, items);
+        verifyExistenceOfAssociateItemInBill(bill, items);
         verifyExistenceOfItemsInBill(bill, items);
         verifyInvitationStatus(bill, items);
         removeReferencedAccountItems(bill, items);
@@ -195,8 +217,6 @@ public class BillServiceImpl implements BillService {
         if (!associatedDeclinedEmails.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(associatedDeclinedEmails.toString()));
         }
-
-
     }
 
     private void verifyExistenceOfItemsInBill(Bill bill, List<ItemAssociationDTO> items) {
@@ -213,9 +233,9 @@ public class BillServiceImpl implements BillService {
         if (nonExistentListIds.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ITEMS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentListIds)));
         }
-
     }
-    private void verifyExistenceOfAccountsInBill(Bill bill, List<ItemAssociationDTO> items) {
+
+    private void verifyExistenceOfAssociateItemInBill(final Bill bill, final List<ItemAssociationDTO> items) {
         final List<String> existingEmailsInList = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
         final String[] nonExistentAccounts = items.stream()
                 .map(ItemAssociationDTO::getEmail)
@@ -227,7 +247,7 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyPercentagesAreIntegerValued(AssociateBillDTO associateBillDTO) {
+    private void verifyPercentagesAreIntegerValued(final AssociateBillDTO associateBillDTO) {
         final var nonIntegerList = associateBillDTO.getItems()
                 .stream()
                 .map(ItemAssociationDTO::getItems)
@@ -241,7 +261,7 @@ public class BillServiceImpl implements BillService {
         }
     }
 
-    private void verifyNoDuplicateEmails(AssociateBillDTO associateBillDTO) {
+    private void verifyNoDuplicateEmails(final AssociateBillDTO associateBillDTO) {
         final HashSet<String> allEmails = new HashSet<>();
         final Set<String> duplicateSet = associateBillDTO.getItems().stream()
                 .map(ItemAssociationDTO::getEmail)
@@ -250,6 +270,25 @@ public class BillServiceImpl implements BillService {
 
         if (!duplicateSet.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(duplicateSet.toString()));
+        }
+    }
+
+    private void verifyIfAccountInBill(final Bill bill, final String email) {
+        final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+        if (!billEmails.contains(email)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
+        }
+    }
+
+    private void setBillTip(final Bill bill, final EditBillDTO editBill) {
+        if ((bill.getTipAmount() == null && editBill.getTipPercent() == null) || (bill.getTipPercent() == null && editBill.getTipAmount() == null)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+        }
+
+        if (bill.getTipAmount() == null) {
+            bill.setTipPercent(editBill.getTipPercent());
+        } else {
+            bill.setTipAmount(editBill.getTipAmount());
         }
     }
 
