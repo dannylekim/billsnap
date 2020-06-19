@@ -146,6 +146,13 @@ task integrationTest(type: Test) {
 }
 
 jacocoTestReport {
+
+    // The JaCoCo plugin adds a JacocoTaskExtension extension to all tasks of type Test.
+    // Use task state to include or not task execution data
+    // https://docs.gradle.org/current/javadoc/org/gradle/api/tasks/TaskState.html
+    // This declaration will be used as a closure, notice there no wrapping parenthesis
+    executionData tasks.withType(Test).findAll { it.state.executed }
+
     reports {
         xml.enabled true
         html.enabled false
