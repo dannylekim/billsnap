@@ -96,6 +96,7 @@ public class BillServiceImpl implements BillService {
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.getItems().forEach(i -> mapItems(i, bill, account, 100));
         inviteRegisteredToBill(bill, accountList);
+        bill.getTaxes().forEach(t -> t.setBill(bill));
         mapAccountBill(bill, account, null, InvitationStatusEnum.ACCEPTED);
 
         return billRepository.save(bill);

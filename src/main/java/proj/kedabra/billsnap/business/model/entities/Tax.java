@@ -8,8 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
@@ -26,10 +26,10 @@ public class Tax implements Serializable {
     @Column(name = "id")
     @GeneratedValue(generator = "tax_id_seq")
     @SequenceGenerator(name = "tax_id_seq", sequenceName = "tax_id_seq", allocationSize = 1)
-    private long id;
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @MapsId("bill_id")
+    @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
     @Column(name = "name", length = 10)

@@ -39,7 +39,7 @@ public class BillCompleteDTO {
 
     private ZonedDateTime updated;
 
-    private List<TaxDTO> taxes;
+    private List<TaxDTO> taxes = new ArrayList<>();
 
     private BigDecimal balance;
 
