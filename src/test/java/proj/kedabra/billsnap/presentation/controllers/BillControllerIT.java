@@ -843,7 +843,7 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
+    @DisplayName("Should return 400 exceptin if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsBlankInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a reque st for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
@@ -1272,6 +1272,25 @@ class BillControllerIT {
 
         // Then
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
+    }
+
+    @Test
+    @DisplayName("Should return error if taxes are null")
+    void shouldReturnErrorIfTaxesAreNull() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.setTaxes(null);
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {

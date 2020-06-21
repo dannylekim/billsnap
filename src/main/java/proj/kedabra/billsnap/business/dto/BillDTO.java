@@ -25,5 +25,5 @@ public class BillDTO {
 
     private BigDecimal tipPercent;
 
-    private List<TaxDTO> taxes;
+    private List<TaxDTO> taxes = new ArrayList<>();
 }

@@ -132,6 +132,7 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
 
         verifyBillDTOToBill(returnBillDTO, bill);
+        assertThat(returnBillDTO.getBalance()).isEqualByComparingTo(new BigDecimal("330"));
     }
 
     @Test
@@ -768,7 +769,7 @@ class BillFacadeImplIT {
             assertEquals(item.getName(), returnItemDTO.getName());
             assertEquals(item.getCost(), returnItemDTO.getCost());
             assertEquals(bill.getName(), returnBillDTO.getName());
-            assertEquals(item.getCost(), returnBillDTO.getBalance());
+            assertEquals(item.getCost(), returnBillDTO.getItems().get(0).getCost());
         } else {
             assertEquals(0, BigDecimal.ZERO.compareTo(returnBillDTO.getBalance()));
         }
