@@ -16,6 +16,7 @@ import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.CostItemsPair;
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
@@ -136,6 +137,13 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     public BillSplitDTO startBill(Long billId, String userEmail) {
         final Bill bill = billService.startBill(billId, userEmail);
+        return getBillSplitDTO(bill);
+    }
+
+    @Override
+    public BillSplitDTO editBill(Long billId, String email, EditBillDTO editBill) {
+        final var account = accountService.getAccount(email);
+        final Bill bill = billService.editBill(billId, account, editBill);
         return getBillSplitDTO(bill);
     }
 
