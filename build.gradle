@@ -5,6 +5,7 @@ plugins {
     id "net.ltgt.errorprone" version "0.8"
     id "io.spring.dependency-management" version "1.0.9.RELEASE"
     id 'jacoco'
+    id 'com.adarshr.test-logger' version '2.0.0'
 }
 
 group = 'proj.kedabra'
@@ -96,47 +97,34 @@ tasks.withType(JavaCompile).configureEach {
 
 //`gradlew test` runs just tests without integration
 //`gradlew integrationTest` runs only integrated
-//`gradlew check` will run test then integrationTest
-//`gradlew integrationTest test` will run test then integrationTest
+
+testlogger {
+    theme 'mocha'
+    showExceptions true
+    showStackTraces true
+    showFullStackTraces false
+    showCauses false
+    slowThreshold 2000
+    showSummary true
+    showSimpleNames false
+    showPassed true
+    showSkipped true
+    showFailed true
+    showStandardStreams false
+    showPassedStandardStreams false
+    showSkippedStandardStreams false
+    showFailedStandardStreams true
+}
+
 
 test {
-
-    testLogging.showStandardStreams = true
-
     useJUnitPlatform {
         excludeTags 'integration'
-    }
-    afterTest { desc, result ->
-        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
-    }
-
-    afterSuite { desc, result ->
-        if (!desc.parent) { // will match the outermost suite
-            def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-            def startItem = '|  ', endItem = '  |'
-            def repeatLength = startItem.length() + output.length() + endItem.length()
-            println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
-        }
     }
 
 }
 
 task integrationTest(type: Test) {
-
-    testLogging.showStandardStreams = true
-
-    afterTest { desc, result ->
-        logger.quiet "Executing test ${desc.name} [${desc.className}] with result: ${result.resultType}"
-    }
-
-    afterSuite { desc, result ->
-        if (!desc.parent) { // will match the outermost suite
-            def output = "Results: ${result.resultType} (${result.testCount} tests, ${result.successfulTestCount} successes, ${result.failedTestCount} failures, ${result.skippedTestCount} skipped)"
-            def startItem = '|  ', endItem = '  |'
-            def repeatLength = startItem.length() + output.length() + endItem.length()
-            println('\n' + ('-' * repeatLength) + '\n' + startItem + output + endItem + '\n' + ('-' * repeatLength))
-        }
-    }
 
     useJUnitPlatform {
         includeTags 'integration'
