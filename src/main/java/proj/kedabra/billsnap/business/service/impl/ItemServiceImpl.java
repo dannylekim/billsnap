@@ -57,7 +57,9 @@ public class ItemServiceImpl implements ItemService {
                 itemRepository.save(item);
                 items.add(item);
             } else {
-                items.add(getItem(it.getId()));
+                final var existingItem = getItem(it.getId());
+                itemMapper.updateItem(it, existingItem);
+                items.add(existingItem);
             }
         });
 

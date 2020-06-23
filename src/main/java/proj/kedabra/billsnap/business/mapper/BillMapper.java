@@ -48,9 +48,9 @@ public interface BillMapper {
     EditBillDTO toDTO(EditBillResource editBillResource);
 
     @Mapping(source = "editBillDTO.name", target = "name")
-    @Mapping(source = "editBillDTO.responsible", target = "responsible")
     @Mapping(source = "editBillDTO.company", target = "company")
     @Mapping(source = "editBillDTO.category", target = "category")
+    @Mapping(source = "editBillDTO.responsible", target = "responsible", ignore = true)
     @Mapping(source = "editBillDTO.tipPercent", target = "tipPercent", ignore = true)
     @Mapping(source = "editBillDTO.tipAmount", target = "tipAmount", ignore = true)
     @Mapping(source = "editBillDTO.items", target = "items", ignore = true)

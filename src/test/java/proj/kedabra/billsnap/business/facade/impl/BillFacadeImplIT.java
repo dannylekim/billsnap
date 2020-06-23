@@ -539,7 +539,7 @@ class BillFacadeImplIT {
         final var billId = 1102L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setResponsible("editBill@email.com");
         editBill.getItems().get(0).setId(1013L);
 
         //When
@@ -547,28 +547,29 @@ class BillFacadeImplIT {
 
         //Then
         assertThat(billSplit.getName()).isEqualTo(editBill.getName());
-        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
-        assertThat(billSplit.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
-        assertThat(billSplit.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
-        assertThat(billSplit.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible());
         assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
 
         final var items = billSplit.getItemsPerAccount().get(0).getItems();
-        if (items.get(0).getName().equals("notEditedItem")) {
-            assertThat(items.get(0).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(0).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(0).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(1).getName()).isEqualTo(editBill.getItems().get(1).getName());
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getItemId()).isNotNull();
+        final var firstItemDTO = editBill.getItems().get(0);
+        final var secondItemDTO = editBill.getItems().get(1);
+        final var firstItemPercentageSplitDTO = items.get(0);
+        final var secondItemPercentageSplitDTO = items.get(1);
+        if (firstItemPercentageSplitDTO.getName().equals(firstItemDTO.getName())) {
+            assertThat(firstItemPercentageSplitDTO.getName()).isEqualTo(firstItemDTO.getName());
+            assertThat(firstItemPercentageSplitDTO.getCost()).isEqualByComparingTo(firstItemDTO.getCost());
+            assertThat(firstItemPercentageSplitDTO.getItemId()).isEqualTo(firstItemDTO.getId());
+            assertThat(secondItemPercentageSplitDTO.getName()).isEqualTo(secondItemDTO.getName());
+            assertThat(secondItemPercentageSplitDTO.getCost()).isEqualByComparingTo(secondItemDTO.getCost());
+            assertThat(secondItemPercentageSplitDTO.getItemId()).isNotNull();
         } else {
-            assertThat(items.get(1).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(1).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(1).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(0).getName()).isEqualTo(editBill.getItems().get(1).getName());
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(0).getItemId()).isNotNull();
+            assertThat(secondItemPercentageSplitDTO.getName()).isEqualTo(firstItemDTO.getName());
+            assertThat(secondItemPercentageSplitDTO.getCost()).isEqualByComparingTo(firstItemDTO.getCost());
+            assertThat(secondItemPercentageSplitDTO.getItemId()).isEqualTo(firstItemDTO.getId());
+            assertThat(firstItemPercentageSplitDTO.getName()).isEqualTo(secondItemDTO.getName());
+            assertThat(firstItemPercentageSplitDTO.getCost()).isEqualByComparingTo(secondItemDTO.getCost());
+            assertThat(firstItemPercentageSplitDTO.getItemId()).isNotNull();
         }
     }
 
@@ -579,7 +580,7 @@ class BillFacadeImplIT {
         final var billId = 1102L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setResponsible("editBill@email.com");
         editBill.getItems().get(0).setId(1013L);
         billFacade.editBill(billId, userEmail, editBill);
 
@@ -588,28 +589,29 @@ class BillFacadeImplIT {
 
         //Then
         assertThat(billSplit.getName()).isEqualTo(editBill.getName());
-        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
-        assertThat(billSplit.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
-        assertThat(billSplit.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
-        assertThat(billSplit.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBill.getResponsible());
         assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
 
         final var items = billSplit.getItemsPerAccount().get(0).getItems();
-        if (items.get(0).getName().equals("notEditedItem")) {
-            assertThat(items.get(0).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(0).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(0).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(1).getName()).isEqualTo(editBill.getItems().get(1).getName());
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getItemId()).isNotNull();
+        final var firstItemDTO = editBill.getItems().get(0);
+        final var secondItemDTO = editBill.getItems().get(1);
+        final var firstItemPercentageSplitDTO = items.get(0);
+        final var secondItemPercentageSplitDTO = items.get(1);
+        if (firstItemPercentageSplitDTO.getName().equals(firstItemDTO.getName())) {
+            assertThat(firstItemPercentageSplitDTO.getName()).isEqualTo(firstItemDTO.getName());
+            assertThat(firstItemPercentageSplitDTO.getCost()).isEqualByComparingTo(firstItemDTO.getCost());
+            assertThat(firstItemPercentageSplitDTO.getItemId()).isEqualTo(firstItemDTO.getId());
+            assertThat(secondItemPercentageSplitDTO.getName()).isEqualTo(secondItemDTO.getName());
+            assertThat(secondItemPercentageSplitDTO.getCost()).isEqualByComparingTo(secondItemDTO.getCost());
+            assertThat(secondItemPercentageSplitDTO.getItemId()).isNotNull();
         } else {
-            assertThat(items.get(1).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(1).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(1).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(0).getName()).isEqualTo(editBill.getItems().get(1).getName());
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(0).getItemId()).isNotNull();
+            assertThat(secondItemPercentageSplitDTO.getName()).isEqualTo(firstItemDTO.getName());
+            assertThat(secondItemPercentageSplitDTO.getCost()).isEqualByComparingTo(firstItemDTO.getCost());
+            assertThat(secondItemPercentageSplitDTO.getItemId()).isEqualTo(firstItemDTO.getId());
+            assertThat(firstItemPercentageSplitDTO.getName()).isEqualTo(secondItemDTO.getName());
+            assertThat(firstItemPercentageSplitDTO.getCost().toString()).isEqualTo(secondItemDTO.getCost().toString());
+            assertThat(firstItemPercentageSplitDTO.getItemId()).isNotNull();
         }
     }
 
@@ -651,7 +653,7 @@ class BillFacadeImplIT {
         final var billId = 1102L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setResponsible("editBill@email.com");
         billFacade.startBill(billId, userEmail);
 
         //When/Then
@@ -669,7 +671,7 @@ class BillFacadeImplIT {
         final var emailNotInBill = "user@user.com";
         final var editBill = EditBillDTOFixture.getDefault();
 
-        editBill.getResponsible().setEmail(emailNotInBill);
+        editBill.setResponsible(emailNotInBill);
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
@@ -684,7 +686,7 @@ class BillFacadeImplIT {
         final var billId = 1102L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setResponsible("editBill@email.com");
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(69));
 
@@ -702,7 +704,7 @@ class BillFacadeImplIT {
         final var nonExistentItem = 6969L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editBill@email.com");
+        editBill.setResponsible("editBill@email.com");
         editBill.getItems().get(0).setId(nonExistentItem);
 
         //When/Then

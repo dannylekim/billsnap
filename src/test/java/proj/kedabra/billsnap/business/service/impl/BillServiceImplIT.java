@@ -631,7 +631,7 @@ class BillServiceImplIT {
         //Given
         final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editbill@email.com");
+        editBill.setResponsible("editbill@email.com");
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(15));
         final var existentBillId = 2001L;
@@ -641,10 +641,7 @@ class BillServiceImplIT {
 
         //Then
         assertThat(editedBill.getName()).isEqualTo(editBill.getName());
-        assertThat(editedBill.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
-        assertThat(editedBill.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
-        assertThat(editedBill.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
-        assertThat(editedBill.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(editedBill.getResponsible().getEmail()).isEqualTo(editBill.getResponsible());
         assertThat(editedBill.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(editedBill.getCategory()).isEqualTo(editBill.getCategory());
         assertThat(editedBill.getTipPercent()).isEqualTo(editBill.getTipPercent());
@@ -653,14 +650,15 @@ class BillServiceImplIT {
         assertThat(items.size()).isEqualTo(editBill.getItems().size());
         if (items.get(0).getId().equals(editBill.getItems().get(0).getId())) {
             assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
-            assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
+            assertThat(items.get(0).getCost()).isEqualByComparingTo(BigDecimal.TEN);
             assertThat(items.get(1).getId()).isNotNull();
             assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
         } else {
             assertThat(items.get(0).getId()).isNotNull();
             assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
             assertThat(items.get(1).getId()).isEqualTo(editBill.getItems().get(0).getId());
-            assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
+            assertThat(items.get(1).getCost()).isEqualByComparingTo(BigDecimal.TEN);
+
         }
     }
 
@@ -670,7 +668,7 @@ class BillServiceImplIT {
         //Given
         final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editbill@email.com");
+        editBill.setResponsible("editbill@email.com");
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(15));
         final var existentBillId = 2001L;
@@ -680,26 +678,26 @@ class BillServiceImplIT {
 
         //Then
         assertThat(editedBill.getName()).isEqualTo(editBill.getName());
-        assertThat(editedBill.getResponsible().getEmail()).isEqualTo(editBill.getResponsible().getEmail());
-        assertThat(editedBill.getResponsible().getId()).isEqualTo(editBill.getResponsible().getId());
-        assertThat(editedBill.getResponsible().getFirstName()).isEqualTo(editBill.getResponsible().getFirstName());
-        assertThat(editedBill.getResponsible().getLastName()).isEqualTo(editBill.getResponsible().getLastName());
+        assertThat(editedBill.getResponsible().getEmail()).isEqualTo(editBill.getResponsible());
         assertThat(editedBill.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(editedBill.getCategory()).isEqualTo(editBill.getCategory());
         assertThat(editedBill.getTipAmount()).isEqualTo(editBill.getTipAmount());
 
         final var items = new ArrayList<>(editedBill.getItems());
         assertThat(items.size()).isEqualTo(editBill.getItems().size());
-        if (items.get(0).getId().equals(editBill.getItems().get(0).getId())) {
-            assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
-            assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
+        final var firstItemDTO = editBill.getItems().get(0);
+        final var secondItemDTO = editBill.getItems().get(1);
+        if (items.get(0).getId().equals(firstItemDTO.getId())) {
+            assertThat(items.get(0).getId()).isEqualTo(firstItemDTO.getId());
+            assertThat(items.get(0).getCost()).isEqualByComparingTo(firstItemDTO.getCost());
             assertThat(items.get(1).getId()).isNotNull();
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(1).getCost()).isEqualByComparingTo(secondItemDTO.getCost());
         } else {
             assertThat(items.get(0).getId()).isNotNull();
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getId()).isEqualTo(editBill.getItems().get(0).getId());
-            assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
+            assertThat(items.get(0).getCost()).isEqualByComparingTo(secondItemDTO.getCost());
+            assertThat(items.get(1).getId()).isEqualTo(firstItemDTO.getId());
+            assertThat(items.get(1).getCost()).isEqualByComparingTo(firstItemDTO.getCost());
+
         }
     }
 
@@ -738,7 +736,7 @@ class BillServiceImplIT {
         //Given
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("random@email.com");
+        editBill.setResponsible("random@email.com");
         final var existentBillId = 1000L;
 
         //When/Then
@@ -766,7 +764,7 @@ class BillServiceImplIT {
     void shouldThrowExceptionIfTipFormatIsIncorrectTipAmount() {
         final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail("editbill@email.com");
+        editBill.setResponsible("editbill@email.com");
         final var existentBillId = 2001L;
 
         assertThatExceptionOfType(IllegalArgumentException.class)

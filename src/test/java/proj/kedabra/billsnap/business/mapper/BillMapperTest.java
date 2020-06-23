@@ -53,21 +53,13 @@ class BillMapperTest {
         final var editbill = EditBillDTOFixture.getDefault();
         final var bill = BillEntityFixture.getDefault();
         final var accountEntity = new Account();
-        accountEntity.setEmail(editbill.getResponsible().getEmail());
-        accountEntity.setId(editbill.getResponsible().getId());
-        accountEntity.setFirstName(editbill.getResponsible().getFirstName());
-        accountEntity.setLastName(editbill.getResponsible().getLastName());
+        accountEntity.setEmail(editbill.getResponsible());
 
         //When
         billMapper.updatebill(bill, editbill);
 
         //Then
         assertThat(bill.getName()).isEqualTo(editbill.getName());
-        assertThat(bill.getResponsible().getEmail()).isEqualTo(editbill.getResponsible().getEmail());
-        assertThat(bill.getResponsible().getId()).isEqualTo(editbill.getResponsible().getId());
-        assertThat(bill.getResponsible().getFirstName()).isEqualTo(editbill.getResponsible().getFirstName());
-        assertThat(bill.getResponsible().getLastName()).isEqualTo(editbill.getResponsible().getLastName());
-        assertThat(bill.getResponsible().getMiddleName()).isEqualTo(editbill.getResponsible().getMiddleName());
         assertThat(bill.getCompany()).isEqualTo(editbill.getCompany());
         assertThat(bill.getCategory()).isEqualTo(editbill.getCategory());
     }

@@ -1132,7 +1132,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("editBill@email.com");
+        editBillResource.setResponsible("editBill@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
         // When
@@ -1142,28 +1142,29 @@ class BillControllerIT {
 
         // Then
         assertThat(billSplit.getName()).isEqualTo(editBillResource.getName());
-        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBillResource.getResponsible().getEmail());
-        assertThat(billSplit.getResponsible().getId()).isEqualTo(editBillResource.getResponsible().getId());
-        assertThat(billSplit.getResponsible().getFirstName()).isEqualTo(editBillResource.getResponsible().getFirstName());
-        assertThat(billSplit.getResponsible().getLastName()).isEqualTo(editBillResource.getResponsible().getLastName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBillResource.getResponsible());
         assertThat(billSplit.getCompany()).isEqualTo(editBillResource.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBillResource.getCategory());
 
         final var items = billSplit.getItemsPerAccount().get(0).getItems();
-        if (items.get(0).getName().equals("notEditedItem")) {
-            assertThat(items.get(0).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(0).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(0).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(1).getName()).isEqualTo(editBillResource.getItems().get(1).getName());
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBillResource.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getItemId()).isNotNull();
+        final var firstItemResource = editBillResource.getItems().get(0);
+        final var secondItemResource = editBillResource.getItems().get(1);
+        final var firstItemPercentageSplitResource = items.get(0);
+        final var secondItemPercentageSplitResource = items.get(1);
+        if (firstItemPercentageSplitResource.getName().equals(firstItemResource.getName())) {
+            assertThat(firstItemPercentageSplitResource.getName()).isEqualTo(firstItemResource.getName());
+            assertThat(firstItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
+            assertThat(firstItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
+            assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
+            assertThat(secondItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(secondItemPercentageSplitResource.getItemId()).isNotNull();
         } else {
-            assertThat(items.get(1).getName()).isEqualTo("notEditedItem");
-            assertThat(items.get(1).getCost().toString()).isEqualTo("123.00");
-            assertThat(items.get(1).getItemId()).isEqualTo(1013L);
-            assertThat(items.get(0).getName()).isEqualTo(editBillResource.getItems().get(1).getName());
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBillResource.getItems().get(1).getCost().toString());
-            assertThat(items.get(0).getItemId()).isNotNull();
+            assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(firstItemResource.getName());
+            assertThat(secondItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
+            assertThat(secondItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
+            assertThat(firstItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
+            assertThat(firstItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(firstItemPercentageSplitResource.getItemId()).isNotNull();
         }
     }
 
@@ -1175,7 +1176,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("test@email.com");
+        editBillResource.setResponsible("test@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
         // When
@@ -1195,7 +1196,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("editBill@email.com");
+        editBillResource.setResponsible("editBill@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
         performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
@@ -1217,7 +1218,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("test@email.com");
+        editBillResource.setResponsible("test@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
         // When
@@ -1237,7 +1238,7 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("editBill@email.com");
+        editBillResource.setResponsible("editBill@email.com");
         editBillResource.setTipPercent(null);
         editBillResource.setTipAmount(BigDecimal.valueOf(15));
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
@@ -1260,7 +1261,7 @@ class BillControllerIT {
         final var existentBillId = 1102L;
         final var nonExistentItem = 6969L;
         final var editBillResource = EditBillResourceFixture.getDefault();
-        editBillResource.getResponsible().setEmail("editBill@email.com");
+        editBillResource.setResponsible("editBill@email.com");
         editBillResource.getItems().get(0).setId(nonExistentItem);
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 

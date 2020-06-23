@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -16,10 +15,8 @@ import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
-import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
-import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -70,6 +67,8 @@ public class ItemServiceImplIT {
         // Given
         final var account = accountRepository.getAccountByEmail("test@email.com");
         final var bill = BillEntityFixture.getDefault();
+        final var onlyItem = bill.getItems().iterator().next();
+        onlyItem.setId(1000L);
         final var editBill = EditBillDTOFixture.getDefault();
 
         // When
@@ -77,13 +76,18 @@ public class ItemServiceImplIT {
 
         // item
         final var items = new ArrayList<>(bill.getItems());
-        if (items.get(0).getId().equals(1000L)) {
-            assertThat(items.get(0).getCost().toString()).isEqualTo("69.00");
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-        } else {
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getCost().toString()).isEqualTo("69.00");
-        }
 
+        assertThat(items).hasSameSizeAs(editBill.getItems());
+
+        editBill.getItems().forEach(editItem -> {
+            final Item correspondingBillItem;
+            if (editItem.getId() == null) {
+                correspondingBillItem = items.stream().filter(i -> !i.getId().equals(onlyItem.getId())).findFirst().orElseThrow();
+            } else {
+                correspondingBillItem = items.stream().filter(i -> i.getId().equals(editItem.getId())).findFirst().orElseThrow();
+            }
+            assertThat(correspondingBillItem.getCost()).isEqualByComparingTo(editItem.getCost());
+            assertThat(correspondingBillItem.getName()).isEqualTo(editItem.getName());
+        });
     }
 }

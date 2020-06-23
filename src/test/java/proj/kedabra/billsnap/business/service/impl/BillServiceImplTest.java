@@ -575,7 +575,7 @@ class BillServiceImplTest {
         final long billId = 123L;
         final Account account = AccountEntityFixture.getDefaultAccount();
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setResponsible(account.getEmail());
 
         final var accountBill = AccountBillEntityFixture.getDefault();
         accountBill.setAccount(account);
@@ -608,7 +608,7 @@ class BillServiceImplTest {
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.TEN);
-        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setResponsible(account.getEmail());
 
         final var accountBill = AccountBillEntityFixture.getDefault();
         accountBill.setAccount(account);
@@ -687,7 +687,7 @@ class BillServiceImplTest {
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(billId, account, editBill))
-                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(editBill.getResponsible().getEmail()));
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(editBill.getResponsible()));
     }
 
     @Test
@@ -697,7 +697,7 @@ class BillServiceImplTest {
         final long billId = 123L;
         final Account account = AccountEntityFixture.getDefaultAccount();
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setResponsible(account.getEmail());
         editBill.setTipAmount(BigDecimal.valueOf(20));
         editBill.setTipPercent(null);
 
@@ -723,7 +723,7 @@ class BillServiceImplTest {
         final long billId = 123L;
         final Account account = AccountEntityFixture.getDefaultAccount();
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.getResponsible().setEmail(account.getEmail());
+        editBill.setResponsible(account.getEmail());
         editBill.setTipAmount(BigDecimal.valueOf(20));
         editBill.setTipAmount(null);
 

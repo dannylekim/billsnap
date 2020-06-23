@@ -10,7 +10,7 @@ public class EditBillDTO {
 
     private String name;
 
-    private AccountDTO responsible;
+    private String responsible;
 
     private String company;
 

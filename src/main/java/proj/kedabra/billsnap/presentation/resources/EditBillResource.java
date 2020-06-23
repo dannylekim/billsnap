@@ -19,7 +19,7 @@ public class EditBillResource {
     private String name;
 
     @ApiModelProperty(name = "User that is responsible for the bill", position = 2)
-    private AccountResource responsible;
+    private String responsible;
 
     @ApiModelProperty(name = "The company this bill is associated with", position = 3)
     private String company;

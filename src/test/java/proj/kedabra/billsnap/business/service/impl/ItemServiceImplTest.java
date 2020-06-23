@@ -4,6 +4,8 @@ package proj.kedabra.billsnap.business.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
+import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.ItemRepository;
@@ -82,22 +85,36 @@ public class ItemServiceImplTest {
         final var repoItem = ItemEntityFixture.getDefault();
         repoItem.setId(1000L);
         repoItem.setCost(BigDecimal.valueOf(69));
+        repoItem.setName("Repo Item");
 
         when(itemMapper.toEntity(any())).thenReturn(newItem);
         when(itemRepository.findById(any())).thenReturn(Optional.of(repoItem));
+        doAnswer((invocation) -> {
+            final var source = invocation.getArgument(0, ItemDTO.class);
+            final var target = invocation.getArgument(1, Item.class);
+            target.setName(source.getName());
+            target.setCost(source.getCost());
+            return null;
+        }).when(itemMapper).updateItem(any(), eq(repoItem));
 
         // When
         itemService.editNewItems(bill, account, editBill);
 
         // then
         final var items = new ArrayList<>(bill.getItems());
-        if (items.get(0).getId().equals(1000L)) {
-            assertThat(items.get(0).getCost().toString()).isEqualTo(repoItem.getCost().toString());
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-        } else {
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
-            assertThat(items.get(1).getCost().toString()).isEqualTo(repoItem.getCost().toString());
-        }
+
+        assertThat(items).hasSameSizeAs(editBill.getItems());
+
+        editBill.getItems().forEach(editItem -> {
+            final Item correspondingBillItem;
+            if (editItem.getId() == null) {
+                correspondingBillItem = items.stream().filter(i -> !i.getId().equals(repoItem.getId())).findFirst().orElseThrow();
+            } else {
+                correspondingBillItem = items.stream().filter(i -> i.getId().equals(editItem.getId())).findFirst().orElseThrow();
+            }
+            assertThat(correspondingBillItem.getCost()).isEqualByComparingTo(editItem.getCost());
+            assertThat(correspondingBillItem.getName()).isEqualTo(editItem.getName());
+        });
 
     }
 }

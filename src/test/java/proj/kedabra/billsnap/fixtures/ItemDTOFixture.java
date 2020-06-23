@@ -11,7 +11,7 @@ public class ItemDTOFixture {
     public static ItemDTO getItemCustom(Long id) {
         ItemDTO item = new ItemDTO();
         item.setId(id);
-        item.setName("item");
+        item.setName("ramen");
         item.setCost(BigDecimal.valueOf(10));
         return item;
     }

@@ -14,7 +14,7 @@ public class EditBillResourceFixture {
     public static EditBillResource getDefault() {
         final EditBillResource editBillResource = new EditBillResource();
         editBillResource.setName("editName");
-        editBillResource.setResponsible(AccountResourceFixture.getDefault());
+        editBillResource.setResponsible(AccountResourceFixture.getDefault().getEmail());
         editBillResource.setCompany("editCompany");
         editBillResource.setCategory("editCategory");
         editBillResource.setTipPercent(BigDecimal.valueOf(25));
@@ -22,6 +22,8 @@ public class EditBillResourceFixture {
         List<ItemResource> items = new ArrayList<>();
         final var item1 = new ItemResource();
         item1.setId(1013L);
+        item1.setCost(BigDecimal.TEN);
+        item1.setName("stone");
         final var item2 = new ItemResource();
         item2.setId(null);
         item2.setCost(BigDecimal.valueOf(75));

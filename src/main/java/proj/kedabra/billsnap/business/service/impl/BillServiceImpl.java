@@ -139,9 +139,11 @@ public class BillServiceImpl implements BillService {
         final Bill bill = getBill(id);
         verifyUserIsBillResponsible(bill, account.getEmail());
         verifyBillStatus(bill, BillStatusEnum.OPEN);
-        verifyIfAccountInBill(bill, editBill.getResponsible().getEmail());
+        verifyIfAccountInBill(bill, editBill.getResponsible());
 
         billMapper.updatebill(bill, editBill);
+        final var newResponsible = bill.getAccounts().stream().map(AccountBill::getAccount).filter(acc -> editBill.getResponsible().equals(acc.getEmail())).findFirst().orElseThrow();
+        bill.setResponsible(newResponsible);
         setBillTip(bill, editBill);
         itemService.editNewItems(bill, account, editBill);
 
