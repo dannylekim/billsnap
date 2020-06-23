@@ -1,19 +1,32 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Notifications;
+import proj.kedabra.billsnap.business.repository.NotificationsRepository;
 import proj.kedabra.billsnap.business.service.NotificationService;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.utils.ErrorMessageEnum;
+
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
 
+    private final NotificationsRepository notificationsRepository;
+
+    @Autowired
+    public NotificationServiceImpl(final NotificationsRepository notificationsRepository) {
+        this.notificationsRepository = notificationsRepository;
+    }
+
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Notifications createNotification(final Bill bill, final Account account) {
         final var notification = new Notifications();
         notification.setAccount(account);
@@ -23,4 +36,27 @@ public class NotificationServiceImpl implements NotificationService {
         account.getNotifications().add(notification);
         return notification;
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Bill answerInvitation(Long invitationId, boolean answer) {
+        final Notifications notification = getNotification(invitationId);
+        final Bill bill = notification.getBill();
+
+        bill.getAccountBill(notification.getAccount()).ifPresent(accountBill -> {
+            if (answer) accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+            else accountBill.setStatus(InvitationStatusEnum.DECLINED);
+        });
+
+        return bill;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class, readOnly = true)
+    public Notifications getNotification(Long notificationId) {
+        return notificationsRepository.findById(notificationId).orElseThrow(() ->
+                new ResourceNotFoundException(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage(notificationId.toString())));
+
+    }
+
 }

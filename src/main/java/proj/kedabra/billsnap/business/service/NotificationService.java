@@ -8,4 +8,7 @@ public interface NotificationService {
 
     Notifications createNotification(Bill bill, Account account);
 
+    Bill answerInvitation(Long invitationId, boolean answer);
+
+    Notifications getNotification(Long notificationId);
 }

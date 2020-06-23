@@ -1,36 +1,15 @@
 package proj.kedabra.billsnap.business.service.impl;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.persistence.EntityManager;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
-import proj.kedabra.billsnap.business.dto.BillDTO;
-import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
-import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
-import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.dto.*;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
-import proj.kedabra.billsnap.business.model.entities.Account;
-import proj.kedabra.billsnap.business.model.entities.AccountBill;
-import proj.kedabra.billsnap.business.model.entities.AccountItem;
-import proj.kedabra.billsnap.business.model.entities.Bill;
-import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.*;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -41,6 +20,17 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
+
+import javax.persistence.EntityManager;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -137,6 +127,7 @@ public class BillServiceImpl implements BillService {
 
         return bill;
     }
+
     @Override
     public void verifyBillIsOpen(Bill bill) {
         if (bill.getStatus() != BillStatusEnum.OPEN) {
