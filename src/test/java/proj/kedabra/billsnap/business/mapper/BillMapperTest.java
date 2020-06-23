@@ -1,9 +1,6 @@
 package proj.kedabra.billsnap.business.mapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.within;
-
-import java.time.temporal.ChronoUnit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,7 +36,6 @@ class BillMapperTest {
         assertThat(pendingRegisteredBillSplitDTO.getSplitBy()).isEqualTo(billSplitDTO.getSplitBy());
         assertThat(pendingRegisteredBillSplitDTO.getStatus()).isEqualTo(billSplitDTO.getStatus());
         assertThat(pendingRegisteredBillSplitDTO.getTotalTip()).isEqualTo(billSplitDTO.getTotalTip());
-        assertThat(pendingRegisteredBillSplitDTO.getCreated()).isCloseTo(billSplitDTO.getCreated(), within(500, ChronoUnit.MILLIS));
         assertThat(pendingRegisteredBillSplitDTO.getPendingAccounts()).isNull();
 
     }

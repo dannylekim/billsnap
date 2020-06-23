@@ -17,6 +17,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import lombok.Data;
 
 @Data
@@ -35,10 +38,12 @@ public class Group implements Serializable {
     @Column(name = "name", length = 30, nullable = false)
     private String name;
 
-    @Column(name = "created")
+    @Column(name = "created", updatable = false)
+    @CreationTimestamp
     private ZonedDateTime created;
 
     @Column(name = "updated")
+    @UpdateTimestamp
     private ZonedDateTime updated;
 
     @Column(name = "approval_option", nullable = false)
