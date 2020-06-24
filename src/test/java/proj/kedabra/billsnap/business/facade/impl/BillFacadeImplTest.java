@@ -3,7 +3,6 @@ package proj.kedabra.billsnap.business.facade.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
-import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -12,7 +11,6 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -583,8 +581,6 @@ class BillFacadeImplTest {
         assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
         assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
         assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
-        assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(500, ChronoUnit.MILLIS));
-        assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
         if (!(dto instanceof PendingRegisteredBillSplitDTO)) {

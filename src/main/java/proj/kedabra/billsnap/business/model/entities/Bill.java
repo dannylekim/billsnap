@@ -2,7 +2,6 @@ package proj.kedabra.billsnap.business.model.entities;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.Optional;
@@ -23,8 +22,10 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 import com.vladmihalcea.hibernate.type.basic.PostgreSQLEnumType;
+import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -66,11 +67,13 @@ public class Bill implements Serializable {
     @Type(type = "pgsql_enum")
     private BillStatusEnum status;
 
-    @Column(name = "created")
-    private ZonedDateTime created = ZonedDateTime.now(ZoneId.systemDefault());
+    @Column(name = "created", updatable = false)
+    @CreationTimestamp
+    private ZonedDateTime created;
 
     @Column(name = "updated")
-    private ZonedDateTime updated = ZonedDateTime.now(ZoneId.systemDefault());
+    @UpdateTimestamp
+    private ZonedDateTime updated;
 
     @Column(name = "category", length = 20)
     private String category;

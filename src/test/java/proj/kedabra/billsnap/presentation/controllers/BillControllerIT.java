@@ -1138,8 +1138,6 @@ class BillControllerIT {
         assertEquals(expectedBillResource.getResponsible(), actualBillResource.getResponsible());
         assertEquals(BillStatusEnum.OPEN, actualBillResource.getStatus());
         assertEquals(0, expectedBillResource.getBalance().compareTo(actualBillResource.getBalance()));
-        assertNotNull(expectedBillResource.getCreated());
-        assertNotNull(expectedBillResource.getUpdated());
         assertNotNull(expectedBillResource.getId());
 
         final HashSet<ItemPercentageSplitResource> itemsList = new HashSet<>();
@@ -1158,8 +1156,6 @@ class BillControllerIT {
         assertEquals(user.getUsername(), response.getResponsible().getEmail());
         assertEquals(BillStatusEnum.OPEN, response.getStatus());
         assertEquals(-1, BigDecimal.valueOf(0).compareTo(response.getBalance()));
-        assertNotNull(response.getCreated());
-        assertNotNull(response.getUpdated());
         assertNotNull(response.getId());
     }
 
