@@ -2,14 +2,12 @@ package proj.kedabra.billsnap.presentation;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import org.apache.tomcat.jni.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -38,7 +36,7 @@ public class ApiError {
      *
      * @param timestamp String of format dd-MM-yyyy HH:mm:ss
      */
-    public void setTimestamp(String timestamp){
+    public void setTimestamp(String timestamp) {
         this.timestamp = LocalDateTime.parse(timestamp, DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"));
     }
 

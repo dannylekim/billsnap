@@ -4,13 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mapstruct.factory.Mappers;
 
 import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
 
 class BillMapperTest {
 
-    private BillMapper billMapper = Mappers.getMapper(BillMapper.class);
+    private final BillMapper billMapper = new BillMapperImpl();
 
     @Test
     @DisplayName("Should map BillSplitDTO to PendingRegisteredBillSplitDTO")
