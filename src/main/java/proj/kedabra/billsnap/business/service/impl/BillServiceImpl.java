@@ -111,7 +111,9 @@ public class BillServiceImpl implements BillService {
     public Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account) {
         return paymentRepository.getAllAmountOwedByStatusAndAccount(status, account);
     }
+
     @Override
+    @Transactional(readOnly = true)
     public Bill getBill(Long id) {
         return billRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(id.toString())));
     }
@@ -147,7 +149,7 @@ public class BillServiceImpl implements BillService {
         setBillTip(bill, editBill);
         itemService.editNewItems(bill, account, editBill);
 
-        return bill;
+        return billRepository.save(bill);
     }
 
     @Override

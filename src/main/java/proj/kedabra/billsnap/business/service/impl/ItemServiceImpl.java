@@ -6,6 +6,7 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -26,20 +27,20 @@ public class ItemServiceImpl implements ItemService {
     private final ItemMapper itemMapper;
 
     @Autowired
-    public ItemServiceImpl(
-            final ItemRepository itemRepository,
-            final ItemMapper itemMapper) {
+    public ItemServiceImpl(final ItemRepository itemRepository, final ItemMapper itemMapper) {
         this.itemRepository = itemRepository;
         this.itemMapper = itemMapper;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Item getItem(Long id) {
         return itemRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(id.toString())));
     }
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void editNewItems(Bill bill, Account account, EditBillDTO editBill) {
         final Set<Item> items = new HashSet<>();
 
@@ -54,7 +55,6 @@ public class ItemServiceImpl implements ItemService {
                 accountItem.setItem(item);
                 item.getAccounts().add(accountItem);
 
-                itemRepository.save(item);
                 items.add(item);
             } else {
                 final var existingItem = getItem(it.getId());

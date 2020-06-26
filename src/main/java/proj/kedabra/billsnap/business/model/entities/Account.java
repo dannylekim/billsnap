@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.business.model.entities;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
@@ -38,9 +37,7 @@ import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
         name = "pgsql_enum",
         typeClass = PostgreSQLEnumType.class
 )
-public class Account implements Serializable {
-
-    private static final long serialVersionUID = 8311925371311988518L;
+public class Account {
 
     @Id
     @Column(name = "id")
@@ -106,4 +103,5 @@ public class Account implements Serializable {
     public Optional<AccountBill> getAccountBill(final Bill bill) {
         return bills.stream().filter(ab -> ab.getBill().equals(bill)).findFirst();
     }
+
 }
