@@ -7,7 +7,7 @@ import javax.validation.constraints.Digits;
 
 import org.hibernate.validator.constraints.Range;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,28 +15,28 @@ import lombok.Setter;
 @Setter
 public class EditBillResource {
 
-    @ApiModelProperty(name = "Name of the bill", position = 1)
+    @Schema(description = "Name of the bill")
     private String name;
 
-    @ApiModelProperty(name = "User that is responsible for the bill", position = 2)
+    @Schema(description = "User that is responsible for the bill")
     private String responsible;
 
-    @ApiModelProperty(name = "The company this bill is associated with", position = 3)
+    @Schema(description = "The company this bill is associated with")
     private String company;
 
-    @ApiModelProperty(name = "The category of the bill", position = 4)
+    @Schema(description = "The category of the bill")
     private String category;
 
-    @ApiModelProperty(name = "The tip amount. Only one of tipAmount or tipPercent is allowed", position = 5)
+    @Schema(description = "The tip amount. Only one of tipAmount or tipPercent is allowed")
     @Digits(integer = 12, fraction = 2)
     @Range(message = "the number must be positive")
     private BigDecimal tipAmount;
 
-    @ApiModelProperty(name = "The tip percent. Only one of tipAmount or tipPercent is allowed", position = 6)
+    @Schema(description = "The tip percent. Only one of tipAmount or tipPercent is allowed")
     @Digits(integer = 3, fraction = 4)
     @Range(message = "the number must be positive")
     private BigDecimal tipPercent;
 
-    @ApiModelProperty(name = "List of items to add in bill", position = 7)
+    @Schema(description = "List of items to add in bill")
     private List<ItemResource> items;
 }

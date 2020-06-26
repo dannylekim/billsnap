@@ -181,8 +181,7 @@ public class BillController {
     }
 
     @PutMapping("bills/{billId}")
-    @Operation(summary = "Edit bill", description = "Edit an unstarted bill",
-            authorizations = {@Authorization(value = SwaggerConfiguration.API_KEY)})
+    @Operation(summary = "Edit bill", description = "Edit an unstarted bill")
     @ApiResponses({
             @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully edited bill!"),
             @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Bill doesn't exist. \t\n" +
@@ -193,11 +192,11 @@ public class BillController {
             @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The user making the request is not the Bill responsible."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public BillSplitResource editBill(@ApiParam(required = true, name = "billId", value = "bill ID")
+    public BillSplitResource editBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                       @PathVariable("billId") final Long billId,
                                       @RequestBody @Valid final EditBillResource editBillResource,
                                       final BindingResult bindingResult,
-                                      @ApiIgnore @AuthenticationPrincipal final Principal principal) {
+                                      @AuthenticationPrincipal final Principal principal) {
 
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
