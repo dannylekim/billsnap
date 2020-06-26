@@ -76,7 +76,9 @@ VALUES (9000, 'user@withADeclinedBill.com',
 
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
                      created, updated, location_id)
-VALUES (50, 'user@inbill.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+VALUES (50, 'user@inbill.com',
+        '$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK', -- bcrypted 'somepass' 4 rounds
+        'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
         current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,

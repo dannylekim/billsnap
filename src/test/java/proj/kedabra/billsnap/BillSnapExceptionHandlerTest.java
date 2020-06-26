@@ -84,7 +84,7 @@ class BillSnapExceptionHandlerTest {
 
 
     @Test
-    @DisplayName("Should return ResponseEntity with error 400 and ResourceNotFound's message")
+    @DisplayName("Should return ResponseEntity with error 404 and ResourceNotFound's message")
     void shouldReturn404ForResourceNotFoundException() {
         //Given
         final var ex = new ResourceNotFoundException(NOT_THIS_ERROR_MESSAGE);
