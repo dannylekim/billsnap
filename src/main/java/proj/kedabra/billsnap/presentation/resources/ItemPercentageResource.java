@@ -13,8 +13,6 @@ import lombok.Data;
 @Data
 public class ItemPercentageResource implements Serializable {
 
-    private static final long serialVersionUID = 2800827086143046648L;
-
     @NotNull
     private Long itemId;
 

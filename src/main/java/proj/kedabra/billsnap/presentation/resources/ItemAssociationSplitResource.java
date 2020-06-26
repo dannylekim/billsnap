@@ -9,8 +9,6 @@ import lombok.Data;
 @Data
 public class ItemAssociationSplitResource implements Serializable {
 
-    private static final long serialVersionUID = 2200729998541265172L;
-
     private AccountResource account;
 
     private List<ItemPercentageSplitResource> items;

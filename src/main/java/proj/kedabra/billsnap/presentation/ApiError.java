@@ -12,23 +12,23 @@ import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
 public class ApiError {
 
-    @ApiModelProperty(name = "Http status of the error")
+    @Schema(description = "Http status of the error")
     private HttpStatus status;
 
-    @ApiModelProperty(name = "Time of the error", position = 1)
+    @Schema(description = "Time of the error")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss")
     private LocalDateTime timestamp = LocalDateTime.now(ZoneId.systemDefault());
 
-    @ApiModelProperty(name = "The error message", position = 2)
+    @Schema(description = "The error message")
     private String message;
 
-    @ApiModelProperty(name = "The list of Sub errors if they exist. Generally only for validation", position = 3)
+    @Schema(description = "The list of Sub errors if they exist. Generally only for validation")
     private List<ApiSubError> errors = new ArrayList<>();
 
     /**

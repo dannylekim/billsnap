@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -32,6 +31,7 @@ import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;

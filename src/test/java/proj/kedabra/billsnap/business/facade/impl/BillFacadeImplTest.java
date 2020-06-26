@@ -23,7 +23,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
@@ -33,6 +32,7 @@ import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;

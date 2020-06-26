@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +23,7 @@ import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;

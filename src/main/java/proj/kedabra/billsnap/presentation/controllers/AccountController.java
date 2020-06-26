@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
@@ -41,16 +44,17 @@ public class AccountController {
 
 
     @PostMapping("/register")
-    @ApiOperation(value = "Register Account", notes = "Register an account in the application using minimum details")
+    @Operation(summary = "Register Account", description = "Register an account in the application using minimum details")
     @ApiResponses({
-            @ApiResponse(code = 201, response = AccountResource.class, message = "Successfully registered an account!"),
-            @ApiResponse(code = 400, response = ApiError.class, message = "Cannot register account with wrong inputs."),
-            @ApiResponse(code = 401, response = ApiError.class, message = "You are unauthorized to access this resource."),
-            @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully registered an account!"),
+            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot register account with wrong inputs."),
+            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
+            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.CREATED)
     @ObfuscateArgs
-    public AccountResource createAccount(@ApiParam(required = true, name = "Registration Details", value = "Minimum registration details")
+    @SecurityRequirements
+    public AccountResource createAccount(@Parameter(required = true, name = "Registration Details", description = "Minimum registration details")
                                          @RequestBody @Valid final AccountCreationResource accountCreationResource,
                                          final BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
@@ -66,16 +70,17 @@ public class AccountController {
     }
 
     @PostMapping(path = "/login", consumes = "application/json")
-    @ApiOperation(value = "Login", notes = "Login to the application")
+    @Operation(summary = "Login", description = "Login to the application")
+    @SecurityRequirements
     @ApiResponses({
-            @ApiResponse(code = 200, response = LoginResponseResource.class, message = "Successfully logged in."),
-            @ApiResponse(code = 400, response = ApiError.class, message = "Cannot login with invalid inputs."),
-            @ApiResponse(code = 401, response = ApiError.class, message = "Cannot login with incorrect credentials."),
-            @ApiResponse(code = 403, response = ApiError.class, message = "You are forbidden to access this resource."),
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseResource.class)), description = "Successfully logged in."),
+            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with invalid inputs."),
+            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with incorrect credentials."),
+            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public void loginAccount(@ApiParam(required = true, name = "Login Details", value = "Valid login details")
-                             @RequestBody @Valid LoginResource loginResource) {
+    public LoginResponseResource loginAccount(@Parameter(required = true, name = "Login Details", description = "Valid login details")
+                                              @RequestBody @Valid LoginResource loginResource) {
         throw new IllegalStateException("loginAccount() shouldn't be called from Controller: it is implemented by custom AuthenticationFilter.");
     }
 

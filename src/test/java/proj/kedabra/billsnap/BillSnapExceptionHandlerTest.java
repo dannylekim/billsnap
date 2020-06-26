@@ -6,12 +6,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.fixtures.FieldErrorFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
@@ -85,7 +85,7 @@ class BillSnapExceptionHandlerTest {
 
     @Test
     @DisplayName("Should return ResponseEntity with error 400 and ResourceNotFound's message")
-    void shouldReturn400ForResourceNotFoundException() {
+    void shouldReturn404ForResourceNotFoundException() {
         //Given
         final var ex = new ResourceNotFoundException(NOT_THIS_ERROR_MESSAGE);
 
@@ -93,7 +93,7 @@ class BillSnapExceptionHandlerTest {
         final ApiError response = billSnapExceptionHandler.handleResourceNotFound(ex);
 
         //Then
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatus());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatus());
         assertEquals(NOT_THIS_ERROR_MESSAGE, response.getMessage());
     }
 
