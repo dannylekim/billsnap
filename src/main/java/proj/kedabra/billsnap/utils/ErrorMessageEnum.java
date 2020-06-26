@@ -29,6 +29,7 @@ public enum ErrorMessageEnum {
     DUPLICATE_EMAILS_IN_ASSOCIATE_USERS("There are duplicate emails being called: {}"),
     BILL_IS_NOT_OPEN("The bill is not in Open status."),
     LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
+    NOTIFICATION_ID_DOES_NOT_EXIST("No notification exists with id: {}"),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
