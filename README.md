@@ -2,7 +2,7 @@
 ![BCH compliance](https://bettercodehub.com/edge/badge/dannylekim/billsnap?branch=develop&token=0d87e307153724f90e74a95254e4fd924d8269be)
 [![CodeFactor](https://www.codefactor.io/repository/github/dannylekim/billsnap/badge?s=d03236e11106ad11acbf82ea016e056275ba27fb)](https://www.codefactor.io/repository/github/dannylekim/billsnap)
 [![codecov](https://codecov.io/gh/dannylekim/billsnap/branch/develop/graph/badge.svg?token=XP6BVqx6XT)](https://codecov.io/gh/dannylekim/billsnap)
-[![travis-ci](https://travis-ci.com/dannylekim/billsnap.svg?token=45ZvGnpE941cwtLEpxxi&branch=develop)
+![travis-ci](https://travis-ci.com/dannylekim/billsnap.svg?token=45ZvGnpE941cwtLEpxxi&branch=develop)
 
 BillSnap is all about snapping away full bills into dust.
 
