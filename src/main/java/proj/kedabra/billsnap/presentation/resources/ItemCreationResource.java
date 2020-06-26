@@ -14,8 +14,6 @@ import lombok.Data;
 @Data
 public class ItemCreationResource implements Serializable {
 
-    private static final long serialVersionUID = 7201751679337910110L;
-
     @NotBlank
     @Size(max = 30)
     private String name;

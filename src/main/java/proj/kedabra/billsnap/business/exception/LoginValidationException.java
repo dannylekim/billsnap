@@ -7,8 +7,6 @@ import org.springframework.validation.ObjectError;
 
 public class LoginValidationException extends AuthenticationException {
 
-    private static final long serialVersionUID = -3708962977537779461L;
-
     private final List<ObjectError> errors;
 
     public LoginValidationException(List<ObjectError> errors) {

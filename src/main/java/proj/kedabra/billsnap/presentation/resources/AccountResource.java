@@ -3,7 +3,7 @@ package proj.kedabra.billsnap.presentation.resources;
 import java.io.Serializable;
 import java.time.LocalDate;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.model.entities.Location;
@@ -11,33 +11,31 @@ import proj.kedabra.billsnap.business.model.entities.Location;
 @Data
 public class AccountResource implements Serializable {
 
-    private static final long serialVersionUID = 3234969136011347459L;
-
-    @ApiModelProperty(name = "Unique ID of the user")
+    @Schema(description = "Unique ID of the user")
     private Long id;
 
-    @ApiModelProperty(name = "Email of the user", position = 1)
+    @Schema(description = "Email of the user")
     private String email;
 
-    @ApiModelProperty(name = "First name of the user", position = 2)
+    @Schema(description = "First name of the user")
     private String firstName;
 
-    @ApiModelProperty(name = "Middle name of the user", position = 3)
+    @Schema(description = "Middle name of the user")
     private String middleName;
 
-    @ApiModelProperty(name = "Middle name of the user", position = 4)
+    @Schema(description = "Middle name of the user")
     private String lastName;
 
-    @ApiModelProperty(name = "Gender of the user", position = 5)
+    @Schema(description = "Gender of the user")
     private String gender;
 
-    @ApiModelProperty(name = "Phone number of the user", position = 6)
+    @Schema(description = "Phone number of the user")
     private String phoneNumber;
 
-    @ApiModelProperty(name = "Birth date of the user", position = 7)
+    @Schema(description = "Birth date of the user")
     private LocalDate birthDate;
 
-    @ApiModelProperty(name = "Location of the User", position = 8)
+    @Schema(description = "Location of the User")
     private Location location;
 
 }

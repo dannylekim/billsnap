@@ -3,7 +3,7 @@ package proj.kedabra.billsnap.presentation.resources;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -11,21 +11,19 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 @Data
 public class ShortBillResource implements Serializable {
 
-    private static final long serialVersionUID = 51325686923749077L;
-
-    @ApiModelProperty(name = "Id of the bill")
+    @Schema(description = "Id of the bill")
     private Long id;
 
-    @ApiModelProperty(name = "Name of the bill", position = 1)
+    @Schema(description = "Name of the bill")
     private String name;
 
-    @ApiModelProperty(name = "status of the bill", position = 2)
+    @Schema(description = "status of the bill")
     private BillStatusEnum status;
 
-    @ApiModelProperty(name = "The category of the bill", position = 3)
+    @Schema(description = "The category of the bill")
     private String category;
 
-    @ApiModelProperty(name = "the total amount of the bill", position = 4)
+    @Schema(description = "the total amount of the bill")
     private BigDecimal balance;
 
 }

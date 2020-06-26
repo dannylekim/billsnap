@@ -6,20 +6,18 @@ import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
-import io.swagger.annotations.ApiModelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
 public class AssociateBillResource implements Serializable {
 
-    private static final long serialVersionUID = 6080802006414641448L;
-
     @NotNull
-    @ApiModelProperty(name = "Bill id to modify")
+    @Schema(description = "Bill id to modify")
     private Long id;
 
     @NotNull
-    @ApiModelProperty(name = "list of items to associate to the account", position = 1)
+    @Schema(description = "list of items to associate to the account")
     private List<@Valid ItemAssociationResource> itemsPerAccount;
 
 }
