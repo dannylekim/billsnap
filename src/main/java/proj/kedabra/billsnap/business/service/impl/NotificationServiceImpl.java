@@ -1,19 +1,22 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import proj.kedabra.billsnap.business.model.entities.Account;
+import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.repository.NotificationsRepository;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -43,9 +46,13 @@ public class NotificationServiceImpl implements NotificationService {
         final Notifications notification = getNotification(invitationId);
         final Bill bill = notification.getBill();
 
-        bill.getAccountBill(notification.getAccount()).ifPresent(accountBill -> {
-            if (answer) accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
-            else accountBill.setStatus(InvitationStatusEnum.DECLINED);
+        final Optional<AccountBill> accountBill = bill.getAccountBill(notification.getAccount());
+        accountBill.ifPresent(accBill -> {
+            if (answer) {
+                accBill.setStatus(InvitationStatusEnum.ACCEPTED);
+            } else {
+                accBill.setStatus(InvitationStatusEnum.DECLINED);
+            }
         });
 
         return bill;

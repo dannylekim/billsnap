@@ -1,14 +1,13 @@
 package proj.kedabra.billsnap.fixtures;
 
-import proj.kedabra.billsnap.business.model.entities.Notifications;
-
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
-public class NotificationsFixture {
+import proj.kedabra.billsnap.business.model.entities.Notifications;
 
-    private NotificationsFixture() {
-    }
+public final class NotificationsFixture {
+
+    private NotificationsFixture() { }
 
     public static Notifications getDefault() {
         final Notifications notification = new Notifications();
