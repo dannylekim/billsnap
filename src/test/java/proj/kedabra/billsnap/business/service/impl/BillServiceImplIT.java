@@ -32,9 +32,9 @@ import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
-import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
@@ -636,6 +636,15 @@ class BillServiceImplIT {
         editBill.setTipAmount(BigDecimal.valueOf(15));
         final var existentBillId = 2001L;
 
+        final var billInsideDb = billRepository.getBillById(existentBillId);
+        final var item = new Item();
+        item.setBill(billInsideDb);
+        item.setName("");
+        item.setCost(BigDecimal.TEN);
+        item.setId(1000L);
+        billInsideDb.getItems().add(item);
+        billRepository.save(billInsideDb);
+
         //When
         final Bill editedBill = billService.editBill(existentBillId, account, editBill);
 
@@ -672,6 +681,15 @@ class BillServiceImplIT {
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(15));
         final var existentBillId = 2001L;
+
+        final var billInsideDb = billRepository.getBillById(existentBillId);
+        final var item = new Item();
+        item.setBill(billInsideDb);
+        item.setName("");
+        item.setCost(BigDecimal.TEN);
+        item.setId(1000L);
+        billInsideDb.getItems().add(item);
+        billRepository.save(billInsideDb);
 
         //When
         final Bill editedBill = billService.editBill(existentBillId, account, editBill);

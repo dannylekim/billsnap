@@ -53,11 +53,16 @@ public class ItemServiceImpl implements ItemService {
                 accountItem.setAccount(account);
                 accountItem.setPercentage(new BigDecimal(100));
                 accountItem.setItem(item);
-                item.getAccounts().add(accountItem);
 
-                items.add(item);
+                item.getAccounts().add(accountItem);
+                items.add(itemRepository.save(item));
             } else {
                 final var existingItem = getItem(it.getId());
+
+                if (!existingItem.getBill().getId().equals(bill.getId())) {
+                    throw new IllegalArgumentException("Item does not belong to the bill");
+                }
+
                 itemMapper.updateItem(it, existingItem);
                 items.add(existingItem);
             }

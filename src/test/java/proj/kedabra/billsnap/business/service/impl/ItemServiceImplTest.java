@@ -17,9 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.mapper.ItemMapper;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.ItemRepository;
@@ -89,6 +89,7 @@ public class ItemServiceImplTest {
 
         when(itemMapper.toEntity(any())).thenReturn(newItem);
         when(itemRepository.findById(any())).thenReturn(Optional.of(repoItem));
+        when(itemRepository.save(any())).thenAnswer(s -> s.getArgument(0));
         doAnswer((invocation) -> {
             final var source = invocation.getArgument(0, ItemDTO.class);
             final var target = invocation.getArgument(1, Item.class);
@@ -115,6 +116,29 @@ public class ItemServiceImplTest {
             assertThat(correspondingBillItem.getCost()).isEqualByComparingTo(editItem.getCost());
             assertThat(correspondingBillItem.getName()).isEqualTo(editItem.getName());
         });
+
+    }
+
+    @Test
+    @DisplayName("Should throw exception if Item does not belong in Bill")
+    void shouldThrowExceptionIfItemIdDoesNotBelongInBill() {
+        // Given
+        final var bill = BillEntityFixture.getDefault();
+        final var account = AccountEntityFixture.getDefaultAccount();
+        final var editBill = EditBillDTOFixture.getDefault();
+        final var newItem = ItemEntityFixture.getDefault();
+        newItem.setId(1L);
+        final var repoItem = ItemEntityFixture.getDefault();
+        repoItem.getBill().setId(9000L);
+        repoItem.setId(1000L);
+        repoItem.setCost(BigDecimal.valueOf(69));
+        repoItem.setName("Repo Item");
+
+        when(itemMapper.toEntity(any())).thenReturn(newItem);
+        when(itemRepository.findById(any())).thenReturn(Optional.of(repoItem));
+
+        // When / Then
+        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> itemService.editNewItems(bill, account, editBill));
 
     }
 }

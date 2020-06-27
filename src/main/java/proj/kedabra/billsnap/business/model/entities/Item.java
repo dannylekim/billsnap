@@ -41,8 +41,10 @@ public class Item {
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
-    @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<AccountItem> accounts = new HashSet<>();
+
+
 }

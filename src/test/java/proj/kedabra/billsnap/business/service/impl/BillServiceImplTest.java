@@ -569,7 +569,7 @@ class BillServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should edit bill successfully")
+    @DisplayName("Should edit bill successfully by Tip Percentage")
     void shouldEditBillSuccessfully() {
         //Given
         final long billId = 123L;
@@ -588,6 +588,7 @@ class BillServiceImplTest {
         item1.setCost(BigDecimal.valueOf(90));
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(billRepository.save(any())).thenAnswer(s -> s.getArgument(0));
 
         //When
         final Bill result = billService.editBill(billId, account, editBill);
@@ -600,7 +601,7 @@ class BillServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should edit bill successfully")
+    @DisplayName("Should edit bill successfully by Tip Amount")
     void shouldEditBillSuccessfullyByTipAmount() {
         //Given
         final long billId = 123L;
@@ -621,6 +622,7 @@ class BillServiceImplTest {
         item1.setCost(BigDecimal.valueOf(90));
 
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(billRepository.save(any())).thenAnswer(s -> s.getArgument(0));
 
         //When
         final Bill result = billService.editBill(billId, account, editBill);

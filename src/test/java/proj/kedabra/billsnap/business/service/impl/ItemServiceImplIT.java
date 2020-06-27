@@ -11,12 +11,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.rest.webmvc.ResourceNotFoundException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
+import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -34,6 +35,9 @@ public class ItemServiceImplIT {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private BillRepository billRepository;
 
     @Test
     @DisplayName("Should get existing item")
@@ -69,13 +73,17 @@ public class ItemServiceImplIT {
         final var bill = BillEntityFixture.getDefault();
         final var onlyItem = bill.getItems().iterator().next();
         onlyItem.setId(1000L);
+        onlyItem.setBill(bill);
+        bill.setResponsible(account);
+        bill.setCreator(account);
+        final var persistedBill = billRepository.save(bill);
         final var editBill = EditBillDTOFixture.getDefault();
 
         // When
-        itemService.editNewItems(bill, account, editBill);
+        itemService.editNewItems(persistedBill, account, editBill);
 
         // item
-        final var items = new ArrayList<>(bill.getItems());
+        final var items = new ArrayList<>(persistedBill.getItems());
 
         assertThat(items).hasSameSizeAs(editBill.getItems());
 
