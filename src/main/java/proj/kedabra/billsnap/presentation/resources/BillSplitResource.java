@@ -57,7 +57,7 @@ public class BillSplitResource implements Serializable {
     @Schema(description = "the total amount of the bill")
     private BigDecimal balance;
 
-    @ApiModelProperty(name = "The taxes for the specific bill", position = 5)
+    @Schema(description = "The taxes for the specific bill")
     private List<TaxResource> taxes;
 
 }

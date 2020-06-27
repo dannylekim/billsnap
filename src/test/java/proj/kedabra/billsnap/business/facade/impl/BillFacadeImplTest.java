@@ -16,13 +16,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
@@ -58,8 +58,10 @@ import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.PendingRegisteredBillSplitDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+@ExtendWith(MockitoExtension.class)
 class BillFacadeImplTest {
 
+    @InjectMocks
     private BillFacadeImpl billFacade;
 
     @Mock
@@ -83,14 +85,6 @@ class BillFacadeImplTest {
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
     private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
-
-    @BeforeEach
-    void setup() {
-
-        MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(billService, accountService, billMapper, accountMapper, itemMapper);
-
-    }
 
     @Test
     @DisplayName("Should return an exception if given an email that does not exist")
@@ -136,7 +130,6 @@ class BillFacadeImplTest {
         final String billCreator = "accountentity@test.com";
         final String existentEmail = "existent@email.com";
         billDTO.setAccountsList(List.of(billCreator, existentEmail));
-        when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
 
         //When/Then
         assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
@@ -207,8 +200,6 @@ class BillFacadeImplTest {
         mappedBillFixture.setAccounts(Set.of(accountBill));
         mappedBillFixture.setCreator(billCreatorAccount);
 
-        when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
-        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
         when(billService.createBillToAccount(any(), any(), any())).thenReturn(mappedBillFixture);
         when(billMapper.toBillCompleteDTO(any(Bill.class))).thenReturn(BillCompleteDTOFixture.getDefault());
         when(accountMapper.toDTO(any(Account.class))).thenReturn(AccountDTOFixture.getCreationDTO());
@@ -639,8 +630,6 @@ class BillFacadeImplTest {
         assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
         assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
         assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
-        assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(500, ChronoUnit.MILLIS));
-        assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(500, ChronoUnit.MILLIS));
         assertThat(bill.getTaxes().size()).isEqualTo(dto.getTaxes().size());
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
