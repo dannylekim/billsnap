@@ -30,6 +30,7 @@ public enum ErrorMessageEnum {
     BILL_IS_NOT_OPEN("The bill is not in Open status."),
     LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
     NOTIFICATION_ID_DOES_NOT_EXIST("No notification exists with id: {}"),
+    ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION("Account is not associated to the specified notification."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

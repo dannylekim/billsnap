@@ -7,6 +7,7 @@ import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.model.entities.Bill;
 
 public interface BillFacade {
 
@@ -21,5 +22,7 @@ public interface BillFacade {
     BillSplitDTO getDetailedBill(Long billId, String userEmail);
 
     BillSplitDTO startBill(Long billId, String userEmail);
+
+    BillSplitDTO getBillSplitDTO(Bill bill);
 
 }
