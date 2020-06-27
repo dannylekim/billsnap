@@ -40,6 +40,7 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillFixture;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
+import proj.kedabra.billsnap.fixtures.EditBillResourceFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.StartBillResourceFixture;
@@ -85,6 +86,8 @@ class BillControllerIT {
     private static final String BILL_BILLID_ACCOUNTS_ENDPOINT = "/bills/%d/accounts";
 
     private static final String BILL_START_ENDPOINT = "/bills/start";
+
+    private static final String BILL_EDIT_ENDPOINT = "/bills/%d";
 
     private static final String JWT_HEADER = "Authorization";
 
@@ -794,7 +797,7 @@ class BillControllerIT {
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
-        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @ParameterizedTest
@@ -817,7 +820,7 @@ class BillControllerIT {
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
-        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -1118,7 +1121,157 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should edit bill successfully")
+    void shouldEditBillSuccessfully() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 200);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final BillSplitResource billSplit = mapper.readValue(content, BillSplitResource.class);
+
+        // Then
+        assertThat(billSplit.getName()).isEqualTo(editBillResource.getName());
+        assertThat(billSplit.getResponsible().getEmail()).isEqualTo(editBillResource.getResponsible());
+        assertThat(billSplit.getCompany()).isEqualTo(editBillResource.getCompany());
+        assertThat(billSplit.getCategory()).isEqualTo(editBillResource.getCategory());
+
+        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        final var firstItemResource = editBillResource.getItems().get(0);
+        final var secondItemResource = editBillResource.getItems().get(1);
+        final var firstItemPercentageSplitResource = items.get(0);
+        final var secondItemPercentageSplitResource = items.get(1);
+        if (firstItemPercentageSplitResource.getName().equals(firstItemResource.getName())) {
+            assertThat(firstItemPercentageSplitResource.getName()).isEqualTo(firstItemResource.getName());
+            assertThat(firstItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
+            assertThat(firstItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
+            assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
+            assertThat(secondItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(secondItemPercentageSplitResource.getItemId()).isNotNull();
+        } else {
+            assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(firstItemResource.getName());
+            assertThat(secondItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
+            assertThat(secondItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
+            assertThat(firstItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
+            assertThat(firstItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(firstItemPercentageSplitResource.getItemId()).isNotNull();
+        }
+    }
+
+    @Test
+    @DisplayName("Should return error account not in bill when edit bill")
+    void shouldReturnErrorAccountNotInBillWhenEditBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("test@email.com");
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 403);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage(List.of(existentBillId).toString()));
+    }
+
+    @Test
+    @DisplayName("Should return error when bill already started when editing bill")
+    void shouldReturnErrorWhenBillAlreadyStartedWhenEditingBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
+        performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 405);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.name()));
+    }
+
+    @Test
+    @DisplayName("Should return error when responsible is not part of bill when editing bill")
+    void shouldReturnErrorWhenResponsibleIsNotPartOfBillWhenEditingBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("test@email.com");
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage("test@email.com"));
+    }
+
+    @Test
+    @DisplayName("Should return error if tip format is incorrect when editing bill")
+    void shouldReturnErrorIfTipFormatIsIncorrectWhenEditingBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        editBillResource.setTipPercent(null);
+        editBillResource.setTipAmount(BigDecimal.valueOf(15));
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error when edit bill does not have referenced item when editing bill")
+    void shouldReturnErrorWhenEditBillDoesNotHaveReferencedItemWhenEditingBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var nonExistentItem = 6969L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        editBillResource.getItems().get(0).setId(nonExistentItem);
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {

@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
@@ -24,10 +25,12 @@ public interface BillService {
 
     Bill inviteRegisteredToBill(Bill bill, List<Account> accounts);
 
-    void verifyBillIsOpen(Bill bill);
+    void verifyBillStatus(Bill bill, BillStatusEnum status);
 
     void verifyUserIsBillResponsible(Bill bill, String userEmail);
 
     Bill startBill(Long id, String userEmail);
+
+    Bill editBill(Long id, Account account, EditBillDTO editBill);
 
 }

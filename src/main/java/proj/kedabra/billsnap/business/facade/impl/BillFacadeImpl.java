@@ -16,6 +16,7 @@ import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.CostItemsPair;
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
@@ -31,6 +32,7 @@ import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
@@ -83,7 +85,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
         final var bill = billService.getBill(associateBillDTO.getId());
-        billService.verifyBillIsOpen(bill);
+        billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
         return getBillSplitDTO(associatedBill);
@@ -93,7 +95,7 @@ public class BillFacadeImpl implements BillFacade {
     @Transactional(rollbackFor = Exception.class)
     public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
         final var bill = billService.getBill(billId);
-        billService.verifyBillIsOpen(bill);
+        billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         billService.verifyUserIsBillResponsible(bill, userEmail);
 
         final List<Account> accountsList = accountService.getAccounts(accounts);
@@ -135,6 +137,13 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     public BillSplitDTO startBill(Long billId, String userEmail) {
         final Bill bill = billService.startBill(billId, userEmail);
+        return getBillSplitDTO(bill);
+    }
+
+    @Override
+    public BillSplitDTO editBill(final Long billId, final String email, final EditBillDTO editBill) {
+        final var account = accountService.getAccount(email);
+        final Bill bill = billService.editBill(billId, account, editBill);
         return getBillSplitDTO(bill);
     }
 

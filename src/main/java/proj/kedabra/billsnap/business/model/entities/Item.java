@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.business.model.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
@@ -24,9 +23,7 @@ import lombok.ToString;
 @Data
 @Entity
 @Table(name = "item", schema = "public")
-public class Item implements Serializable {
-
-    private static final long serialVersionUID = 5729865586128253732L;
+public class Item {
 
     @Id
     @Column(name = "id")
@@ -44,8 +41,10 @@ public class Item implements Serializable {
     @JoinColumn(name = "bill_id", nullable = false)
     private Bill bill;
 
-    @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", orphanRemoval = true, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
     private Set<AccountItem> accounts = new HashSet<>();
+
+
 }

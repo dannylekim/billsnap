@@ -21,7 +21,6 @@ public class BillsnapApplication {
                 environment.getProperty("server.servlet.context-path", "");
 
         log.info("Server located at: http://" + url);
-        log.info("Swagger located at: http://" + url + "/swagger-ui.html");
     }
 
 }

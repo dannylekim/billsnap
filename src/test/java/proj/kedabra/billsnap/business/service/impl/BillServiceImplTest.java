@@ -26,6 +26,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
@@ -43,6 +44,7 @@ import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
+import proj.kedabra.billsnap.business.service.ItemService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
@@ -51,6 +53,7 @@ import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
+import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemAssociationDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
@@ -83,12 +86,15 @@ class BillServiceImplTest {
     @Mock
     private EntityManager entityManager;
 
+    @Mock
+    private ItemService itemService;
+
     private BillServiceImpl billService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, entityManager);
+        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, itemService, entityManager);
     }
 
     @Test
@@ -306,8 +312,8 @@ class BillServiceImplTest {
         bill.setStatus(status);
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillIsOpen(bill))
-                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.verifyBillStatus(bill, BillStatusEnum.OPEN))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -542,7 +548,7 @@ class BillServiceImplTest {
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.startBill(billId, billResponsible))
-                .withMessage(ErrorMessageEnum.BILL_IS_NOT_OPEN.getMessage());
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
     @Test
@@ -560,6 +566,182 @@ class BillServiceImplTest {
         assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billService.startBill(billId, notBillResponsible))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should edit bill successfully by Tip Percentage")
+    void shouldEditBillSuccessfully() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible(account.getEmail());
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(billRepository.save(any())).thenAnswer(s -> s.getArgument(0));
+
+        //When
+        final Bill result = billService.editBill(billId, account, editBill);
+
+        //Then
+        assertThat(result.getResponsible().getId()).isEqualTo(bill.getResponsible().getId());
+        assertThat(result.getTipPercent()).isEqualTo(bill.getTipPercent());
+        assertThat(result.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(result.getCompany()).isEqualTo(bill.getCompany());
+    }
+
+    @Test
+    @DisplayName("Should edit bill successfully by Tip Amount")
+    void shouldEditBillSuccessfullyByTipAmount() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.TEN);
+        editBill.setResponsible(account.getEmail());
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+        when(billRepository.save(any())).thenAnswer(s -> s.getArgument(0));
+
+        //When
+        final Bill result = billService.editBill(billId, account, editBill);
+
+        //Then
+        assertThat(result.getResponsible().getId()).isEqualTo(bill.getResponsible().getId());
+        assertThat(result.getTipAmount()).isEqualTo(editBill.getTipAmount());
+        assertThat(result.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(result.getCompany()).isEqualTo(bill.getCompany());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when user is not responsible of bill")
+    void shouldThrowExceptionWhenUserIsNotResponsibleOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        account.setEmail("someEmail@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        final Bill bill = BillEntityFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception when bill already started")
+    void shouldThrowExceptionWhenBillAlreadyStarted() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.IN_PROGRESS);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw if account is not part of bill")
+    void shouldThrowIfAccountIsNotPartOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(editBill.getResponsible()));
+    }
+
+    @Test
+    @DisplayName("Should throw if edit bill with wrong tip format")
+    void shouldThrowIfEditBillWithWrongTipFormat() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible(account.getEmail());
+        editBill.setTipAmount(BigDecimal.valueOf(20));
+        editBill.setTipPercent(null);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+        bill.setTipAmount(null);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if edit bill with wrong tip format")
+    void shouldThrowIfEditBillWithWrongTipFormatType2() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible(account.getEmail());
+        editBill.setTipAmount(BigDecimal.valueOf(20));
+        editBill.setTipAmount(null);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+        bill.setTipPercent(null);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
     }
 
 }
