@@ -165,6 +165,11 @@ INSERT INTO bill (id, name, responsible, creator, status, created, updated, cate
 VALUES (1220, 'bill with invitations', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
 
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1221, 'bill with invitations', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
+        1);
+
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -204,6 +209,10 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1220, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1220, 50, 0, 'PENDING');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1221, 5000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1221, 50, 0, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1102, 10000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -265,3 +274,7 @@ INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (101, 1220, 50, current_timestamp);
 INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (102, 1220, 5000, current_timestamp);
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (103, 1101, 50, current_timestamp); --bill IN_PROGRESS status
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (104, 1221, 50, current_timestamp);

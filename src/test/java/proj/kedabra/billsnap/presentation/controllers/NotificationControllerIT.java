@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import javax.transaction.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -23,6 +22,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.repository.NotificationsRepository;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AnswerNotificationResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
@@ -37,7 +37,6 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @ActiveProfiles(SpringProfiles.TEST)
 @SpringBootTest
 @AutoConfigureMockMvc
-//@SuppressWarnings("squid:S00112")
 @AutoConfigureTestDatabase
 @Transactional
 class NotificationControllerIT {
@@ -61,9 +60,6 @@ class NotificationControllerIT {
     private static final String JWT_PREFIX = "Bearer ";
 
     private static final String INVALID_INPUTS = "Invalid Inputs. Please fix the following errors";
-
-    private static final String MUST_NOT_BE_NULL = "must not be null";
-
 
     @Test
     @DisplayName("Should return 200 when answering invitation with ACCEPT")
@@ -163,13 +159,12 @@ class NotificationControllerIT {
     }
 
     @Test
-    @Disabled
     @DisplayName("Should return 405 when the bill that the user is invited to is not Open status")
     public void shouldReturn405WhenBillNotOpenStatus() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 123456789L;
+        final long invitationId = 103L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
@@ -177,7 +172,24 @@ class NotificationControllerIT {
         final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 405);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should return 405 when the invitation status is not PENDING")
+    public void shouldReturn405WhenInvitationStatusNotPending() throws Exception {
+        //Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final long invitationId = 104L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+
+        //When/Then
+        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 405);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_INVITATION_STATUS.getMessage(InvitationStatusEnum.PENDING.toString()));
     }
 
     private <T> MvcResult performMvcPostRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
