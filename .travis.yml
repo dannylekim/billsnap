@@ -5,16 +5,24 @@ jdk:
 
 before_install:
   - chmod +x gradlew
+  
+script:
+  - ./gradlew sonarqube
 
+addons:
+  sonarcloud:
+    organization: "dannylekim"
+    token:
+      secure: "nZJOTEq2K9eLBZKaapWaAqC+G3lPAiaOtP0EfiscgDWM6lSIHBjzd9oQYsXwyiJbCbR5FZCOAOQwRY8yJ5V2M/2EUzAEz7KHCjma+ixFF94CKx5D1orgFtSeYarRBRLlWDoV8eRG+9fC8hfiUMhbaVphYrjURuAQd0PD4oS/QGr2DqOgmXKY7NIhBCtlP611yA3ErfWkZJo77jYLyhepRPCFFbmSGlQf0YG7YgwzIhSsc1qM1XkViKdlICmbNhFdLrw2jsy1cqgc/qOx2RIB5l2K0IHI6ETUiVae9KxNYGCHT7KJaaQYGR2xnmeZMIhOD3ungfXshaM/F3f3n82f3Tpd848rd3TJ64fn2eNZ4QzgrmAPlr+kSTHKCfC1lg4Fw6AYx0iqisBDAWn1kvoLk0ik1+qgcs+8RQjJdj80J8pO1Ouf35QHYBScghGvLSk9hfdWDRZIxXP95Dj5rrsWMZTKTQ6xzv3NPGHC+kT+IG6Qh+Zg7YcMHgOHy7juAN7ZfTvbp5cQw/dhFK6RNazKYLBcGugEMYrxRJNzXxWnQcCmBmyZj1W5TZ34I3YP23R0GobNeSNdn4w6YDBz9AICEb1Wp7Or2qpnfF7p4U444MN7qO4qY0mY2tJI381jO8E5eGHiYNR3AzS4nRINtBhib1IsvugB/hMJxHTT/rCMEow="
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
   - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
 cache:
   directories:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
 
 after_success:
-  - ./gradlew jacocoTestReport
   - bash <(curl -s https://codecov.io/bash)

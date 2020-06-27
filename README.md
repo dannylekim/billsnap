@@ -3,6 +3,7 @@
 [![CodeFactor](https://www.codefactor.io/repository/github/dannylekim/billsnap/badge?s=d03236e11106ad11acbf82ea016e056275ba27fb)](https://www.codefactor.io/repository/github/dannylekim/billsnap)
 [![codecov](https://codecov.io/gh/dannylekim/billsnap/branch/develop/graph/badge.svg?token=XP6BVqx6XT)](https://codecov.io/gh/dannylekim/billsnap)
 ![travis-ci](https://travis-ci.com/dannylekim/billsnap.svg?token=45ZvGnpE941cwtLEpxxi&branch=develop)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=billsnap&metric=alert_status)](https://sonarcloud.io/dashboard?id=billsnap)
 
 BillSnap is all about snapping away full bills into dust.
 
