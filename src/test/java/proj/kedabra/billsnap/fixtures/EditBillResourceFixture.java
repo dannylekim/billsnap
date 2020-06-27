@@ -7,7 +7,7 @@ import java.util.List;
 import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.ItemResource;
 
-public class EditBillResourceFixture {
+public final class EditBillResourceFixture {
 
     private EditBillResourceFixture() {}
 

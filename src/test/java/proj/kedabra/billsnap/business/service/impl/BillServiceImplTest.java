@@ -744,32 +744,4 @@ class BillServiceImplTest {
                 .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
     }
 
-//    @Test
-//    @DisplayName("Should throw exception when edit bill with non-existent item")
-//    void shouldThrowExceptionWhenEditBillWithNonExistentItem() {
-//        //Given
-//        final long billId = 123L;
-//        final Account account = AccountEntityFixture.getDefaultAccount();
-//        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-//        editBill.getResponsible().setEmail(account.getEmail());
-//
-//        final var accountBill = AccountBillEntityFixture.getDefault();
-//        accountBill.setAccount(account);
-//
-//        final Bill bill = BillEntityFixture.getDefault();
-//        bill.setAccounts(Set.of(accountBill));
-//
-//        final Item item1 = ItemEntityFixture.getDefault();
-//        item1.setId(9999L);
-//        item1.setCost(BigDecimal.valueOf(90));
-//        final Item item2 = ItemEntityFixture.getDefault();
-//
-//        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
-//
-//        //When/then
-//        assertThatExceptionOfType(ResourceNotFoundException.class)
-//                .isThrownBy(() -> billService.editBill(billId, account, editBill))
-//                .withMessage(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage("123"));
-//    }
-
 }

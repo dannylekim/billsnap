@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 
-public class ItemDTOFixture {
+public final class ItemDTOFixture {
 
     private ItemDTOFixture() {}
 

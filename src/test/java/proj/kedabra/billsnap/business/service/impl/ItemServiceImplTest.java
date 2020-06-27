@@ -12,11 +12,12 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Optional;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -29,6 +30,7 @@ import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+@ExtendWith(MockitoExtension.class)
 public class ItemServiceImplTest {
 
     @Mock
@@ -37,13 +39,8 @@ public class ItemServiceImplTest {
     @Mock
     private ItemMapper itemMapper;
 
+    @InjectMocks
     private ItemServiceImpl itemService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        itemService = new ItemServiceImpl(itemRepository, itemMapper);
-    }
 
     @Test
     @DisplayName("Should get item from repository")
@@ -134,7 +131,6 @@ public class ItemServiceImplTest {
         repoItem.setCost(BigDecimal.valueOf(69));
         repoItem.setName("Repo Item");
 
-        when(itemMapper.toEntity(any())).thenReturn(newItem);
         when(itemRepository.findById(any())).thenReturn(Optional.of(repoItem));
 
         // When / Then

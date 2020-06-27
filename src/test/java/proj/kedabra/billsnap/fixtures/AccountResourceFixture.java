@@ -2,7 +2,7 @@ package proj.kedabra.billsnap.fixtures;
 
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 
-public class AccountResourceFixture {
+public final class AccountResourceFixture {
 
     private AccountResourceFixture() {}
 

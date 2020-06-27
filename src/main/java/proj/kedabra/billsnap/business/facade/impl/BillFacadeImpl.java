@@ -141,7 +141,7 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     @Override
-    public BillSplitDTO editBill(Long billId, String email, EditBillDTO editBill) {
+    public BillSplitDTO editBill(final Long billId, final String email, final EditBillDTO editBill) {
         final var account = accountService.getAccount(email);
         final Bill bill = billService.editBill(billId, account, editBill);
         return getBillSplitDTO(bill);

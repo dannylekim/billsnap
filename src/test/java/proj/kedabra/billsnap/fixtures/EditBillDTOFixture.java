@@ -8,7 +8,7 @@ import java.util.List;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 
-public class EditBillDTOFixture {
+public final class EditBillDTOFixture {
 
     private EditBillDTOFixture() {}
 
