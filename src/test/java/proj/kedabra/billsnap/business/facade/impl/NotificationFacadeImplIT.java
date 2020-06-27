@@ -1,13 +1,16 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+
 import proj.kedabra.billsnap.business.dto.AnswerNotificationDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
@@ -21,13 +24,9 @@ import proj.kedabra.billsnap.fixtures.AnswerNotificationDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-
 @Tag("integration")
 @ActiveProfiles(SpringProfiles.TEST)
 @SpringBootTest
-@AutoConfigureTestDatabase
 @Transactional
 class NotificationFacadeImplIT {
 

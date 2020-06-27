@@ -50,6 +50,7 @@ import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
+import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -531,6 +532,20 @@ class BillFacadeImplIT {
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
+    @Test
+    @DisplayName("Should return BillSplitDTO")
+    void shouldReturnBillSplitDTO() {
+        //Given
+        final Bill bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+
+        //When
+        final BillSplitDTO billSplitDTO = billFacade.getBillSplitDTO(bill);
+
+        //Then
+        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+    }
+
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
@@ -545,9 +560,12 @@ class BillFacadeImplIT {
         assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
         assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
         assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
-        assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
-        assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
-
+        if (dto.getUpdated() != null) {
+            assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
+        }
+        if (dto.getCreated() != null) {
+            assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
+        }
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
