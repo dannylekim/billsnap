@@ -164,7 +164,8 @@ public class BillFacadeImpl implements BillFacade {
         return billCompleteDTO;
     }
 
-    private BillSplitDTO getBillSplitDTO(Bill bill) {
+    @Override
+    public BillSplitDTO getBillSplitDTO(Bill bill) {
         final BillSplitDTO billSplitDTO = billMapper.toBillSplitDTO(bill);
         final BigDecimal totalTip = calculateTip(bill);
         final BigDecimal balance = calculateBalance(bill);

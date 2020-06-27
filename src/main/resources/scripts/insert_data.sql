@@ -76,6 +76,11 @@ VALUES (9000, 'user@withADeclinedBill.com',
 
 INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
                      created, updated, location_id)
+VALUES (50, 'user@inbill.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
 VALUES (10000, 'editBill@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
         current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
@@ -153,6 +158,11 @@ INSERT INTO bill (id, name, responsible, creator, status, created, updated, cate
 VALUES (1102, 'test', 10000, 10000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
 
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1220, 'bill with invitations', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
+        1);
+
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -188,6 +198,10 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 2000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1101, 5000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1220, 5000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1220, 50, 0, 'PENDING');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1102, 10000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -244,3 +258,8 @@ INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1011, 8000, 100.0);
 INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1013, 10000, 100.0);
+
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (101, 1220, 50, current_timestamp);
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (102, 1220, 5000, current_timestamp);
