@@ -53,6 +53,6 @@ public class BillCreationResource implements Serializable {
     private BigDecimal tipPercent;
 
     @NotNull
-    @ApiModelProperty(name = "The taxes for the specific bill", position = 5)
+    @Schema(description = "The taxes for the specific bill")
     private List<@Valid TaxResource> taxes;
 }

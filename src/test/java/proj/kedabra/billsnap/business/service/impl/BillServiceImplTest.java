@@ -18,13 +18,14 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
@@ -60,6 +61,7 @@ import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+@ExtendWith(MockitoExtension.class)
 class BillServiceImplTest {
 
     @Mock
@@ -89,13 +91,8 @@ class BillServiceImplTest {
     @Mock
     private ItemService itemService;
 
+    @InjectMocks
     private BillServiceImpl billService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, itemService, entityManager);
-    }
 
     @Test
     @DisplayName("Should return default bill")
