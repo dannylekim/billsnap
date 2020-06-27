@@ -5,6 +5,9 @@ jdk:
 
 before_install:
   - chmod +x gradlew
+  
+script:
+  - ./gradlew sonarqube
 
 addons:
   sonarcloud:
@@ -23,4 +26,3 @@ cache:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
-  - ./gradlew sonarqube
