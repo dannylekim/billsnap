@@ -34,6 +34,7 @@ public enum ErrorMessageEnum {
     WRONG_BILL_STATUS("The bill is not in {} status."),
     WRONG_TIP_FORMAT("Tip format is incorrect."),
     WRONG_INVITATION_STATUS("The invitation is not in {} status."),
+    TAX_ID_DOES_NOT_EXIST("No tax exists with that id: {}"),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

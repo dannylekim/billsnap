@@ -54,5 +54,5 @@ public class BillCreationResource implements Serializable {
 
     @NotNull
     @Schema(description = "The taxes for the specific bill")
-    private List<@Valid TaxResource> taxes;
+    private List<@Valid NewTaxResource> taxes;
 }
