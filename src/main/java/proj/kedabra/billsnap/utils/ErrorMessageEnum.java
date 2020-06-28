@@ -33,6 +33,7 @@ public enum ErrorMessageEnum {
     ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION("Account is not associated to the specified notification."),
     WRONG_BILL_STATUS("The bill is not in {} status."),
     WRONG_TIP_FORMAT("Tip format is incorrect."),
+    WRONG_INVITATION_STATUS("The invitation is not in {} status."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

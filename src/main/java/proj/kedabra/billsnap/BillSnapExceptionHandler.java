@@ -36,7 +36,7 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     protected ApiError handleResourceNotFound(final ResourceNotFoundException ex) {
         return new ApiError(HttpStatus.NOT_FOUND, ex.getMessage());
     }

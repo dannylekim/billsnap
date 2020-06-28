@@ -546,7 +546,6 @@ class BillFacadeImplIT {
         verifyBillSplitDTOToBill(billSplitDTO, bill, null);
     }
 
-
     @Test
     @DisplayName("Should return BillSplitDTO when edit bill")
     void shouldReturnBillSplitDTOWhenEditBill() {

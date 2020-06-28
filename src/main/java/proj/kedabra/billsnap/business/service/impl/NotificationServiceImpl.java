@@ -1,8 +1,14 @@
 package proj.kedabra.billsnap.business.service.impl;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
@@ -12,10 +18,6 @@ import proj.kedabra.billsnap.business.repository.NotificationsRepository;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
-
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.util.Optional;
 
 @Service
 public class NotificationServiceImpl implements NotificationService {
@@ -47,6 +49,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         final Optional<AccountBill> accountBill = bill.getAccountBill(notification.getAccount());
         accountBill.ifPresent(accBill -> {
+            verifyAccountBillInvitationStatus(accBill, InvitationStatusEnum.PENDING);
             if (answer) {
                 accBill.setStatus(InvitationStatusEnum.ACCEPTED);
             } else {
@@ -63,6 +66,12 @@ public class NotificationServiceImpl implements NotificationService {
         return notificationsRepository.findById(notificationId).orElseThrow(() ->
                 new ResourceNotFoundException(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage(notificationId.toString())));
 
+    }
+
+    private void verifyAccountBillInvitationStatus(final AccountBill accountBill, final InvitationStatusEnum invitationStatus) {
+        if (accountBill.getStatus() != invitationStatus) {
+            throw new FunctionalWorkflowException(ErrorMessageEnum.WRONG_INVITATION_STATUS.getMessage(invitationStatus.toString()));
+        }
     }
 
 }

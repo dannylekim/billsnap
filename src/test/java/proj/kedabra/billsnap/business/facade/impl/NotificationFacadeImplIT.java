@@ -14,11 +14,13 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.AnswerNotificationDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
+import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.facade.NotificationFacade;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.repository.NotificationsRepository;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AnswerNotificationDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -114,6 +116,39 @@ class NotificationFacadeImplIT {
                 .isThrownBy(() -> notificationFacade.answerInvitation(answerNotificationDTO))
                 .withMessage(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
 
+    }
+
+    @Test
+    @DisplayName("Should throw exception if bill is not Open status")
+    void shouldThrowExceptionIfBillNotOpenStatus() {
+        //Given
+        final long invitationId = 103L;
+        final String email = "user@inbill.com";
+        final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
+        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setEmail(email);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> notificationFacade.answerInvitation(answerNotificationDTO))
+                .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+
+    }
+
+    @Test
+    @DisplayName("Should throw exception if invitation status is not PENDING")
+    void shouldThrowExceptionIfInvitationStatusIsNotPending() {
+        //Given
+        final long invitationId = 104L;
+        final String email = "user@inbill.com";
+        final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
+        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setEmail(email);
+
+        //When/Then
+        assertThatExceptionOfType(FunctionalWorkflowException.class)
+                .isThrownBy(() -> notificationFacade.answerInvitation(answerNotificationDTO))
+                .withMessage(ErrorMessageEnum.WRONG_INVITATION_STATUS.getMessage(InvitationStatusEnum.PENDING.toString()));
     }
 
 }

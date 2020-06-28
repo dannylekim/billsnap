@@ -39,6 +39,7 @@ public class NotificationFacadeImpl implements NotificationFacade {
         verifyUserAssociatedToNotification(answerNotificationDTO.getEmail(), notification.getAccount());
 
         final Bill bill = notificationService.answerInvitation(answerNotificationDTO.getInvitationId(), answerNotificationDTO.isAnswer());
+
         return billFacade.getBillSplitDTO(bill);
     }
 
