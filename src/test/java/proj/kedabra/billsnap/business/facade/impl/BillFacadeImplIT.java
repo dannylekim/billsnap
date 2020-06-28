@@ -179,8 +179,36 @@ class BillFacadeImplIT {
         final AccountBill accountBill = accounts.iterator().next();
         assertNull(accountBill.getPercentage());
         assertEquals(account, accountBill.getAccount());
+    }
 
+    @Test
+    @DisplayName("Should save bill with new taxes in database")
+    void shouldSaveBillWithNewTaxesInDatabase() {
 
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String testEmail = "test@email.com";
+
+        // When
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+
+        // Then
+        final var taxDTO = billDTO.getTaxes().get(0);
+        final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
+        final var persistedTaxes = bill.getTaxes();
+
+        assertThat(returnBillDTO.getTaxes()).hasSameSizeAs(billDTO.getTaxes());
+        final var returnedTaxDTO = returnBillDTO.getTaxes().get(0);
+        assertThat(returnedTaxDTO.getId()).isNotNull();
+        assertThat(returnedTaxDTO.getPercentage()).isEqualByComparingTo(taxDTO.getPercentage());
+        assertThat(returnedTaxDTO.getName()).isEqualTo(taxDTO.getName());
+
+        assertThat(persistedTaxes).hasSameSizeAs(billDTO.getTaxes());
+        final var persistedTax = persistedTaxes.iterator().next();
+        assertThat(persistedTax.getId()).isNotNull();
+        assertThat(persistedTax.getBill()).isEqualTo(bill);
+        assertThat(persistedTax.getPercentage()).isEqualByComparingTo(taxDTO.getPercentage());
+        assertThat(persistedTax.getName()).isEqualTo(taxDTO.getName());
     }
 
     @Test
