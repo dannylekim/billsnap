@@ -244,3 +244,6 @@ INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1011, 8000, 100.0);
 INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1013, 10000, 100.0);
+
+insert into tax (bill_id, percentage, name, id)
+values (1102, 10, 'Tax 1', 123);

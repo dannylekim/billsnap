@@ -250,6 +250,7 @@ class BillFacadeImplTest {
         //Given bill with 1 item {name: yogurt, cost: 4}
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var item = bill.getItems().iterator().next();
         final var accountPercentageSplit = BigDecimal.valueOf(50);
         final var billSplitDTO = BillSplitDTOFixture.getDefault();
@@ -414,6 +415,7 @@ class BillFacadeImplTest {
         accountNotInBill.setEmail(emailNotInBill);
 
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var principal = AccountEntityFixture.getDefaultAccount();
         principal.setEmail(billResponsible);
         bill.setResponsible(principal);
@@ -486,6 +488,7 @@ class BillFacadeImplTest {
         //Given user that is bill's creator
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var billId = bill.getId();
         final var userEmail = "accountentity@test.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
@@ -517,6 +520,7 @@ class BillFacadeImplTest {
         //Given user is in bill's accounts
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var billId = bill.getId();
         final var userEmail = "hellomotto@cell.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
@@ -570,6 +574,7 @@ class BillFacadeImplTest {
         final var tax = new Tax();
         tax.setName("Tax 2");
         tax.setPercentage(new BigDecimal("20"));
+        bill.getTaxes().clear();
         bill.getTaxes().add(tax);
 
         when(billService.createBillToAccount(any(), any(), any())).thenReturn(bill);
@@ -592,6 +597,7 @@ class BillFacadeImplTest {
         final var tax = new Tax();
         tax.setName("Tax 2");
         tax.setPercentage(new BigDecimal("20"));
+        bill.getTaxes().clear();
         bill.getTaxes().add(tax);
 
         when(billService.getBill(any())).thenReturn(bill);

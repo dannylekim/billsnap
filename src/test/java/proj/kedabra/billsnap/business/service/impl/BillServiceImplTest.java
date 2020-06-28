@@ -30,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.dto.TaxDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -741,6 +742,38 @@ class BillServiceImplTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(billId, account, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if Tax Id does not exist in the current bill")
+    void shouldThrowIfTaxIdDoesNotExistInCurrentBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.TEN);
+        editBill.setResponsible(account.getEmail());
+        final var taxDTO = new TaxDTO();
+        taxDTO.setId(9999L);
+        editBill.setTaxes(List.of(taxDTO));
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.TAX_ID_DOES_NOT_EXIST.getMessage(editBill.getTaxes().stream().map(TaxDTO::getId).collect(Collectors.toList()).toString()));
     }
 
 }

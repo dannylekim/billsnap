@@ -3,7 +3,9 @@ package proj.kedabra.billsnap.presentation.resources;
 import java.math.BigDecimal;
 import java.util.List;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.Range;
 
@@ -39,4 +41,8 @@ public class EditBillResource {
 
     @Schema(description = "List of items to add in bill")
     private List<ItemResource> items;
+
+    @NotNull
+    @Schema(description = "The taxes for the specific bill")
+    private List<@Valid TaxResource> taxes;
 }

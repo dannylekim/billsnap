@@ -41,6 +41,14 @@ public final class BillEntityFixture {
         bill.setItems(Stream.of(item).collect(Collectors.toSet()));
         bill.setId(5000L);
 
+        final var tax = new Tax();
+        tax.setName("Tax 1");
+        tax.setPercentage(BigDecimal.TEN);
+        tax.setId(123L);
+        final var taxes = new HashSet<Tax>();
+        taxes.add(tax);
+        bill.setTaxes(taxes);
+
         return bill;
     }
 
@@ -61,8 +69,9 @@ public final class BillEntityFixture {
         final var tax = new Tax();
         tax.setName("Tax 1");
         tax.setPercentage(BigDecimal.TEN);
-
-        bill.setTaxes(Set.of(tax));
+        final var taxes = new HashSet<Tax>();
+        taxes.add(tax);
+        bill.setTaxes(taxes);
 
         return bill;
     }
