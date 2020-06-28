@@ -16,4 +16,17 @@ public final class AccountDTOFixture {
 
         return dto;
     }
+
+    public static AccountDTO getMappedDefaultAccount() {
+        final var account = new AccountDTO();
+        account.setEmail("accountentity@test.com");
+        account.setFirstName("Naruto");
+        account.setLastName("Uchiha");
+        account.setPassword("Hidden@Vill4ge");
+        account.setMiddleName("middlename");
+        account.setGender("MALE");
+        account.setPhoneNumber("123456789");
+        account.setId(1234L);
+        return account;
+    }
 }

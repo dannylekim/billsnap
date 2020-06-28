@@ -10,8 +10,6 @@ import proj.kedabra.billsnap.business.model.entities.Location;
 @Data
 public class AccountDTO implements Serializable {
 
-    private static final long serialVersionUID = -8319328053666986576L;
-
     private Long id;
 
     private String email;

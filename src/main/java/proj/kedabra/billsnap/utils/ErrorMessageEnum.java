@@ -29,8 +29,11 @@ public enum ErrorMessageEnum {
     GIVEN_VALUES_NOT_INTEGER_VALUED("The given percentages are not integer valued: {}"),
     DUPLICATE_EMAILS_IN_ASSOCIATE_USERS("There are duplicate emails being called: {}"),
     LIST_ACCOUNT_DECLINED("One or more accounts trying to be associated with an item has already declined the invitation: {}"),
+    NOTIFICATION_ID_DOES_NOT_EXIST("No notification exists with id: {}"),
+    ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION("Account is not associated to the specified notification."),
     WRONG_BILL_STATUS("The bill is not in {} status."),
     WRONG_TIP_FORMAT("Tip format is incorrect."),
+    WRONG_INVITATION_STATUS("The invitation is not in {} status."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");

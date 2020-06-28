@@ -5,7 +5,7 @@ import java.util.List;
 
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 
-public class BillSplitDTOFixture {
+public final class BillSplitDTOFixture {
 
     private BillSplitDTOFixture() {}
 
@@ -40,19 +40,19 @@ public class BillSplitDTOFixture {
         billSplitDTO.setStatus(bill.getStatus());
         billSplitDTO.setUpdated(bill.getUpdated());
 
-        final var accountDTO1 = AccountDTOFixture.getCreationDTO();
+        final var accountDTO1 = AccountDTOFixture.getMappedDefaultAccount();
         accountDTO1.setEmail(account1.getEmail());
         accountDTO1.setId(account1.getId());
         billSplitDTO.setCreator(accountDTO1);
         billSplitDTO.setResponsible(accountDTO1);
 
-        final var accountDTO2 = AccountDTOFixture.getCreationDTO();
+        final var accountDTO2 = AccountDTOFixture.getMappedDefaultAccount();
         accountDTO2.setEmail(account2.getEmail());
         accountDTO2.setId(account2.getId());
 
         final var itemAssociationSplitDTO1 = ItemAssociationSplitDTOFixture.getDefault();
         itemAssociationSplitDTO1.setAccount(accountDTO1);
-        itemAssociationSplitDTO1.setCost(BigDecimal.valueOf(2));
+        itemAssociationSplitDTO1.setCost(BigDecimal.valueOf(2.0));
         final var itemPercentageSplitDTO1 = ItemPercentageSplitDTOFixture.getDefault();
         itemPercentageSplitDTO1.setPercentage(accountItem1.getPercentage());
         itemPercentageSplitDTO1.setCost(item.getCost());
@@ -62,7 +62,7 @@ public class BillSplitDTOFixture {
 
         final var itemAssociationSplitDTO2 = ItemAssociationSplitDTOFixture.getDefault();
         itemAssociationSplitDTO2.setAccount(accountDTO2);
-        itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2));
+        itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2.0));
         final var itemPercentageSplitDTO2 = ItemPercentageSplitDTOFixture.getDefault();
         itemPercentageSplitDTO2.setPercentage(accountItem2.getPercentage());
         itemPercentageSplitDTO2.setCost(item.getCost());

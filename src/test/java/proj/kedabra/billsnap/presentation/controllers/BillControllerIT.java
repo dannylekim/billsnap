@@ -1016,8 +1016,8 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return 400 when bill is not found with billId")
-    void shouldReturn400WhenBillIsNotFoundWithBillId() throws Exception {
+    @DisplayName("Should return 404 when bill is not found with billId")
+    void shouldReturn404WhenBillIsNotFoundWithBillId() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
@@ -1025,7 +1025,7 @@ class BillControllerIT {
         final var path = String.format(BILL_BILLID_ENDPOINT, nonExistentBillId);
 
         // When
-        final var mvcResult = performMvcGetRequest(bearerToken, path, 400);
+        final var mvcResult = performMvcGetRequest(bearerToken, path, 404);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1097,7 +1097,7 @@ class BillControllerIT {
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillId);
 
         // When
-        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 400);
+        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 404);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1266,7 +1266,7 @@ class BillControllerIT {
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 404);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
