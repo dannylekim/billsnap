@@ -36,6 +36,7 @@ public class BillCreationResource implements Serializable {
     @Schema(description = "List of items that were on the bill")
     private List<@Valid ItemCreationResource> items;
 
+    @NotNull
     @Schema(description = "List of accounts to associate to the bill")
     private List<
             @NotBlank
@@ -51,4 +52,8 @@ public class BillCreationResource implements Serializable {
     @Digits(integer = 3, fraction = 4)
     @Range(message = "the number must be positive")
     private BigDecimal tipPercent;
+
+    @NotNull
+    @Schema(description = "The taxes for the specific bill")
+    private List<@Valid NewTaxResource> taxes;
 }

@@ -11,18 +11,19 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
@@ -40,6 +41,7 @@ import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
@@ -57,8 +59,10 @@ import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.PendingRegisteredBillSplitDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+@ExtendWith(MockitoExtension.class)
 class BillFacadeImplTest {
 
+    @InjectMocks
     private BillFacadeImpl billFacade;
 
     @Mock
@@ -82,14 +86,6 @@ class BillFacadeImplTest {
     private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
 
     private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
-
-    @BeforeEach
-    void setup() {
-
-        MockitoAnnotations.initMocks(this);
-        billFacade = new BillFacadeImpl(billService, accountService, billMapper, accountMapper, itemMapper);
-
-    }
 
     @Test
     @DisplayName("Should return an exception if given an email that does not exist")
@@ -135,7 +131,6 @@ class BillFacadeImplTest {
         final String billCreator = "accountentity@test.com";
         final String existentEmail = "existent@email.com";
         billDTO.setAccountsList(List.of(billCreator, existentEmail));
-        when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
 
         //When/Then
         assertThatIllegalArgumentException().isThrownBy(() -> billFacade.addPersonalBill(billCreator, billDTO))
@@ -206,8 +201,6 @@ class BillFacadeImplTest {
         mappedBillFixture.setAccounts(Set.of(accountBill));
         mappedBillFixture.setCreator(billCreatorAccount);
 
-        when(accountRepository.getAccountByEmail(billCreator)).thenReturn(AccountEntityFixture.getDefaultAccount());
-        when(accountRepository.getAccountsByEmailIn(any())).thenReturn(Stream.of(existingAccount));
         when(billService.createBillToAccount(any(), any(), any())).thenReturn(mappedBillFixture);
         when(billMapper.toBillCompleteDTO(any(Bill.class))).thenReturn(BillCompleteDTOFixture.getDefault());
         when(accountMapper.toDTO(any(Account.class))).thenReturn(AccountDTOFixture.getCreationDTO());
@@ -258,6 +251,7 @@ class BillFacadeImplTest {
         //Given bill with 1 item {name: yogurt, cost: 4}
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var item = bill.getItems().iterator().next();
         final var accountPercentageSplit = BigDecimal.valueOf(50);
         final var billSplitDTO = BillSplitDTOFixture.getDefault();
@@ -422,6 +416,7 @@ class BillFacadeImplTest {
         accountNotInBill.setEmail(emailNotInBill);
 
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var principal = AccountEntityFixture.getDefaultAccount();
         principal.setEmail(billResponsible);
         bill.setResponsible(principal);
@@ -494,6 +489,7 @@ class BillFacadeImplTest {
         //Given user that is bill's creator
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var billId = bill.getId();
         final var userEmail = "accountentity@test.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
@@ -525,6 +521,7 @@ class BillFacadeImplTest {
         //Given user is in bill's accounts
         final var billSplitDTOFixture = BillSplitDTOFixture.getDefault();
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
         final var billId = bill.getId();
         final var userEmail = "hellomotto@cell.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
@@ -567,6 +564,65 @@ class BillFacadeImplTest {
                 .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
+    @Test
+    @DisplayName("Should calculate balance properly by creating Bill")
+    void shouldCalculateBalanceWithTipAndTaxesByCreatingBill() {
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final var userEmail = "hellomotto@cell.com";
+
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var tax = new Tax();
+        tax.setName("Tax 2");
+        tax.setPercentage(new BigDecimal("18.653"));
+        bill.getTaxes().clear();
+        bill.getTaxes().add(tax);
+
+        when(billService.createBillToAccount(any(), any(), any())).thenReturn(bill);
+        when(billMapper.toBillCompleteDTO(any(Bill.class))).thenReturn(BillCompleteDTOFixture.getDefault());
+
+        // When
+        final var billCompleteDTO = billFacade.addPersonalBill(userEmail, billDTO);
+
+        // Then
+        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.75"));
+    }
+
+    @Test
+    @DisplayName("Should calculate balance properly by get Bill")
+    void shouldCalculateBalanceWithTipAndTaxes() {
+        // Given
+        final var userEmail = "hellomotto@cell.com";
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.setTipAmount(BigDecimal.TEN);
+        final var tax = new Tax();
+        tax.setName("Tax 2");
+        tax.setPercentage(new BigDecimal("20"));
+        bill.getTaxes().clear();
+        bill.getTaxes().add(tax);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        when(billMapper.toBillSplitDTO(bill)).thenReturn(BillSplitDTOFixture.getDefault());
+        final var accountPercentageSplit = BigDecimal.valueOf(50);
+        when(itemMapper.toItemPercentageSplitDTO(any(Item.class))).thenAnswer(
+                i -> {
+                    final Item itemInput = (Item) i.getArguments()[0];
+                    final ItemPercentageSplitDTO itemDTO = new ItemPercentageSplitDTO();
+                    itemDTO.setItemId(itemInput.getId());
+                    itemDTO.setName(itemInput.getName());
+                    itemDTO.setCost(itemInput.getCost());
+                    itemDTO.setPercentage(accountPercentageSplit);
+                    return itemDTO;
+                }
+        );
+
+        // When
+        final var billCompleteDTO = billFacade.getDetailedBill(bill.getId(), userEmail);
+
+        // Then
+        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.8"));
+    }
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
@@ -581,6 +637,7 @@ class BillFacadeImplTest {
         assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
         assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
         assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(bill.getTaxes().size()).isEqualTo(dto.getTaxes().size());
 
         final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
         if (!(dto instanceof PendingRegisteredBillSplitDTO)) {
@@ -593,7 +650,7 @@ class BillFacadeImplTest {
             final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
             assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
             assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
+            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
         }
 
     }

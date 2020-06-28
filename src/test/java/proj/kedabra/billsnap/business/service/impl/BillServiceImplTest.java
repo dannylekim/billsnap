@@ -18,17 +18,19 @@ import java.util.stream.Stream;
 
 import javax.persistence.EntityManager;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.dto.TaxDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -60,6 +62,7 @@ import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
 import proj.kedabra.billsnap.fixtures.PaymentOwedProjectionFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
+@ExtendWith(MockitoExtension.class)
 class BillServiceImplTest {
 
     @Mock
@@ -89,13 +92,8 @@ class BillServiceImplTest {
     @Mock
     private ItemService itemService;
 
+    @InjectMocks
     private BillServiceImpl billService;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.initMocks(this);
-        billService = new BillServiceImpl(billRepository, billMapper, accountBillRepository, paymentMapper, paymentRepository, notificationService, itemService, entityManager);
-    }
 
     @Test
     @DisplayName("Should return default bill")
@@ -125,6 +123,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(bill.getTaxes().size()).isEqualTo(billDTO.getTaxes().size());
         assertThat(accountBill.getPercentage()).isNull();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
 
@@ -175,6 +174,7 @@ class BillServiceImplTest {
         assertThat(bill.getTipAmount()).isEqualTo(billDTO.getTipAmount());
         assertThat(bill.getTipPercent()).isEqualTo(billDTO.getTipPercent());
         assertThat(bill.getItems().size()).isEqualTo(billDTO.getItems().size());
+        assertThat(bill.getTaxes().size()).isEqualTo(billDTO.getTaxes().size());
         assertThat(creatorAccountBill.getPercentage()).isNull();
         assertThat(creatorAccountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
         assertThat(bill).isEqualTo(creatorAccountBill.getBill());
@@ -742,6 +742,38 @@ class BillServiceImplTest {
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(billId, account, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if Tax Id does not exist in the current bill")
+    void shouldThrowIfTaxIdDoesNotExistInCurrentBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setTipPercent(null);
+        editBill.setTipAmount(BigDecimal.TEN);
+        editBill.setResponsible(account.getEmail());
+        final var taxDTO = new TaxDTO();
+        taxDTO.setId(9999L);
+        editBill.setTaxes(List.of(taxDTO));
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        final Item item1 = ItemEntityFixture.getDefault();
+        item1.setId(9999L);
+        item1.setCost(BigDecimal.valueOf(90));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.TAX_ID_DOES_NOT_EXIST.getMessage(editBill.getTaxes().stream().map(TaxDTO::getId).collect(Collectors.toList()).toString()));
     }
 
 }

@@ -24,4 +24,5 @@ public class EditBillDTO {
 
     private List<ItemDTO> items;
 
+    private List<TaxDTO> taxes;
 }

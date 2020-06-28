@@ -9,6 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
+import proj.kedabra.billsnap.business.dto.TaxDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -133,6 +135,7 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
 
         verifyBillDTOToBill(returnBillDTO, bill);
+        assertThat(returnBillDTO.getBalance()).isEqualByComparingTo(new BigDecimal("330"));
     }
 
     @Test
@@ -178,8 +181,36 @@ class BillFacadeImplIT {
         final AccountBill accountBill = accounts.iterator().next();
         assertNull(accountBill.getPercentage());
         assertEquals(account, accountBill.getAccount());
+    }
 
+    @Test
+    @DisplayName("Should save bill with new taxes in database")
+    void shouldSaveBillWithNewTaxesInDatabase() {
 
+        // Given
+        final var billDTO = BillDTOFixture.getDefault();
+        final String testEmail = "test@email.com";
+
+        // When
+        final BillCompleteDTO returnBillDTO = billFacade.addPersonalBill(testEmail, billDTO);
+
+        // Then
+        final var taxDTO = billDTO.getTaxes().get(0);
+        final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
+        final var persistedTaxes = bill.getTaxes();
+
+        assertThat(returnBillDTO.getTaxes()).hasSameSizeAs(billDTO.getTaxes());
+        final var returnedTaxDTO = returnBillDTO.getTaxes().get(0);
+        assertThat(returnedTaxDTO.getId()).isNotNull();
+        assertThat(returnedTaxDTO.getPercentage()).isEqualByComparingTo(taxDTO.getPercentage());
+        assertThat(returnedTaxDTO.getName()).isEqualTo(taxDTO.getName());
+
+        assertThat(persistedTaxes).hasSameSizeAs(billDTO.getTaxes());
+        final var persistedTax = persistedTaxes.iterator().next();
+        assertThat(persistedTax.getId()).isNotNull();
+        assertThat(persistedTax.getBill()).isEqualTo(bill);
+        assertThat(persistedTax.getPercentage()).isEqualByComparingTo(taxDTO.getPercentage());
+        assertThat(persistedTax.getName()).isEqualTo(taxDTO.getName());
     }
 
     @Test
@@ -538,6 +569,7 @@ class BillFacadeImplIT {
     void shouldReturnBillSplitDTO() {
         //Given
         final Bill bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
 
         //When
         final BillSplitDTO billSplitDTO = billFacade.getBillSplitDTO(bill);
@@ -727,6 +759,95 @@ class BillFacadeImplIT {
                 .withMessage(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
     }
 
+    @Test
+    @DisplayName("Should return exception when tax id does not exist for edit bill")
+    void shouldReturnExceptionForTaxIdNotFoundEditBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible("editBill@email.com");
+        editBill.getItems().get(0).setId(1013L);
+        final var nonExistentTaxDTO = new TaxDTO();
+        nonExistentTaxDTO.setId(999L);
+        editBill.getTaxes().add(nonExistentTaxDTO);
+
+        //When / Then
+        assertThatExceptionOfType(ResourceNotFoundException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.TAX_ID_DOES_NOT_EXIST.getMessage(List.of(nonExistentTaxDTO.getId()).toString()));
+
+
+    }
+
+    @Test
+    @DisplayName("Should return updated tax for edit bill")
+    void shouldReturnUpdatedTaxForEditBIll() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible("editBill@email.com");
+        editBill.getItems().get(0).setId(1013L);
+        final var taxDto = editBill.getTaxes().iterator().next();
+        taxDto.setName("Sharingan");
+        taxDto.setPercentage(BigDecimal.ONE);
+
+
+        //When
+        final var billSplitDTO = billFacade.editBill(billId, userEmail, editBill);
+
+        //Then
+        assertThat(billSplitDTO.getTaxes()).hasSize(1);
+        final var resultTax = billSplitDTO.getTaxes().iterator().next();
+        assertThat(resultTax.getName()).isEqualTo(taxDto.getName());
+        assertThat(resultTax.getPercentage()).isEqualByComparingTo(taxDto.getPercentage());
+        assertThat(resultTax.getId()).isEqualByComparingTo(taxDto.getId());
+
+        final var persistedBill = billRepository.getBillById(billId);
+        assertThat(persistedBill.getTaxes()).hasSize(1);
+        final var persistedBillTax = persistedBill.getTaxes().iterator().next();
+        assertThat(persistedBillTax.getName()).isEqualTo(taxDto.getName());
+        assertThat(persistedBillTax.getPercentage()).isEqualByComparingTo(taxDto.getPercentage());
+        assertThat(persistedBillTax.getId()).isEqualTo(taxDto.getId());
+
+    }
+
+    @Test
+    @DisplayName("Should return added tax for edit bill")
+    void shouldReturnAddedTaxForEditBIll() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible("editBill@email.com");
+        editBill.getItems().get(0).setId(1013L);
+        final var taxDto = new TaxDTO();
+        taxDto.setName("Sharingan");
+        taxDto.setPercentage(BigDecimal.ONE);
+        editBill.getTaxes().add(taxDto);
+
+        //When
+        final var billSplitDTO = billFacade.editBill(billId, userEmail, editBill);
+
+        //Then
+        assertThat(billSplitDTO.getTaxes()).hasSize(2);
+        final var resultTax = billSplitDTO.getTaxes().stream().filter(t -> !t.getId().equals(123L)).findFirst().orElseThrow();
+        assertThat(resultTax.getName()).isEqualTo(taxDto.getName());
+        assertThat(resultTax.getPercentage()).isEqualByComparingTo(taxDto.getPercentage());
+        assertThat(resultTax.getId()).isNotNull();
+
+        final var persistedBill = billRepository.getBillById(billId);
+        assertThat(persistedBill.getTaxes()).hasSize(2);
+        final var persistedBillTax = billSplitDTO.getTaxes().stream().filter(t -> !t.getId().equals(123L)).findFirst().orElseThrow();
+        assertThat(persistedBillTax.getName()).isEqualTo(taxDto.getName());
+        assertThat(persistedBillTax.getPercentage()).isEqualByComparingTo(taxDto.getPercentage());
+        assertThat(persistedBillTax.getId()).isNotNull();
+
+
+    }
+
+
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
 
@@ -758,7 +879,7 @@ class BillFacadeImplIT {
 
             assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
             assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()));
+            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
         } else {
             assertThat(BigDecimal.ZERO.compareTo(dto.getBalance())).isEqualTo(0);
         }
@@ -785,7 +906,7 @@ class BillFacadeImplIT {
             assertEquals(item.getName(), returnItemDTO.getName());
             assertEquals(item.getCost(), returnItemDTO.getCost());
             assertEquals(bill.getName(), returnBillDTO.getName());
-            assertEquals(item.getCost(), returnBillDTO.getBalance());
+            assertEquals(item.getCost(), returnBillDTO.getItems().get(0).getCost());
         } else {
             assertEquals(0, BigDecimal.ZERO.compareTo(returnBillDTO.getBalance()));
         }

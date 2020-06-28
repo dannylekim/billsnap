@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -22,6 +23,7 @@ import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
+import proj.kedabra.billsnap.business.dto.TaxDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -32,6 +34,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -96,6 +99,7 @@ public class BillServiceImpl implements BillService {
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.getItems().forEach(i -> mapItems(i, bill, account, 100));
         inviteRegisteredToBill(bill, accountList);
+        bill.getTaxes().forEach(t -> t.setBill(bill));
         mapAccountBill(bill, account, null, InvitationStatusEnum.ACCEPTED);
 
         return billRepository.save(bill);
@@ -143,8 +147,10 @@ public class BillServiceImpl implements BillService {
         verifyUserIsBillResponsible(bill, account.getEmail());
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         verifyIfAccountInBill(bill, editBill.getResponsible());
+        verifyExistenceofTaxesInBill(editBill, bill);
 
         billMapper.updatebill(bill, editBill);
+        bill.getTaxes().forEach(t -> t.setBill(bill));
         final var newResponsible = bill.getAccounts().stream().map(AccountBill::getAccount).filter(acc -> editBill.getResponsible().equals(acc.getEmail())).findFirst().orElseThrow();
         bill.setResponsible(newResponsible);
         setBillTip(bill, editBill);
@@ -152,6 +158,7 @@ public class BillServiceImpl implements BillService {
 
         return billRepository.save(bill);
     }
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -249,6 +256,15 @@ public class BillServiceImpl implements BillService {
 
         if (nonExistentAccounts.length > 0) {
             throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(Arrays.toString(nonExistentAccounts)));
+        }
+    }
+
+    private void verifyExistenceofTaxesInBill(EditBillDTO editBill, Bill bill) {
+        final var existentTaxIds = bill.getTaxes().stream().map(Tax::getId).collect(Collectors.toList());
+        final var nonExistentTaxIds = editBill.getTaxes().stream().map(TaxDTO::getId).filter(Objects::nonNull).filter(Predicate.not(existentTaxIds::contains)).collect(Collectors.toList());
+
+        if (!nonExistentTaxIds.isEmpty()) {
+            throw new ResourceNotFoundException(ErrorMessageEnum.TAX_ID_DOES_NOT_EXIST.getMessage(nonExistentTaxIds.toString()));
         }
     }
 

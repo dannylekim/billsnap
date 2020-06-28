@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.business.dto;
 
 import java.math.BigDecimal;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Data;
@@ -35,6 +36,8 @@ public class BillSplitDTO {
     private SplitByEnum splitBy;
 
     private BigDecimal totalTip;
+
+    private List<TaxDTO> taxes = new ArrayList<>();
 
     private BigDecimal balance;
 }

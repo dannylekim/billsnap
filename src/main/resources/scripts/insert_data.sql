@@ -270,6 +270,9 @@ VALUES (1011, 8000, 100.0);
 INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1013, 10000, 100.0);
 
+insert into tax (bill_id, percentage, name, id)
+values (1102, 10, 'Tax 1', 123);
+
 INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (101, 1220, 50, current_timestamp);
 INSERT INTO notifications (id, bill_id, account_id, time_sent)

@@ -32,6 +32,9 @@ public final class EditBillResourceFixture {
         items.add(item2);
         editBillResource.setItems(items);
 
+        final var taxResource = TaxResourceFixture.getDefault();
+        editBillResource.setTaxes(List.of(taxResource));
+
         return editBillResource;
     }
 }

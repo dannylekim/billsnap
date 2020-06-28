@@ -10,6 +10,7 @@ import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
@@ -40,6 +41,14 @@ public final class BillEntityFixture {
         bill.setItems(Stream.of(item).collect(Collectors.toSet()));
         bill.setId(5000L);
 
+        final var tax = new Tax();
+        tax.setName("Tax 1");
+        tax.setPercentage(BigDecimal.TEN);
+        tax.setId(123L);
+        final var taxes = new HashSet<Tax>();
+        taxes.add(tax);
+        bill.setTaxes(taxes);
+
         return bill;
     }
 
@@ -56,6 +65,13 @@ public final class BillEntityFixture {
         item.setCost(BigDecimal.valueOf(300));
         items.add(item);
         bill.setItems(items);
+
+        final var tax = new Tax();
+        tax.setName("Tax 1");
+        tax.setPercentage(BigDecimal.TEN);
+        final var taxes = new HashSet<Tax>();
+        taxes.add(tax);
+        bill.setTaxes(taxes);
 
         return bill;
     }

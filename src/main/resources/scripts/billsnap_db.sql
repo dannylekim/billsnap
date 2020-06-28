@@ -65,8 +65,8 @@ create table if not exists account
     phone_number varchar(20),
     birth_date   date,
     status       account_status not null default 'REGISTERED',
-    created      timestamptz not null default clock_timestamp(),
-    updated      timestamptz not null default clock_timestamp(),
+    created      timestamptz    not null default clock_timestamp(),
+    updated      timestamptz    not null default clock_timestamp(),
     location_id  integer
         constraint "USER_location_id_fkey"
             references location,
@@ -95,7 +95,7 @@ create table if not exists bill
     occurrence  integer,
     tip_percent numeric(7, 4),
     tip_amount  numeric(14, 2),
-    split_by    split_type not null,
+    split_by    split_type  not null,
     location_id integer
         constraint "BILLS_location_id_fkey"
             references location,
@@ -108,16 +108,13 @@ comment on column bill.occurrence is 'repeat every x days where x = occurrence';
 
 create table if not exists tax
 (
+    id         serial  not null
+        constraint "tax_pk" primary key,
     bill_id    integer not null
         constraint "TAX_bill_id_fkey"
             references bill,
-    tax_order  integer not null,
-    amount     numeric(14, 2),
-    percentage numeric(7, 4),
-    constraint unique_orders_to_bill
-        primary key (bill_id, tax_order),
-    constraint one_of_amount_or_percentage
-        check ((amount IS NULL) <> (percentage IS NULL))
+    name       varchar(10),
+    percentage numeric(7, 4)
 );
 
 create table if not exists "group"
@@ -133,10 +130,10 @@ create table if not exists "group"
 
 create table if not exists groups_vs_accounts
 (
-    group_id   integer     not null
+    group_id   integer not null
         constraint "GROUPS_VS_USERS_group_id_fkey"
             references "group",
-    account_id integer     not null
+    account_id integer not null
         constraint "GROUPS_VS_USERS_user_id_fkey"
             references account,
     role       group_role not null,
@@ -202,13 +199,13 @@ create table if not exists bills_vs_accounts
 
 create table if not exists notifications
 (
-    id          serial         not null
+    id         serial  not null
         constraint "NOTIFICATION_pkey"
             primary key,
-    bill_id     integer        not null
+    bill_id    integer not null
         constraint "Notification_bill_id_fkey"
             references bill,
-    account_id integer     not null
+    account_id integer not null
         constraint "NOTIFICATION_user_id_fkey"
             references account,
     time_sent  timestamp with time zone default clock_timestamp()

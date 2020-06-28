@@ -40,6 +40,7 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
+import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -634,6 +635,7 @@ class BillServiceImplIT {
         editBill.setResponsible("editbill@email.com");
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(15));
+        editBill.getTaxes().clear();
         final var existentBillId = 2001L;
 
         final var billInsideDb = billRepository.getBillById(existentBillId);
@@ -689,6 +691,12 @@ class BillServiceImplIT {
         item.setCost(BigDecimal.TEN);
         item.setId(1000L);
         billInsideDb.getItems().add(item);
+        final var tax = new Tax();
+        tax.setId(123L);
+        tax.setName("Tax 1");
+        tax.setPercentage(BigDecimal.TEN);
+        tax.setBill(billInsideDb);
+        billInsideDb.getTaxes().add(tax);
         billRepository.save(billInsideDb);
 
         //When
@@ -768,6 +776,7 @@ class BillServiceImplIT {
     void shouldThrowExceptionIfTipFormatIsIncorrectTipPercentage() {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getTaxes().clear();
         editBill.setTipPercent(null);
         editBill.setTipAmount(BigDecimal.valueOf(69));
         final var existentBillId = 1000L;
@@ -782,6 +791,7 @@ class BillServiceImplIT {
     void shouldThrowExceptionIfTipFormatIsIncorrectTipAmount() {
         final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getTaxes().clear();
         editBill.setResponsible("editbill@email.com");
         final var existentBillId = 2001L;
 
@@ -796,6 +806,7 @@ class BillServiceImplIT {
         //Given
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.getTaxes().clear();
         editBill.getItems().get(0).setId(1L);
         final var existentBillId = 1000L;
 

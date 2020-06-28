@@ -107,6 +107,8 @@ class BillControllerIT {
 
     private static final String WRONG_SIZE_0_TO_20 = "size must be between 0 and 20";
 
+    private static final String NOT_IN_RANGE = "The number must be within 0 to 100";
+
     private static final String HAVE_BOTH_TIP_AMOUNT_PERCENT = "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.";
 
     private static final String NUMBER_MUST_BE_POSITIVE = "the number must be positive";
@@ -1272,6 +1274,139 @@ class BillControllerIT {
 
         // Then
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
+    }
+
+    @Test
+    @DisplayName("Should return error if taxes are null")
+    void shouldReturnErrorIfTaxesAreNull() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.setTaxes(null);
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return error if tax name is null")
+    void shouldReturnErrorIfTaxNameIsNull() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.getTaxes().get(0).setName(null);
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_BLANK);
+    }
+
+    @Test
+    @DisplayName("Should return error if tax percentage is null")
+    void shouldReturnErrorIfTaxPercentageIsNull() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.getTaxes().get(0).setPercentage(null);
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+    }
+
+    @Test
+    @DisplayName("Should return error if tax percentage is negative")
+    void shouldReturnErrorIfTaxPercentageIsNegative() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.getTaxes().get(0).setPercentage(new BigDecimal(-100));
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_RANGE);
+    }
+
+    @Test
+    @DisplayName("Should return error if tax percentage exceeds 100")
+    void shouldReturnErrorIfTaxPercentageIsGreaterThan100() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.getTaxes().get(0).setPercentage(new BigDecimal(105));
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_RANGE);
+    }
+
+    @Test
+    @DisplayName("Should return error if tax percentage not in bounds")
+    void shouldReturnErrorIfTaxPercentageIsNotInBounds() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.getTaxes().get(0).setPercentage(new BigDecimal("99.15555"));
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
+    }
+
+    @Test
+    @DisplayName("Should return error if accounts list is null")
+    void shouldReturnErrorIfAccountsListIsNull() throws Exception {
+        //Given
+        final var billCreationResource = BillCreationResourceFixture.getDefault();
+        billCreationResource.setAccountsList(null);
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+        //When/Then
+        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 400);
+        String content = result.getResponse().getContentAsString();
+        ApiError error = mapper.readValue(content, ApiError.class);
+
+        assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
+        assertThat(error.getErrors().size()).isEqualTo(1);
+        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
     private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {

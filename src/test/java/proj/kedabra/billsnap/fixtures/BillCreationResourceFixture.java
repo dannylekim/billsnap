@@ -18,6 +18,7 @@ public final class BillCreationResourceFixture {
         resource.setItems(List.of(ItemCreationResourceFixture.getDefault()));
         resource.setTipAmount(BigDecimal.valueOf(5));
         resource.setAccountsList(new ArrayList<>());
+        resource.setTaxes(List.of(TaxResourceFixture.getDefault()));
 
         return resource;
     }
