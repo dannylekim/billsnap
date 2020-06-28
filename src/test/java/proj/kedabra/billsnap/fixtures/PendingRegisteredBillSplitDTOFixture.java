@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.fixtures;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
@@ -29,7 +30,7 @@ public class PendingRegisteredBillSplitDTOFixture {
         accountItem2.setItem(item);
         accountItem2.setPercentage(accountPercentageSplit);
 
-        dto.setBalance(item.getCost().add(bill.getTipAmount()));
+        dto.setBalance(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
         dto.setTotalTip(bill.getTipAmount());
         dto.setCategory(bill.getCategory());
         dto.setCompany(bill.getCompany());
