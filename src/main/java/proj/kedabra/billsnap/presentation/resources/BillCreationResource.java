@@ -36,6 +36,7 @@ public class BillCreationResource implements Serializable {
     @Schema(description = "List of items that were on the bill")
     private List<@Valid ItemCreationResource> items;
 
+    @NotNull
     @Schema(description = "List of accounts to associate to the bill")
     private List<
             @NotBlank

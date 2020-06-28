@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.facade.impl;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -274,7 +275,7 @@ public class BillFacadeImpl implements BillFacade {
         final var total = subTotal.add(taxes);
         final BigDecimal tipTotal = calculateTip(bill, total);
 
-        return total.add(tipTotal);
+        return total.add(tipTotal).setScale(2, RoundingMode.HALF_UP);
     }
 
 

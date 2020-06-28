@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 import org.hibernate.validator.constraints.Range;
@@ -22,8 +23,9 @@ public class NewTaxResource implements Serializable {
     @Schema(description = "The name of the tax like TVQ or TPS. Required")
     private String name;
 
+    @NotNull
     @Digits(integer = 3, fraction = 4)
     @Schema(description = "The percentage used for this specific tax. Required")
-    @Range(message = "the number must be positive")
+    @Range(max = 100, message = "The number must be within 0 to 100")
     private BigDecimal percentage;
 }

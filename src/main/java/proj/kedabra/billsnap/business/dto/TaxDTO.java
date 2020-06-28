@@ -2,9 +2,11 @@ package proj.kedabra.billsnap.business.dto;
 
 import java.math.BigDecimal;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class TaxDTO {
 
     private Long id;

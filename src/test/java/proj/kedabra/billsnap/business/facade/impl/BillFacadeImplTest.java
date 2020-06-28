@@ -573,7 +573,7 @@ class BillFacadeImplTest {
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         final var tax = new Tax();
         tax.setName("Tax 2");
-        tax.setPercentage(new BigDecimal("20"));
+        tax.setPercentage(new BigDecimal("18.653"));
         bill.getTaxes().clear();
         bill.getTaxes().add(tax);
 
@@ -584,7 +584,7 @@ class BillFacadeImplTest {
         final var billCompleteDTO = billFacade.addPersonalBill(userEmail, billDTO);
 
         // Then
-        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.8"));
+        assertThat(billCompleteDTO.getBalance()).isEqualByComparingTo(new BigDecimal("14.75"));
     }
 
     @Test

@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.business.model.entities;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 
 import javax.persistence.Column;
@@ -18,9 +17,7 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "tax", schema = "public")
-public class Tax implements Serializable {
-
-    private static final long serialVersionUID = -8132492217154508847L;
+public class Tax {
 
     @Id
     @Column(name = "id")
