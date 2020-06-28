@@ -568,6 +568,7 @@ class BillFacadeImplIT {
     void shouldReturnBillSplitDTO() {
         //Given
         final Bill bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getTaxes().clear();
 
         //When
         final BillSplitDTO billSplitDTO = billFacade.getBillSplitDTO(bill);
