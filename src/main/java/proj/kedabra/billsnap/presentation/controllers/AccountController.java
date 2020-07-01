@@ -90,9 +90,8 @@ public class AccountController {
 
     @GetMapping(path = "/account")
     @Operation(summary = "Get account information", description = "Get account information")
-    @SecurityRequirements
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully logged in."),
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information"),
             @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist"),
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
     })
