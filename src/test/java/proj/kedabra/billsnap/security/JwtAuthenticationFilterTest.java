@@ -41,6 +41,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -65,6 +66,9 @@ class JwtAuthenticationFilterTest {
     private Validator validator;
 
     @Mock
+    private AccountMapper accountMapper;
+
+    @Mock
     private AccountServiceImpl accountService;
 
     private final String MUST_NOT_BE_BLANK = "must not be blank";
@@ -76,7 +80,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper, accountService);
+        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper, accountService, accountMapper);
     }
 
     @Test

@@ -24,6 +24,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import proj.kedabra.billsnap.presentation.resources.AccountResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 
 @Service
@@ -88,13 +89,12 @@ public class JwtService implements Serializable {
                 .collect(Collectors.toList());
     }
 
-    String loginSuccessJson(final String token, final String firstName, final String lastName) throws IOException {
+    String loginSuccessJson(final String token, final AccountResource accountResource) throws IOException {
         try {
             final LoginResponseResource loginResponseResource = new LoginResponseResource();
             loginResponseResource.setMessage(LOGIN_SUCCESS_MESSAGE);
+            loginResponseResource.setAccount(accountResource);
             loginResponseResource.setToken(token);
-            loginResponseResource.setFirstName(firstName);
-            loginResponseResource.setLastName(lastName);
 
             return mapper.writeValueAsString(loginResponseResource);
         } catch (JsonProcessingException e) {
