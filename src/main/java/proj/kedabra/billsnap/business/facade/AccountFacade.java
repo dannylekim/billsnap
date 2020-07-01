@@ -6,4 +6,6 @@ public interface AccountFacade {
 
     AccountDTO registerAccount(AccountDTO accountDTO);
 
+    AccountDTO getAccount(String email);
+
 }
