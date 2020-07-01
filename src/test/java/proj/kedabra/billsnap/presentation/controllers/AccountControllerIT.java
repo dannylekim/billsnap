@@ -1,9 +1,11 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,9 +29,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.fixtures.AccountCreationResourceFixture;
+import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 
 @Tag("integration")
@@ -47,6 +51,9 @@ class AccountControllerIT {
     @Autowired
     private ObjectMapper mapper;
 
+    @Autowired
+    private JwtService jwtService;
+
     private static final String INVALID_INPUTS = "Invalid Inputs. Please fix the following errors";
 
     private static final String MUST_NOT_BE_BLANK = "must not be blank";
@@ -59,7 +66,9 @@ class AccountControllerIT {
 
     private static final String INVALID_PASSWORD = "Password must contain an upper and lower case, a number, and a symbol.";
 
+    private static final String JWT_HEADER = "Authorization";
 
+    private static final String JWT_PREFIX = "Bearer ";
 
 
     @Test
@@ -405,5 +414,32 @@ class AccountControllerIT {
         assertNotNull(response.getId());
     }
 
+    @Test
+    @DisplayName("Should return account information")
+    void shouldReturnAccountInformation() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var path = "/account";
+
+        //When
+        MvcResult result = performMvcGetRequest(bearerToken, path, 200);
+        String content = result.getResponse().getContentAsString();
+        AccountResource accountResource = mapper.readValue(content, AccountResource.class);
+
+        //Then
+        assertThat(accountResource.getId()).isEqualTo(3000L);
+        assertThat(accountResource.getFirstName()).isEqualTo("firstName");
+        assertThat(accountResource.getLastName()).isEqualTo("lastName");
+        assertThat(accountResource.getMiddleName()).isEqualTo("middleName");
+        assertThat(accountResource.getEmail()).isEqualTo(user.getUsername());
+        assertThat(accountResource.getGender()).isEqualTo("MALE");
+        assertThat(accountResource.getPhoneNumber()).isEqualTo("123456789");
+    }
+
+    private MvcResult performMvcGetRequest(String bearerToken, String path, int resultCode) throws Exception {
+        return mockMvc.perform(get(path).header(JWT_HEADER, bearerToken))
+                .andExpect(status().is(resultCode)).andReturn();
+    }
 
 }
