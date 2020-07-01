@@ -1,9 +1,13 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
+import java.security.Principal;
+
 import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -82,6 +86,18 @@ public class AccountController {
     public LoginResponseResource loginAccount(@Parameter(required = true, name = "Login Details", description = "Valid login details")
                                               @RequestBody @Valid LoginResource loginResource) {
         throw new IllegalStateException("loginAccount() shouldn't be called from Controller: it is implemented by custom AuthenticationFilter.");
+    }
+
+    @GetMapping(path = "/account")
+    @Operation(summary = "Get account information", description = "Get account information")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information"),
+            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist"),
+            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
+    })
+    @ResponseStatus(HttpStatus.OK)
+    public AccountResource getAccount(@AuthenticationPrincipal final Principal principal) {
+        return mapper.toResource(accountFacade.getAccount(principal.getName()));
     }
 
 }
