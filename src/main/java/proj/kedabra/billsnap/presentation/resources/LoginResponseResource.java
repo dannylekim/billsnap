@@ -11,8 +11,8 @@ public class LoginResponseResource implements Serializable {
     @Schema(description = "Login success message")
     private String message;
 
-    @Schema(description = "Account information")
-    private AccountResource account;
+    @Schema(description = "Profile information")
+    private AccountResource profile;
 
     @Schema(description = "Login bearer token")
     private String token;

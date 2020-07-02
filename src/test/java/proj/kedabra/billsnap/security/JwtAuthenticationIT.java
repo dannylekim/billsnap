@@ -112,8 +112,15 @@ class JwtAuthenticationIT {
         assertThat(HttpServletResponse.SC_OK).isEqualTo(result.getResponse().getStatus());
         assertThat(LOGIN_SUCCESS).isEqualTo(contentJson.getString("message"));
         assertThat(trimmedAuthorizationHeader).isEqualTo(contentJson.getString("token"));
-        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstName"));
-        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastName"));
+
+        JSONObject profile = new JSONObject(contentJson.getString("profile"));
+        assertThat(account.getId().toString()).isEqualTo(profile.getString("id"));
+        assertThat(account.getMiddleName()).isEqualTo(profile.getString("middleName"));
+        assertThat(account.getFirstName()).isEqualTo(profile.getString("firstName"));
+        assertThat(account.getLastName()).isEqualTo(profile.getString("lastName"));
+        assertThat(account.getPhoneNumber()).isEqualTo(profile.getString("phoneNumber"));
+        assertThat(account.getGender().toString()).isEqualTo(profile.getString("gender"));
+        assertThat(account.getEmail()).isEqualTo(profile.getString("email"));
     }
 
     @Test

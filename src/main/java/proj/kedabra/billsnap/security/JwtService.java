@@ -93,7 +93,7 @@ public class JwtService implements Serializable {
         try {
             final LoginResponseResource loginResponseResource = new LoginResponseResource();
             loginResponseResource.setMessage(LOGIN_SUCCESS_MESSAGE);
-            loginResponseResource.setAccount(accountResource);
+            loginResponseResource.setProfile(accountResource);
             loginResponseResource.setToken(token);
 
             return mapper.writeValueAsString(loginResponseResource);
