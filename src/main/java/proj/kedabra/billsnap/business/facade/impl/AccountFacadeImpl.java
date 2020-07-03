@@ -30,4 +30,10 @@ public class AccountFacadeImpl implements AccountFacade {
     public AccountDTO registerAccount(final AccountDTO accountDTO) {
         return accountMapper.toDTO(accountService.registerAccount(accountDTO));
     }
+
+    @Override
+    public AccountDTO getAccount(String email) {
+        return accountMapper.toDTO(accountService.getAccount(email));
+    }
+
 }
