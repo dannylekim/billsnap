@@ -98,10 +98,10 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,
                                             FilterChain filterChain, Authentication authResult) throws IOException {
-        User user = ((User) authResult.getPrincipal());
+        final User user = ((User) authResult.getPrincipal());
 
-        String token = jwtService.generateToken(user);
-        AccountDTO account = this.accountMapper.toDTO(accountService.getAccount(user.getUsername()));
+        final String token = jwtService.generateToken(user);
+        final AccountDTO account = this.accountMapper.toDTO(accountService.getAccount(user.getUsername()));
 
         response.addHeader(TOKEN_HEADER, TOKEN_PREFIX + token);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
