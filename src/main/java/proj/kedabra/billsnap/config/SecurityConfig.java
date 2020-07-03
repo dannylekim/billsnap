@@ -17,6 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.validation.Validator;
 
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.security.JwtAuthenticationEntryPoint;
@@ -40,18 +41,22 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final Validator validator;
 
+    private final AccountMapper accountMapper;
+
     @Autowired
     public SecurityConfig(
             final UserDetailsServiceImpl userDetailsServiceImpl,
             final JwtService jwtService,
             final ObjectMapper mapper,
             @Qualifier("getValidator") final Validator validator,
-            final AccountService accountService) {
+            final AccountService accountService,
+            final AccountMapper accountMapper) {
         this.userDetailsServiceImpl = userDetailsServiceImpl;
         this.jwtService = jwtService;
         this.mapper = mapper;
         this.validator = validator;
         this.accountService = accountService;
+        this.accountMapper = accountMapper;
     }
 
     @Override
@@ -104,7 +109,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper, accountService);
+        final JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtService, validator, mapper, accountService, accountMapper);
         filter.setAuthenticationSuccessHandler(new JwtAuthenticationSuccessHandler());
         filter.setAuthenticationFailureHandler(new JwtAuthenticationFailureHandler(mapper));
 
