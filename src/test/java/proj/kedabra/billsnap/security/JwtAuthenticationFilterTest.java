@@ -41,6 +41,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.validation.Validator;
 
 import proj.kedabra.billsnap.business.exception.LoginValidationException;
+import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.service.impl.AccountServiceImpl;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
@@ -65,6 +66,9 @@ class JwtAuthenticationFilterTest {
     private Validator validator;
 
     @Mock
+    private AccountMapper accountMapper;
+
+    @Mock
     private AccountServiceImpl accountService;
 
     private final String MUST_NOT_BE_BLANK = "must not be blank";
@@ -76,7 +80,7 @@ class JwtAuthenticationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper, accountService);
+        filter = new JwtAuthenticationFilter(authenticationManager, jwtService, validator, mapper, accountService, accountMapper);
     }
 
     @Test
@@ -175,12 +179,12 @@ class JwtAuthenticationFilterTest {
         MockHttpServletResponse mockResponse = new MockHttpServletResponse();
         final String jwtToken = "example_token";
         final Account account = AccountEntityFixture.getDefaultAccount();
-        final String successMes = "{\"token\":\"%s\", \"firstname\":\"%s\", \"lastname\":\"%s\"}";
+        final String successMes = "{\"token\":\"%s\", \"profile\":\"%s\"}";
         UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(UserFixture.getDefault(), VALID_PASSWORD);
 
         when(jwtService.generateToken(any())).thenReturn(jwtToken);
         when(accountService.getAccount(any())).thenReturn(account);
-        when(jwtService.loginSuccessJson(any(), any(), any())).thenReturn(String.format(successMes, jwtToken, account.getFirstName(), account.getLastName()));
+        when(jwtService.loginSuccessJson(any(), any())).thenReturn(String.format(successMes, jwtToken, account.toString()));
 
         //When
         filter.successfulAuthentication(mockRequest, mockResponse, mock(FilterChain.class), token);
@@ -190,8 +194,7 @@ class JwtAuthenticationFilterTest {
         assertThat(jwtToken).isEqualTo(Objects.requireNonNull(mockResponse.getHeader("Authorization")).replace("Bearer ", ""));
         assertThat(MediaType.APPLICATION_JSON_VALUE).isEqualTo(mockResponse.getContentType());
         assertThat(jwtToken).isEqualTo(contentJson.getString("token"));
-        assertThat(account.getFirstName()).isEqualTo(contentJson.getString("firstname"));
-        assertThat(account.getLastName()).isEqualTo(contentJson.getString("lastname"));
+        assertThat(account.toString()).isEqualTo(contentJson.getString("profile"));
     }
 
     @Test

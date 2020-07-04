@@ -14,6 +14,7 @@ import org.springframework.security.core.GrantedAuthority;
 
 import io.jsonwebtoken.JwsHeader;
 
+import proj.kedabra.billsnap.fixtures.AccountResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 
@@ -40,18 +41,19 @@ class JwtServiceTest {
     void ShouldReturnJsonFormatSuccessGivenAToken() throws Exception {
         //Given
         final var testToken = "tester_token";
-        final var firstName = "firstname";
-        final var lastName = "lastname";
+        final var account = AccountResourceFixture.getDefault();
 
         //When
-        final String jsonSuccess = jwtService.loginSuccessJson(testToken, firstName, lastName);
+        final String jsonSuccess = jwtService.loginSuccessJson(testToken, account);
         final LoginResponseResource response = mapper.readValue(jsonSuccess, LoginResponseResource.class);
 
         //Then
         assertThat(JSON_SUCCESS).isEqualTo(response.getMessage());
         assertThat(testToken).isEqualTo(response.getToken());
-        assertThat(firstName).isEqualTo(response.getFirstName());
-        assertThat(lastName).isEqualTo(response.getLastName());
+        assertThat(response.getProfile().getFirstName()).isEqualTo(account.getFirstName());
+        assertThat(response.getProfile().getLastName()).isEqualTo(account.getLastName());
+        assertThat(response.getProfile().getMiddleName()).isEqualTo(account.getMiddleName());
+        assertThat(response.getProfile().getEmail()).isEqualTo(account.getEmail());
     }
 
     @Test
