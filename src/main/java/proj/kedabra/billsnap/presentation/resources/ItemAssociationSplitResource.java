@@ -13,5 +13,11 @@ public class ItemAssociationSplitResource implements Serializable {
 
     private List<ItemPercentageSplitResource> items;
 
-    private BigDecimal cost;
+    private BigDecimal subTotal = BigDecimal.ZERO;
+
+    private BigDecimal tip = BigDecimal.ZERO;
+
+    private BigDecimal taxes = BigDecimal.ZERO;
+
+    private BigDecimal total = BigDecimal.ZERO;
 }

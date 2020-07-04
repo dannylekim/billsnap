@@ -287,7 +287,7 @@ class BillFacadeImplTest {
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
 
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
-        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getCost())
+        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getSubTotal())
                 .isEqualTo(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR)));
     }
 
@@ -299,13 +299,14 @@ class BillFacadeImplTest {
         final var principal = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final Long nonExistentBillId = 90019001L;
-        inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+        final var accounts = List.of(accountNotInBill);
+        inviteRegisteredResource.setAccounts(accounts);
 
         when(billService.getBill(any())).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString())));
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, accounts))
                 .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
     }
 
@@ -314,6 +315,7 @@ class BillFacadeImplTest {
     void shouldReturnErrorIfUserMakingRequestIsNotBillResponsible() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var accounts = inviteRegisteredResource.getAccounts();
         final var billId = 1000L;
         final var notBillResponsible = "nobills@inthisemail.com";
         final var bill = BillEntityFixture.getDefault();
@@ -329,7 +331,7 @@ class BillFacadeImplTest {
         //When/Then
         verifyNoInteractions(accountService);
         assertThatExceptionOfType(AccessForbiddenException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()));
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, accounts));
     }
 
     @Test
@@ -357,7 +359,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accountsList))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
     }
 
@@ -397,7 +399,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accountsList))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(emailInBill).toString()));
     }
 

@@ -149,7 +149,6 @@ public class BillFacadeImpl implements BillFacade {
         return getBillSplitDTO(bill);
     }
 
-    //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BillCompleteDTO billCompleteDTO = billMapper.toBillCompleteDTO(bill);
 
@@ -211,7 +210,7 @@ public class BillFacadeImpl implements BillFacade {
         accountPairMap.forEach((account, costItemsPair) -> {
             final var itemSplitDTO = new ItemAssociationSplitDTO();
             itemSplitDTO.setAccount(accountMapper.toDTO(account));
-            itemSplitDTO.setCost(costItemsPair.getCost());
+            itemSplitDTO.setSubTotal(costItemsPair.getCost());
             itemSplitDTO.setItems(costItemsPair.getItemList());
             itemsPerAccount.add(itemSplitDTO);
         });

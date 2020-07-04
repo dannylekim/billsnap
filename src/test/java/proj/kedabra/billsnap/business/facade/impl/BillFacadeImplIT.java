@@ -329,7 +329,7 @@ class BillFacadeImplIT {
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
 
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
-        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getCost()).isEqualTo(item.getCost());
+        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getSubTotal()).isEqualTo(item.getCost());
     }
 
     @Test
@@ -339,10 +339,12 @@ class BillFacadeImplIT {
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var billId = 1000L;
         final var notBillResponsible = "nobills@inthisemail.com";
+        final var accounts = inviteRegisteredResource.getAccounts();
+
 
         //When/Then
         assertThatExceptionOfType(AccessForbiddenException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, accounts))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
@@ -354,11 +356,12 @@ class BillFacadeImplIT {
         final var principal = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var nonExistentBillId = 90019001L;
-        inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
+        final var accounts = List.of(accountNotInBill);
+        inviteRegisteredResource.setAccounts(accounts);
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, accounts))
                 .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(String.valueOf(nonExistentBillId)));
     }
 
@@ -371,11 +374,12 @@ class BillFacadeImplIT {
         final var accountNotInBill = "nobills@inthisemail.com";
         final var nonExistentEmail = "clearly@nonexistent.gov";
         final var existentBillId = 1000L;
-        inviteRegisteredResource.setAccounts(List.of(accountNotInBill, nonExistentEmail));
+        final var accounts = List.of(accountNotInBill, nonExistentEmail);
+        inviteRegisteredResource.setAccounts(accounts);
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail).toString()));
     }
 
@@ -389,11 +393,12 @@ class BillFacadeImplIT {
         final var nonExistentEmail = "clearly@nonexistent.gov";
         final var secondNonExistentEmail = "veryfake@fake.ca";
         final var existentBillId = 1000L;
-        inviteRegisteredResource.setAccounts(List.of(accountNotInBill, nonExistentEmail, secondNonExistentEmail));
+        final var accounts = List.of(accountNotInBill, nonExistentEmail, secondNonExistentEmail);
+        inviteRegisteredResource.setAccounts(accounts);
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, secondNonExistentEmail).toString()));
     }
 
@@ -406,11 +411,12 @@ class BillFacadeImplIT {
         final var accountInBill = "user@hasbills.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1005L;
-        inviteRegisteredResource.setAccounts(List.of(accountInBill, accountNotInBill));
+        final var accounts = List.of(accountInBill, accountNotInBill);
+        inviteRegisteredResource.setAccounts(accounts);
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(accountInBill).toString()));
     }
 
@@ -423,11 +429,12 @@ class BillFacadeImplIT {
         final var accountInBill = "user@hasbills.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1005L;
-        inviteRegisteredResource.setAccounts(List.of(billResponsible, accountInBill, accountNotInBill));
+        final var accounts = List.of(billResponsible, accountInBill, accountNotInBill);
+        inviteRegisteredResource.setAccounts(accounts);
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessageContaining(billResponsible).withMessageContaining(accountInBill);
     }
 
@@ -463,10 +470,11 @@ class BillFacadeImplIT {
         final var existentBillId = 1000L;
         final var bill = billRepository.findById(existentBillId).orElseThrow();
         bill.setStatus(status);
+        final var accounts = inviteRegisteredResource.getAccounts();
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts()))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
@@ -656,7 +664,7 @@ class BillFacadeImplIT {
             assertThat(secondItemPercentageSplitDTO.getCost()).isEqualByComparingTo(firstItemDTO.getCost());
             assertThat(secondItemPercentageSplitDTO.getItemId()).isEqualTo(firstItemDTO.getId());
             assertThat(firstItemPercentageSplitDTO.getName()).isEqualTo(secondItemDTO.getName());
-            assertThat(firstItemPercentageSplitDTO.getCost().toString()).isEqualTo(secondItemDTO.getCost().toString());
+            assertThat(firstItemPercentageSplitDTO.getCost()).isEqualByComparingTo(secondItemDTO.getCost());
             assertThat(firstItemPercentageSplitDTO.getItemId()).isNotNull();
         }
     }
@@ -881,7 +889,7 @@ class BillFacadeImplIT {
             assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
             assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
         } else {
-            assertThat(BigDecimal.ZERO.compareTo(dto.getBalance())).isEqualTo(0);
+            assertThat(dto.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }
 
     }
