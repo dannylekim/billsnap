@@ -10,6 +10,7 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +37,7 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.repository.BillRepository;
+import proj.kedabra.billsnap.business.service.CalculatePaymentService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillFixture;
@@ -601,8 +603,8 @@ class BillControllerIT {
         final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
-        verifyShortBillResources(billOne, response.get(0), BillStatusEnum.OPEN);
-        verifyShortBillResources(billTwo, response.get(1), BillStatusEnum.OPEN);
+        verifyShortBillResources(billOne, response.get(0));
+        verifyShortBillResources(billTwo, response.get(1));
     }
 
     @Test
@@ -848,7 +850,7 @@ class BillControllerIT {
     @Test
     @DisplayName("Should return 400 exception if 1+ emails in InviteRegisteredResource is blank for POST /bills/{billId}/accounts")
     void shouldReturnExceptionIfListEmailsBlankInInviteRegisteredResourceGivenPost() throws Exception {
-        //Given the User makes a reque st for a bill where User is the responsible
+        //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
@@ -1410,11 +1412,11 @@ class BillControllerIT {
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
 
-    private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource, BillStatusEnum status) {
+    private void verifyShortBillResources(BillResource expectedBillResource, ShortBillResource actualBillResource) {
         assertEquals(expectedBillResource.getId(), actualBillResource.getId());
         assertEquals(expectedBillResource.getName(), actualBillResource.getName());
         assertEquals(expectedBillResource.getCategory(), actualBillResource.getCategory());
-        assertEquals(status, actualBillResource.getStatus());
+        assertEquals(BillStatusEnum.OPEN, actualBillResource.getStatus());
         assertEquals(0, expectedBillResource.getBalance().compareTo(actualBillResource.getBalance()));
     }
 
@@ -1434,9 +1436,15 @@ class BillControllerIT {
         assertEquals(expectedBillResource.getItems().size(), itemsList.size());
         actualBillResource.getInformationPerAccount().forEach(info -> {
             assertThat(info.getSubTotal()).isNotNull();
-            assertThat(info.getTotal()).isNotNull();
             assertThat(info.getTaxes()).isNotNull();
             assertThat(info.getTip()).isNotNull();
+            assertThat(info.getTotal()).isEqualByComparingTo(info.getSubTotal().add(info.getTaxes()).add(info.getTip()).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
+            assertThat(info.getInvitationStatus()).isNotNull();
+            if (info.getInvitationStatus() == InvitationStatusEnum.ACCEPTED && actualBillResource.getStatus() == BillStatusEnum.IN_PROGRESS) {
+                assertThat(info.getPaidStatus()).isNotNull();
+            } else {
+                assertThat(info.getPaidStatus()).isNull();
+            }
         });
 
     }

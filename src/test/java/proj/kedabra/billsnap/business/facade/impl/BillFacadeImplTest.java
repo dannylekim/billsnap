@@ -592,13 +592,6 @@ class BillFacadeImplTest {
         final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getInformationPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
-        //for the time being we verify a bill with only 1 item. Should be generic when needed.
-        if (!bill.getItems().isEmpty()) {
-            final Item item = bill.getItems().iterator().next();
-            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
-            assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
-            assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-        }
 
     }
 

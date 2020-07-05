@@ -50,6 +50,7 @@ import proj.kedabra.billsnap.business.service.ItemService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 import proj.kedabra.billsnap.fixtures.AccountBillEntityFixture;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
@@ -566,6 +567,51 @@ class BillServiceImplTest {
         assertThatExceptionOfType(AccessForbiddenException.class)
                 .isThrownBy(() -> billService.startBill(billId, notBillResponsible))
                 .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should set payment status to IN_PROGRESS and start the bill")
+    void shouldStartBill() {
+        //Given
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setStatus(BillStatusEnum.OPEN);
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final String billResponsible = "billresponsible@email.com";
+        account.setEmail(billResponsible);
+        bill.setResponsible(account);
+
+        final var accountBill = new AccountBill();
+        accountBill.setAccount(account);
+        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+        accountBill.setBill(bill);
+
+        final Account account2 = AccountEntityFixture.getDefaultAccount();
+        account2.setId(234L);
+
+
+        final var accountBill2 = new AccountBill();
+        accountBill.setAccount(account2);
+        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
+        accountBill.setBill(bill);
+
+        bill.setAccounts(Set.of(accountBill, accountBill2));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When
+        final var startedBill = billService.startBill(billId, billResponsible);
+
+        //Then
+        assertThat(startedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
+        startedBill.getAccounts().forEach(ab -> {
+            if (ab.getStatus() == InvitationStatusEnum.ACCEPTED) {
+                assertThat(ab.getPaymentStatus()).isEqualTo(PaymentStatusEnum.IN_PROGRESS);
+            } else {
+                assertThat(ab.getPaymentStatus()).isNull();
+            }
+        });
+
     }
 
     @Test

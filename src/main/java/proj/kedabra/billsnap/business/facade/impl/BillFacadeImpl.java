@@ -175,7 +175,6 @@ public class BillFacadeImpl implements BillFacade {
         billSplitDTO.getInformationPerAccount()
                 .stream()
                 .filter(information -> BigDecimal.ZERO.compareTo(information.getSubTotal()) < 0)
-                .filter(information -> information.getInvitationStatus() == InvitationStatusEnum.ACCEPTED)
                 .forEach(item -> {
                     item.setTaxes(calculatePaymentService.calculateTaxes(item.getSubTotal(), bill.getTaxes()));
                     final var accountTip = item.getSubTotal().divide(billSubTotal, RoundingMode.HALF_UP).multiply(totalTip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
@@ -200,7 +199,10 @@ public class BillFacadeImpl implements BillFacade {
     private void mapAllBillAccountItemsIntoHashMap(Bill bill, HashMap<Account, DetailedAccountBillInformation> accountPairMap) {
         bill.getItems().forEach(item -> {
             final BigDecimal percentageSum = item.getAccounts().stream()
-                    .peek(accountItem -> mapAccountItemIntoHashMap(item, accountItem, accountPairMap))
+                    .map(accountItem -> {
+                        mapAccountItemIntoHashMap(item, accountItem, accountPairMap);
+                        return accountItem;
+                    })
                     .map(AccountItem::getPercentage).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             verifyItemPercentageSum(item, percentageSum);

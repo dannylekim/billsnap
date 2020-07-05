@@ -49,7 +49,6 @@ import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
-import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
@@ -870,9 +869,28 @@ class BillFacadeImplIT {
             assertThat(info.getSubTotal()).isEqualByComparingTo(new BigDecimal("2.00"));
             assertThat(info.getTaxes()).isEqualByComparingTo(new BigDecimal("0.20"));
             assertThat(info.getTip()).isEqualByComparingTo(new BigDecimal("5.00"));
-            assertThat(info.getTotal()).isEqualByComparingTo(new BigDecimal("7.20"));
             assertThat(info.getInvitationStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
-            assertThat(info.getPaidStatus()).isEqualTo(PaymentStatusEnum.IN_PROGRESS);
+            assertThat(info.getPaidStatus()).isNull();
+        });
+    }
+
+    @Test
+    @DisplayName("Should return informations per account accurate to the specified account NOT ACCEPTED")
+    void shouldReturnAccurateInformationsPerAccountNotAccepted() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getAccounts().forEach(ab -> ab.setStatus(InvitationStatusEnum.PENDING));
+
+        //When
+        final var billSplitDTO = billFacade.getBillSplitDTO(bill);
+
+        //Then
+        billSplitDTO.getInformationPerAccount().forEach(info -> {
+            assertThat(info.getSubTotal()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTaxes()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTip()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getInvitationStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+            assertThat(info.getPaidStatus()).isNull();
         });
     }
 
@@ -897,10 +915,9 @@ class BillFacadeImplIT {
             assertThat(info.getSubTotal()).isEqualByComparingTo(BigDecimal.ZERO);
             assertThat(info.getTaxes()).isEqualByComparingTo(BigDecimal.ZERO);
             assertThat(info.getTip()).isEqualByComparingTo(BigDecimal.ZERO);
-            assertThat(info.getTotal()).isEqualByComparingTo(BigDecimal.ZERO);
             assertThat(info.getInvitationStatus()).isEqualTo(invitationStatus);
             assertThat(info.getItems()).isEmpty();
-            assertThat(info.getPaidStatus()).isEqualTo(null);
+            assertThat(info.getPaidStatus()).isNull();
         });
     }
 
@@ -940,7 +957,6 @@ class BillFacadeImplIT {
             assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
-            assertThat(itemAssociationSplitDTO.getTotal()).isEqualByComparingTo(itemAssociationSplitDTO.getSubTotal().add(itemAssociationSplitDTO.getTaxes()).add(itemAssociationSplitDTO.getTip()));
         } else {
             assertThat(billSplitDTO.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }
