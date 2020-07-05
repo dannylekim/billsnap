@@ -6,12 +6,14 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
+import proj.kedabra.billsnap.presentation.deserializers.MoneySerializer;
 
 @Data
 public class BillSplitResource implements Serializable {
@@ -52,9 +54,11 @@ public class BillSplitResource implements Serializable {
     private SplitByEnum splitBy;
 
     @Schema(description = "Total tip of the bill")
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal totalTip;
 
     @Schema(description = "the total amount of the bill")
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal balance;
 
     @Schema(description = "The taxes for the specific bill")

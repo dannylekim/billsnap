@@ -14,6 +14,8 @@ public interface CalculatePaymentService {
 
     int DOLLAR_SCALE = 2;
 
+    int DISPLAY_PERCENT_SCALE = 4;
+
     /**
      * Calculate the full balance in accordance to the bill
      *
