@@ -47,12 +47,13 @@ import proj.kedabra.billsnap.fixtures.StartBillResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.ApiSubError;
+import proj.kedabra.billsnap.presentation.resources.AccountResource;
 import proj.kedabra.billsnap.presentation.resources.AccountStatusResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.presentation.resources.ItemAssociationSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ItemPercentageSplitResource;
-import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.security.JwtService;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -945,10 +946,10 @@ class BillControllerIT {
         //When
         final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
         final String content = mvcResult.getResponse().getContentAsString();
-        final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
+        final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
         //Then
-        assertThat((int) response.getPendingAccounts().stream()
+        assertThat((int) response.getInformationPerAccount().stream().map(ItemAssociationSplitResource::getAccount).map(AccountResource::getEmail)
                 .filter(acc -> acc.equals(accountNotInBill)).count())
                 .isEqualTo(1);
     }
@@ -969,10 +970,10 @@ class BillControllerIT {
         //When
         final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
         final String content = mvcResult.getResponse().getContentAsString();
-        final PendingRegisteredBillSplitResource response = mapper.readValue(content, PendingRegisteredBillSplitResource.class);
+        final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
         //Then
-        assertThat((int) response.getPendingAccounts().stream()
+        assertThat((int) response.getInformationPerAccount().stream().map(ItemAssociationSplitResource::getAccount).map(AccountResource::getEmail)
                 .filter(acc -> acc.equals(accountNotInBill) || acc.equals(secondAccountNotInBill)).count())
                 .isEqualTo(2);
     }

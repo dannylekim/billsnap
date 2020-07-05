@@ -16,7 +16,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +32,6 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
-import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
@@ -58,7 +56,6 @@ import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillSplitDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
-import proj.kedabra.billsnap.fixtures.PendingRegisteredBillSplitDTOFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
@@ -300,7 +297,7 @@ class BillFacadeImplTest {
         final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
 
         //Then
-        verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
 
         assertThat(returnBillSplitDTO.getInformationPerAccount().get(0).getSubTotal())
                 .isEqualTo(item.getCost().multiply(accountPercentageSplit.divide(PERCENTAGE_DIVISOR).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP)));
@@ -486,18 +483,15 @@ class BillFacadeImplTest {
                     return accountDTO;
                 }
         );
-        final var pendingRegisteredBillSplitDTOFixture = PendingRegisteredBillSplitDTOFixture.getMappedBillSplitDTOFixture();
+        final var pendingRegisteredBillSplitDTOFixture = BillSplitDTOFixture.getMappedPendingBillSplitDTOFixture();
         pendingRegisteredBillSplitDTOFixture.setId(existentBillId);
-        when(billMapper.toPendingRegisteredBillSplitDTO(any())).thenReturn(pendingRegisteredBillSplitDTOFixture);
+        when(billMapper.toBillSplitDTO(any())).thenReturn(pendingRegisteredBillSplitDTOFixture);
 
         //When
         final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
 
         //Then
-        verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
-        final List<String> dtoPendingAccounts = pendingRegisteredBillSplitDTO.getPendingAccounts();
-        assertThat(dtoPendingAccounts.size()).isEqualTo(1);
-        assertThat(dtoPendingAccounts.containsAll(invitedAccountsList)).isTrue();
+        verifyBillSplitDTOToBill(pendingRegisteredBillSplitDTO, bill);
     }
 
     @Test
@@ -529,7 +523,7 @@ class BillFacadeImplTest {
         final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
-        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
     }
 
     @Test
@@ -561,7 +555,7 @@ class BillFacadeImplTest {
         final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
-        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
     }
 
     @Test
@@ -581,27 +575,23 @@ class BillFacadeImplTest {
                 .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
-    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
-        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
-
+    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();
-        assertThat(dto.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(dto.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
         assertThat(bill.getStatus()).isEqualTo(BillStatusEnum.OPEN);
-        assertThat(dto.getId()).isEqualTo(bill.getId());
-        assertThat(dto.getName()).isEqualTo(bill.getName());
-        assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
-        assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
-        assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
-        assertThat(bill.getTaxes().size()).isEqualTo(dto.getTaxes().size());
+        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
+        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
+        assertThat(billSplitDTO.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(billSplitDTO.getCompany()).isEqualTo(bill.getCompany());
+        assertThat(bill.getTaxes().size()).isEqualTo(billSplitDTO.getTaxes().size());
 
-        final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getInformationPerAccount();
-        if (!(dto instanceof PendingRegisteredBillSplitDTO)) {
-            final Set<AccountBill> accounts = bill.getAccounts();
-            assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
-        }
+        final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getInformationPerAccount();
+        final Set<AccountBill> accounts = bill.getAccounts();
+        assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
         //for the time being we verify a bill with only 1 item. Should be generic when needed.
         if (!bill.getItems().isEmpty()) {
             final Item item = bill.getItems().iterator().next();
