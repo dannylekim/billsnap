@@ -136,7 +136,7 @@ class ResolveBillControllerTest {
         //then
         final var result = mvcResult.getResponse().getContentAsString();
         final var remainingPaymentResource = mapper.readValue(result, RemainingPaymentResource.class);
-        assertThat(remainingPaymentResource.getRemainingBalance()).isEqualTo(BigDecimal.TEN);
+        assertThat(remainingPaymentResource.getRemainingBalance()).isEqualTo(new BigDecimal("10.00"));
     }
 
     @Test
