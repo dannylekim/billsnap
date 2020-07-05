@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
 import java.security.Principal;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -33,6 +35,7 @@ import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
+import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AssociateBillResource;
 import proj.kedabra.billsnap.presentation.resources.BillCreationResource;
@@ -85,7 +88,11 @@ public class BillController {
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
-    public List<ShortBillResource> getAllBills(@AuthenticationPrincipal final Principal principal) {
+    public List<ShortBillResource> getAllBills(@RequestParam(value = "statuses", defaultValue = "OPEN") final List<BillStatusEnum> statuses,
+                                               @RequestParam(value = "start", required = false) LocalDate start,
+                                               @RequestParam(value = "end", required = false) LocalDate end,
+                                               @RequestParam(value = "category", required = false) String category,
+                                               @AuthenticationPrincipal final Principal principal) {
 
         final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
         return billsFromEmail.stream().map(billMapper::toShortBillResource).collect(Collectors.toList());
