@@ -912,6 +912,7 @@ class BillFacadeImplIT {
             assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
+            assertThat(itemAssociationSplitDTO.getTotal()).isEqualByComparingTo(itemAssociationSplitDTO.getSubTotal().add(itemAssociationSplitDTO.getTaxes()).add(itemAssociationSplitDTO.getTip()));
         } else {
             assertThat(dto.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }
