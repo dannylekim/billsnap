@@ -18,5 +18,4 @@ public class ItemAssociationSplitDTO {
 
     private BigDecimal taxes = BigDecimal.ZERO;
 
-    private BigDecimal total = BigDecimal.ZERO;
 }

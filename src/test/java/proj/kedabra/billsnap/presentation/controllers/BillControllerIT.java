@@ -1007,7 +1007,7 @@ class BillControllerIT {
         final String content = result.getResponse().getContentAsString();
         final BillResource createdBill = mapper.readValue(content, BillResource.class);
 
-        final var path = String.format(BILL_BILLID_ENDPOINT,  createdBill.getId());
+        final var path = String.format(BILL_BILLID_ENDPOINT, createdBill.getId());
 
         //When/Then
         final var mvcResult = performMvcGetRequest(bearerToken, path, 200);
@@ -1148,7 +1148,7 @@ class BillControllerIT {
         assertThat(billSplit.getCompany()).isEqualTo(editBillResource.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBillResource.getCategory());
 
-        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        final var items = billSplit.getInformationPerAccount().get(0).getItems();
         final var firstItemResource = editBillResource.getItems().get(0);
         final var secondItemResource = editBillResource.getItems().get(1);
         final var firstItemPercentageSplitResource = items.get(0);
@@ -1158,14 +1158,14 @@ class BillControllerIT {
             assertThat(firstItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
             assertThat(firstItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
             assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
-            assertThat(secondItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(secondItemPercentageSplitResource.getCost()).isEqualByComparingTo(secondItemResource.getCost());
             assertThat(secondItemPercentageSplitResource.getItemId()).isNotNull();
         } else {
             assertThat(secondItemPercentageSplitResource.getName()).isEqualTo(firstItemResource.getName());
             assertThat(secondItemPercentageSplitResource.getCost()).isEqualByComparingTo(firstItemResource.getCost());
             assertThat(secondItemPercentageSplitResource.getItemId()).isEqualTo(firstItemResource.getId());
             assertThat(firstItemPercentageSplitResource.getName()).isEqualTo(secondItemResource.getName());
-            assertThat(firstItemPercentageSplitResource.getCost().toString()).isEqualTo(secondItemResource.getCost().toString());
+            assertThat(firstItemPercentageSplitResource.getCost()).isEqualByComparingTo(secondItemResource.getCost());
             assertThat(firstItemPercentageSplitResource.getItemId()).isNotNull();
         }
     }
@@ -1429,8 +1429,14 @@ class BillControllerIT {
         assertNotNull(expectedBillResource.getId());
 
         final HashSet<ItemPercentageSplitResource> itemsList = new HashSet<>();
-        actualBillResource.getItemsPerAccount().forEach(account -> itemsList.addAll(account.getItems()));
+        actualBillResource.getInformationPerAccount().forEach(account -> itemsList.addAll(account.getItems()));
         assertEquals(expectedBillResource.getItems().size(), itemsList.size());
+        actualBillResource.getInformationPerAccount().forEach(info -> {
+            assertThat(info.getSubTotal()).isNotNull();
+            assertThat(info.getTotal()).isNotNull();
+            assertThat(info.getTaxes()).isNotNull();
+            assertThat(info.getTip()).isNotNull();
+        });
 
     }
 

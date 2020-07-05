@@ -46,7 +46,7 @@ public class BillSplitResource implements Serializable {
     private ZonedDateTime updated;
 
     @Schema(description = "List of items associated per account on the bill")
-    private List<ItemAssociationSplitResource> itemsPerAccount;
+    private List<ItemAssociationSplitResource> informationPerAccount;
 
     @Schema(description = "By which method the bill is split by")
     private SplitByEnum splitBy;

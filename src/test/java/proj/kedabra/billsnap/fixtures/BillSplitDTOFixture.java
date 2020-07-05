@@ -70,7 +70,7 @@ public final class BillSplitDTOFixture {
         itemPercentageSplitDTO2.setItemId(item.getId());
         itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
 
-        billSplitDTO.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
+        billSplitDTO.setInformationPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
 
         return billSplitDTO;
     }

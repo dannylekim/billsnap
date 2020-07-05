@@ -71,7 +71,7 @@ public class PendingRegisteredBillSplitDTOFixture {
         itemPercentageSplitDTO2.setItemId(item.getId());
         itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
 
-        dto.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
+        dto.setInformationPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
 
         return dto;
     }

@@ -2,9 +2,12 @@ package proj.kedabra.billsnap.presentation.resources;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 
 import lombok.Data;
+
+import proj.kedabra.billsnap.business.service.CalculatePaymentService;
 
 @Data
 public class ItemAssociationSplitResource implements Serializable {
@@ -19,5 +22,7 @@ public class ItemAssociationSplitResource implements Serializable {
 
     private BigDecimal taxes = BigDecimal.ZERO;
 
-    private BigDecimal total = BigDecimal.ZERO;
+    public BigDecimal getTotal() {
+        return subTotal.add(taxes).add(tip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
+    }
 }

@@ -135,7 +135,7 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(returnBillDTO.getId()).orElseThrow();
 
         verifyBillDTOToBill(returnBillDTO, bill);
-        assertThat(returnBillDTO.getBalance()).isEqualByComparingTo(new BigDecimal("330"));
+        assertThat(returnBillDTO.getBalance()).isEqualByComparingTo(new BigDecimal("330.00"));
     }
 
     @Test
@@ -329,7 +329,7 @@ class BillFacadeImplIT {
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
 
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
-        assertThat(returnBillSplitDTO.getItemsPerAccount().get(0).getSubTotal()).isEqualTo(item.getCost());
+        assertThat(returnBillSplitDTO.getInformationPerAccount().get(0).getSubTotal()).isEqualTo(item.getCost());
     }
 
     @Test
@@ -605,7 +605,7 @@ class BillFacadeImplIT {
         assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
 
-        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        final var items = billSplit.getInformationPerAccount().get(0).getItems();
         final var firstItemDTO = editBill.getItems().get(0);
         final var secondItemDTO = editBill.getItems().get(1);
         final var firstItemPercentageSplitDTO = items.get(0);
@@ -647,7 +647,7 @@ class BillFacadeImplIT {
         assertThat(billSplit.getCompany()).isEqualTo(editBill.getCompany());
         assertThat(billSplit.getCategory()).isEqualTo(editBill.getCategory());
 
-        final var items = billSplit.getItemsPerAccount().get(0).getItems();
+        final var items = billSplit.getInformationPerAccount().get(0).getItems();
         final var firstItemDTO = editBill.getItems().get(0);
         final var secondItemDTO = editBill.getItems().get(1);
         final var firstItemPercentageSplitDTO = items.get(0);
@@ -855,6 +855,25 @@ class BillFacadeImplIT {
 
     }
 
+    @Test
+    @DisplayName("Should return informations per account accurate to the specified account")
+    void shouldReturnAccurateInformationsPerAccount() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+
+        //When
+        final var billSplitDTO = billFacade.getBillSplitDTO(bill);
+
+        //Then
+        billSplitDTO.getInformationPerAccount().forEach(info -> {
+            assertThat(info.getSubTotal()).isEqualByComparingTo(new BigDecimal("2.00"));
+            assertThat(info.getTaxes()).isEqualByComparingTo(new BigDecimal("0.20"));
+            assertThat(info.getTip()).isEqualByComparingTo(new BigDecimal("5.00"));
+        });
+
+
+    }
+
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
         var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
@@ -876,18 +895,23 @@ class BillFacadeImplIT {
         if (dto.getCreated() != null) {
             assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
         }
-        final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getItemsPerAccount();
+        final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getInformationPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
         if (!bill.getItems().isEmpty()) {
             //for the time being we verify a bill with only 1 item. Should be generic when needed.
             final Item item = bill.getItems().iterator().next();
-            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemsPerAccount.get(0).getItems().get(0);
+            final var itemAssociationSplitDTO = itemsPerAccount.get(0);
+            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemAssociationSplitDTO.getItems().get(0);
 
             assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
             assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
             assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
+            // due to the difficulty of testing the calculations here without outright copying the math from the implementation, we'll simply check for null and leave specific tests to verify the cost.
+            assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
+            assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
+            assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
         } else {
             assertThat(dto.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }

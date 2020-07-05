@@ -1,7 +1,6 @@
 package proj.kedabra.billsnap.business.service.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -12,23 +11,24 @@ import org.junit.jupiter.api.Test;
 import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.service.CalculatePaymentService;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
-import proj.kedabra.billsnap.utils.ErrorMessageEnum;
+import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 
 class CalculatePaymentServiceImplTest {
 
     private final CalculatePaymentService calculatePaymentService = new CalculatePaymentServiceImpl();
 
     @Test
-    @DisplayName("Only one tipping method is supported")
-    void shouldCalculateTipByPercentage() {
-        // When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> calculatePaymentService.calculateTip(null, null, BigDecimal.TEN)).withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> calculatePaymentService.calculateTip(BigDecimal.TEN, BigDecimal.TEN, BigDecimal.TEN)).withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> calculatePaymentService.calculateTip(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.TEN)).withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> calculatePaymentService.calculateTip(BigDecimal.ZERO, null, BigDecimal.TEN)).withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> calculatePaymentService.calculateTip(null, BigDecimal.ZERO, BigDecimal.TEN)).withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
+    @DisplayName("Should calculate the subtotal of items within a bill")
+    void shouldCalculateSubtotal() {
+        // Given
+        final var bill = BillEntityFixture.getDefault();
+        bill.getItems().add(ItemEntityFixture.getDefault());
 
+        // When
+        final var subTotal = calculatePaymentService.calculateSubTotal(bill);
 
+        //Then
+        assertThat(subTotal).isEqualByComparingTo(new BigDecimal("14.00"));
     }
 
     @Test
