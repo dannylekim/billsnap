@@ -37,7 +37,7 @@ class BillMapperTest {
         assertThat(pendingRegisteredBillSplitDTO.getCategory()).isEqualTo(billSplitDTO.getCategory());
         assertThat(pendingRegisteredBillSplitDTO.getCompany()).isEqualTo(billSplitDTO.getCompany());
         assertThat(pendingRegisteredBillSplitDTO.getCreator()).isEqualTo(billSplitDTO.getCreator());
-        assertThat(pendingRegisteredBillSplitDTO.getItemsPerAccount()).isEqualTo(billSplitDTO.getItemsPerAccount());
+        assertThat(pendingRegisteredBillSplitDTO.getInformationPerAccount()).isEqualTo(billSplitDTO.getInformationPerAccount());
         assertThat(pendingRegisteredBillSplitDTO.getResponsible()).isEqualTo(billSplitDTO.getResponsible());
         assertThat(pendingRegisteredBillSplitDTO.getSplitBy()).isEqualTo(billSplitDTO.getSplitBy());
         assertThat(pendingRegisteredBillSplitDTO.getStatus()).isEqualTo(billSplitDTO.getStatus());

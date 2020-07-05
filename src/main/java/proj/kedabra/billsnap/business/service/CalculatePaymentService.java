@@ -10,6 +10,10 @@ import proj.kedabra.billsnap.business.model.entities.Tax;
 
 public interface CalculatePaymentService {
 
+    int PERCENT_SCALE = 7;
+
+    int DOLLAR_SCALE = 2;
+
     /**
      * Calculate the full balance in accordance to the bill
      *
@@ -17,6 +21,14 @@ public interface CalculatePaymentService {
      * @return the full balance set to 2 decimal places and rounded {@link java.math.RoundingMode#HALF_UP}
      */
     BigDecimal calculateBalance(Bill bill);
+
+    /**
+     * Calculate the sub total of a bill
+     *
+     * @param bill the bill to calculate the subtotal on
+     * @return the subtotal set to 2 decimal places and rounded {@link java.math.RoundingMode#HALF_UP}
+     */
+    BigDecimal calculateSubTotal(Bill bill);
 
     /**
      * Calculate the taxes for a subtotal. It will return a value at the end set to 2 decimal places and rounded {@link java.math.RoundingMode#HALF_UP}

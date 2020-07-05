@@ -11,7 +11,7 @@ public class ItemAssociationSplitDTOFixture {
     public static ItemAssociationSplitDTO getDefault() {
         final var itemAssociationSplitDTO = new ItemAssociationSplitDTO();
         itemAssociationSplitDTO.setAccount(AccountDTOFixture.getCreationDTO());
-        itemAssociationSplitDTO.setCost(BigDecimal.valueOf(5));
+        itemAssociationSplitDTO.setSubTotal(BigDecimal.valueOf(5));
         final var items = List.of(ItemPercentageSplitDTOFixture.getDefault());
         itemAssociationSplitDTO.setItems(items);
 
