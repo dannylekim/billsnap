@@ -52,7 +52,7 @@ public final class BillSplitDTOFixture {
 
         final var itemAssociationSplitDTO1 = ItemAssociationSplitDTOFixture.getDefault();
         itemAssociationSplitDTO1.setAccount(accountDTO1);
-        itemAssociationSplitDTO1.setCost(BigDecimal.valueOf(2.0));
+        itemAssociationSplitDTO1.setSubTotal(BigDecimal.valueOf(2.0));
         final var itemPercentageSplitDTO1 = ItemPercentageSplitDTOFixture.getDefault();
         itemPercentageSplitDTO1.setPercentage(accountItem1.getPercentage());
         itemPercentageSplitDTO1.setCost(item.getCost());
@@ -62,7 +62,7 @@ public final class BillSplitDTOFixture {
 
         final var itemAssociationSplitDTO2 = ItemAssociationSplitDTOFixture.getDefault();
         itemAssociationSplitDTO2.setAccount(accountDTO2);
-        itemAssociationSplitDTO2.setCost(BigDecimal.valueOf(2.0));
+        itemAssociationSplitDTO2.setSubTotal(BigDecimal.valueOf(2.0));
         final var itemPercentageSplitDTO2 = ItemPercentageSplitDTOFixture.getDefault();
         itemPercentageSplitDTO2.setPercentage(accountItem2.getPercentage());
         itemPercentageSplitDTO2.setCost(item.getCost());
@@ -70,7 +70,7 @@ public final class BillSplitDTOFixture {
         itemPercentageSplitDTO2.setItemId(item.getId());
         itemAssociationSplitDTO2.setItems(List.of(itemPercentageSplitDTO2));
 
-        billSplitDTO.setItemsPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
+        billSplitDTO.setInformationPerAccount(List.of(itemAssociationSplitDTO1, itemAssociationSplitDTO2));
 
         return billSplitDTO;
     }

@@ -5,7 +5,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,9 +30,9 @@ import proj.kedabra.billsnap.business.model.entities.AccountBill;
 import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
-import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.service.AccountService;
 import proj.kedabra.billsnap.business.service.BillService;
+import proj.kedabra.billsnap.business.service.CalculatePaymentService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
@@ -41,6 +40,10 @@ import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
 
 @Service
 public class BillFacadeImpl implements BillFacade {
+
+    private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
+
+    private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
 
     private final BillService billService;
 
@@ -52,17 +55,17 @@ public class BillFacadeImpl implements BillFacade {
 
     private final ItemMapper itemMapper;
 
-    private static final BigDecimal PERCENTAGE_DIVISOR = BigDecimal.valueOf(100);
+    private final CalculatePaymentService calculatePaymentService;
 
-    private static final String ITEM_PERCENTAGES_MUST_ADD_TO_100 = "The percentage split for this item must add up to 100: {%s, Percentage: %s}";
 
     @Autowired
-    public BillFacadeImpl(final BillService billService, final AccountService accountService, final BillMapper billMapper, final AccountMapper accountMapper, final ItemMapper itemMapper) {
+    public BillFacadeImpl(final BillService billService, final AccountService accountService, final BillMapper billMapper, final AccountMapper accountMapper, final ItemMapper itemMapper, final CalculatePaymentService calculatePaymentService) {
         this.billService = billService;
         this.accountService = accountService;
         this.billMapper = billMapper;
         this.accountMapper = accountMapper;
         this.itemMapper = itemMapper;
+        this.calculatePaymentService = calculatePaymentService;
     }
 
     @Override
@@ -149,7 +152,6 @@ public class BillFacadeImpl implements BillFacade {
         return getBillSplitDTO(bill);
     }
 
-    //TODO should move these things into the billMapperObject itself. Mapstruct has a way to add mapping methods.
     private BillCompleteDTO getBillCompleteDTO(Bill bill) {
         final BillCompleteDTO billCompleteDTO = billMapper.toBillCompleteDTO(bill);
 
@@ -159,7 +161,7 @@ public class BillFacadeImpl implements BillFacade {
             accountStatusList.add(pair);
         });
 
-        final BigDecimal balance = calculateBalance(bill);
+        final BigDecimal balance = calculatePaymentService.calculateBalance(bill);
         billCompleteDTO.setBalance(balance);
         billCompleteDTO.setAccountsList(accountStatusList);
 
@@ -169,17 +171,27 @@ public class BillFacadeImpl implements BillFacade {
     @Override
     public BillSplitDTO getBillSplitDTO(Bill bill) {
         final BillSplitDTO billSplitDTO = billMapper.toBillSplitDTO(bill);
-        final BigDecimal totalTip = calculateTip(bill);
-        final BigDecimal balance = calculateBalance(bill);
+        final var billSubTotal = calculatePaymentService.calculateSubTotal(bill);
+        final BigDecimal totalTip = calculatePaymentService.calculateTip(bill.getTipAmount(), bill.getTipPercent(), billSubTotal);
+        final BigDecimal balance = calculatePaymentService.calculateBalance(bill);
         billSplitDTO.setTotalTip(totalTip);
         billSplitDTO.setBalance(balance);
 
-        mapAccountTotalCostIntoBillSplitDTO(bill, billSplitDTO);
+        mapAccountSubTotalCostIntoBillSplitDTO(bill, billSplitDTO);
+
+        billSplitDTO.getInformationPerAccount()
+                .stream()
+                .filter(information -> BigDecimal.ZERO.compareTo(information.getSubTotal()) < 0)
+                .forEach(item -> {
+                    item.setTaxes(calculatePaymentService.calculateTaxes(item.getSubTotal(), bill.getTaxes()));
+                    final var accountTip = item.getSubTotal().divide(billSubTotal, RoundingMode.HALF_UP).multiply(totalTip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
+                    item.setTip(accountTip);
+                });
 
         return billSplitDTO;
     }
 
-    private void mapAccountTotalCostIntoBillSplitDTO(Bill bill, BillSplitDTO billSplitDTO) {
+    private void mapAccountSubTotalCostIntoBillSplitDTO(Bill bill, BillSplitDTO billSplitDTO) {
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
         final HashMap<Account, CostItemsPair> accountPairMap = new HashMap<>();
         bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
@@ -188,7 +200,7 @@ public class BillFacadeImpl implements BillFacade {
         });
         mapAllBillAccountItemsIntoHashMap(bill, accountPairMap);
         mapHashMapIntoItemsPerAccount(accountPairMap, itemsPerAccount);
-        billSplitDTO.setItemsPerAccount(itemsPerAccount);
+        billSplitDTO.setInformationPerAccount(itemsPerAccount);
     }
 
     private void mapAllBillAccountItemsIntoHashMap(Bill bill, HashMap<Account, CostItemsPair> accountPairMap) {
@@ -211,71 +223,22 @@ public class BillFacadeImpl implements BillFacade {
         accountPairMap.forEach((account, costItemsPair) -> {
             final var itemSplitDTO = new ItemAssociationSplitDTO();
             itemSplitDTO.setAccount(accountMapper.toDTO(account));
-            itemSplitDTO.setCost(costItemsPair.getCost());
+            itemSplitDTO.setSubTotal(costItemsPair.getCost().setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
             itemSplitDTO.setItems(costItemsPair.getItemList());
             itemsPerAccount.add(itemSplitDTO);
         });
     }
 
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
     private void mapAccountItemIntoHashMap(Item item, AccountItem accountItem, HashMap<Account, CostItemsPair> accountPairMap) {
         final Account thisAccount = accountItem.getAccount();
         final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
-        final BigDecimal itemPercentage = accountItem.getPercentage();
+        final BigDecimal itemPercentage = accountItem.getPercentage().setScale(CalculatePaymentService.PERCENT_SCALE, RoundingMode.HALF_UP);
         itemPercentageSplitDTO.setPercentage(itemPercentage);
 
-        final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR));
+        final BigDecimal itemCostForAccount = item.getCost().multiply(itemPercentage.divide(PERCENTAGE_DIVISOR, RoundingMode.HALF_UP));
         final BigDecimal newAccountTotalCost = accountPairMap.get(thisAccount).getCost().add(itemCostForAccount);
         accountPairMap.get(thisAccount).setCost(newAccountTotalCost);
         accountPairMap.get(thisAccount).getItemList().add(itemPercentageSplitDTO);
-    }
-
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private BigDecimal calculateTip(final Bill bill) {
-        final BigDecimal subTotal = bill.getItems().stream().map(Item::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        final BigDecimal tipAmount = Optional.ofNullable(bill.getTipAmount()).orElse(BigDecimal.ZERO);
-
-        final BigDecimal tipPercentAmount = Optional.ofNullable(bill.getTipPercent())
-                .map(tipPercent -> tipPercent.divide(PERCENTAGE_DIVISOR))
-                .map(subTotal::multiply)
-                .orElse(BigDecimal.ZERO);
-
-        return tipAmount.add(tipPercentAmount);
-    }
-
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private BigDecimal calculateTip(final Bill bill, BigDecimal total) {
-        final BigDecimal tipAmount = Optional.ofNullable(bill.getTipAmount()).orElse(BigDecimal.ZERO);
-
-        final BigDecimal tipPercentAmount = Optional.ofNullable(bill.getTipPercent())
-                .map(tipPercent -> tipPercent.divide(PERCENTAGE_DIVISOR))
-                .map(total::multiply)
-                .orElse(BigDecimal.ZERO);
-
-        return tipAmount.add(tipPercentAmount);
-    }
-
-    @SuppressWarnings("BigDecimalMethodWithoutRoundingCalled")
-    private BigDecimal calculateTaxes(final Bill bill, final BigDecimal subTotal) {
-
-        final var total = bill.getTaxes()
-                .stream()
-                .map(Tax::getPercentage)
-                .map(taxPercent -> taxPercent.divide(PERCENTAGE_DIVISOR)
-                        .add(BigDecimal.ONE)).reduce(subTotal, BigDecimal::multiply);
-
-        return total.subtract(subTotal);
-
-    }
-
-    private BigDecimal calculateBalance(final Bill bill) {
-        final BigDecimal subTotal = bill.getItems().stream().map(Item::getCost).reduce(BigDecimal.ZERO, BigDecimal::add);
-        final var taxes = calculateTaxes(bill, subTotal);
-        final var total = subTotal.add(taxes);
-        final BigDecimal tipTotal = calculateTip(bill, total);
-
-        return total.add(tipTotal).setScale(2, RoundingMode.HALF_UP);
     }
 
 

@@ -2,6 +2,7 @@ package proj.kedabra.billsnap.config;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -60,7 +61,7 @@ public class LogAspectConfiguration {
     private final boolean isDev;
 
     @Autowired
-    public LogAspectConfiguration(final Environment env){
+    public LogAspectConfiguration(final Environment env) {
         isDev = Optional.ofNullable(env.getProperty("spring.active.profiles")).map(s -> s.contains("dev")).orElse(false);
     }
 
@@ -69,7 +70,7 @@ public class LogAspectConfiguration {
         final var signature = (MethodSignature) proceedingJoinPoint.getSignature();
         final var methodName = signature.toShortString();
         final String methodType = this.getMethodType(signature.getMethod().getDeclaringClass());
-        final Class returnType = signature.getReturnType();
+        final Class<?> returnType = signature.getReturnType();
         final String formattedArgsMsg = getFormattedArgsMsg(proceedingJoinPoint);
         final String entryMessage = getEntryMessage(formattedArgsMsg, methodName, returnType, methodType);
 
@@ -101,7 +102,7 @@ public class LogAspectConfiguration {
 
     }
 
-    private String getEntryMessage(final String formattedMsgArgs, final String methodName, final Class returnType, final String methodType) {
+    private String getEntryMessage(final String formattedMsgArgs, final String methodName, final Class<?> returnType, final String methodType) {
         return methodType +
                 SEPARATOR +
                 methodName +
@@ -113,7 +114,7 @@ public class LogAspectConfiguration {
                 SEPARATOR +
                 formattedMsgArgs;
     }
-    private String createExitMessage(final String methodName, final String returnObjectMessage, final long executionTime, final String methodType, final Class returnType) {
+    private String createExitMessage(final String methodName, final String returnObjectMessage, final long executionTime, final String methodType, final Class<?> returnType) {
         return methodType +
                 SEPARATOR +
                 methodName +
@@ -130,7 +131,7 @@ public class LogAspectConfiguration {
                 + " ms";
     }
 
-    private String getMethodType(final Class declaringClass) {
+    private String getMethodType(final Class<?> declaringClass) {
         if (declaringClass.getAnnotation(Service.class) != null) {
             return SERVICE;
         }
@@ -154,7 +155,7 @@ public class LogAspectConfiguration {
 
     }
 
-    private String getFormattedReturnObjectMessage(final Class returnType, Object returnObject) {
+    private String getFormattedReturnObjectMessage(final Class<?> returnType, Object returnObject) {
         String formattedReturnObjectMessage;
 
         if (returnType.equals(Void.class)) {
@@ -169,7 +170,7 @@ public class LogAspectConfiguration {
     }
 
     private boolean shouldObfuscateArgs(final MethodSignature signature) {
-        if(!isDev){
+        if (!isDev) {
             Method method = signature.getMethod();
             return Optional.ofNullable(method.getAnnotation(ObfuscateArgs.class)).isPresent();
         }
@@ -195,6 +196,8 @@ public class LogAspectConfiguration {
                     .collect(Collectors.joining(","));
         }
         return Arrays.stream(args)
+                .map(argument -> (argument == null) ?
+                        Objects.toString(null) : argument)
                 .filter(Predicate.not(
                         arg -> BindingResult.class.isAssignableFrom(arg.getClass())))
                 .map(this::formatObject)

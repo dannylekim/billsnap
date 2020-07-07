@@ -6,11 +6,13 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.presentation.deserializers.MoneySerializer;
 
 @Data
 public class BillResource implements Serializable {
@@ -51,6 +53,7 @@ public class BillResource implements Serializable {
     private List<AccountStatusResource> accountsList;
 
     @Schema(description = "the total amount of the bill")
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal balance;
 
 }

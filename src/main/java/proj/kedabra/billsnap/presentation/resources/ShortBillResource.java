@@ -3,10 +3,13 @@ package proj.kedabra.billsnap.presentation.resources;
 import java.io.Serializable;
 import java.math.BigDecimal;
 
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.presentation.deserializers.MoneySerializer;
 
 @Data
 public class ShortBillResource implements Serializable {
@@ -24,6 +27,7 @@ public class ShortBillResource implements Serializable {
     private String category;
 
     @Schema(description = "the total amount of the bill")
+    @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal balance;
 
 }

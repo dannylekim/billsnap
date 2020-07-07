@@ -37,7 +37,6 @@ public final class BillEntityFixture {
         bill.setSplitBy(SplitByEnum.ITEM);
         bill.setName("default bill");
         bill.setTipAmount(BigDecimal.TEN);
-        bill.setTipPercent(BigDecimal.ZERO);
         bill.setItems(Stream.of(item).collect(Collectors.toSet()));
         bill.setId(5000L);
 
@@ -135,6 +134,7 @@ public final class BillEntityFixture {
 
         return bill;
     }
+
     private static AccountBill getAccountBill(Bill bill, Account account) {
         final var accountBill = AccountBillEntityFixture.getDefault();
         accountBill.setBill(bill);

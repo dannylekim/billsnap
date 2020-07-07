@@ -582,6 +582,8 @@ class BillServiceImplTest {
 
         final Bill bill = BillEntityFixture.getDefault();
         bill.setAccounts(Set.of(accountBill));
+        bill.setTipAmount(null);
+        bill.setTipPercent(BigDecimal.ZERO);
 
         final Item item1 = ItemEntityFixture.getDefault();
         item1.setId(9999L);
