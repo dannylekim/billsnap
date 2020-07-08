@@ -16,7 +16,7 @@ public interface BillFacade {
 
     List<BillSplitDTO> getAllBillsByEmail(String email);
 
-    BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO);
+    BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO, String responsibleEmail);
 
     PendingRegisteredBillSplitDTO inviteRegisteredToBill(Long billId, String userEmail, List<String> accounts);
 

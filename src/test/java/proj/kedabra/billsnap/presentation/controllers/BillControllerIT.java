@@ -783,16 +783,36 @@ class BillControllerIT {
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
 
+    @Test
+    @DisplayName("Should return exception if responsible is not the caller for associate bill")
+    void shouldReturnExceptionIfResponsibleIsNotCallerForAssociateBill() throws Exception {
+        //Given
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        final var user = UserFixture.getDefault();
+
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
+
+        //When/Then
+        final MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 403);
+        final String content = result.getResponse().getContentAsString();
+        final ApiError apiError = mapper.readValue(content, ApiError.class);
+
+        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
     @ParameterizedTest
     @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
     @DisplayName("Should return exception if Bill is not in Open status for Associate Bills")
     void shouldReturnExceptionIfBillIsNotOpenForAssociateBills(BillStatusEnum status) throws Exception {
         //Given
-        final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         final Bill billById = billRepository.getBillById(associateBillResource.getId());
         billById.setStatus(status);
+        final var user = UserFixture.getDefaultWithEmailAndPassword(billById.getResponsible().getEmail(), "somepass");
+
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+
 
         //When/Then
         final MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 405);

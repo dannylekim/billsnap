@@ -273,11 +273,24 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(dto.getId()).orElseThrow();
         final var item = bill.getItems().iterator().next();
         dto.getItems().get(0).getItems().get(0).setPercentage(new BigDecimal(10));
+        final var responsibleEmail = bill.getResponsible().getEmail();
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(10)));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if responsible is not the caller for associate bill")
+    void shouldThrowExceptionIfResponsibleIsNotTheCallerForAssociateBill() {
+        //Given
+        final var dto = AssociateBillDTOFixture.getDefault();
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, "notResponsibleEmail@email.com"))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
     @ParameterizedTest
@@ -288,10 +301,12 @@ class BillFacadeImplIT {
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = billRepository.findById(dto.getId()).orElseThrow();
         bill.setStatus(status);
+        final var responsibleEmail = bill.getResponsible().getEmail();
+
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
@@ -307,9 +322,12 @@ class BillFacadeImplIT {
         itemAssociationDTO.setItems(List.of(ItemPercentageDTOFixture.getDefaultWithId(1012L)));
         associateBillDTO.setItems(List.of(itemAssociationDTO));
 
+        final var existentBill = billRepository.getBillById(2000L);
+        final var responsibleEmail = existentBill.getResponsible().getEmail();
+
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO, responsibleEmail))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(List.of(email).toString()));
 
     }
@@ -323,7 +341,7 @@ class BillFacadeImplIT {
         final var item = bill.getItems().iterator().next();
 
         //When
-        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
+        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto, bill.getResponsible().getEmail());
 
         //Then
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);

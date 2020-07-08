@@ -130,7 +130,7 @@ public class BillController {
         }
 
         final AssociateBillDTO associateBill = billMapper.toAssociateBillDTO(associateBillResource);
-        final BillSplitDTO billSplit = billFacade.associateAccountsToBill(associateBill);
+        final BillSplitDTO billSplit = billFacade.associateAccountsToBill(associateBill, principal.getName());
         return billMapper.toResource(billSplit);
     }
 
