@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -22,7 +23,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
@@ -40,6 +40,7 @@ import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.presentation.resources.StartBillResource;
+import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
 public class BillController {
@@ -56,12 +57,10 @@ public class BillController {
 
     @PostMapping("/bills")
     @Operation(summary = "Add personal bill", description = "Add a personal bill to a user account.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = BillResource.class)), description = "Successfully added a bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot create bill with wrong inputs."),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-    })
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = BillResource.class)), description = "Successfully added a bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot create bill with wrong inputs.")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.CREATED)
     public BillResource createBill(@Parameter(required = true, name = "Bill Details", description = "Minimum bill details")
                                    @RequestBody @Valid final BillCreationResource billCreationResource,
@@ -79,11 +78,10 @@ public class BillController {
 
     @GetMapping("/bills")
     @Operation(summary = "Get all bills", description = "Get all bills associated to an account")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Successfully retrieved all bills!"),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-    })
+    @Cacheable(value = CacheNames.BILLS, key = "#principal.name")
+    @ApiResponse(responseCode = "200", description = "Successfully retrieved all bills!")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     public List<ShortBillResource> getAllBills(@AuthenticationPrincipal final Principal principal) {
 
@@ -94,12 +92,10 @@ public class BillController {
 
     @GetMapping("/bills/{billId}")
     @Operation(summary = "Get detailed bill", description = "Get detailed bill associated to account")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully retrieved detailed bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "No bill with that id exists"),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Access is unauthorized!"),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account does not have the bill specified."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully retrieved detailed bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "No bill with that id exists")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Access is unauthorized!")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account does not have the bill specified.")
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource getDetailedBill(
             @AuthenticationPrincipal final Principal principal,
@@ -111,13 +107,11 @@ public class BillController {
 
     @PutMapping("/bills")
     @Operation(summary = "Associate users/modify bill", description = "Modify bill's users/items and user-item association")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully modified bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Error modifying bill"),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-            @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully modified bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Error modifying bill")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
+    @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource modifyBill(@Parameter(required = true, name = "Bill modification details", description = "Minimum bill modification details")
                                         @RequestBody @Valid final AssociateBillResource associateBillResource,
@@ -135,13 +129,11 @@ public class BillController {
 
     @PostMapping("bills/{billId}/accounts")
     @Operation(summary = "Invite registered users to bill", description = "Sends notification invite to all registered users in given list")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully invited Registered users to bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Error inviting registered users to bill."),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-            @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully invited Registered users to bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Error inviting registered users to bill.")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
+    @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource inviteRegisteredToBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                                     @PathVariable("billId") final Long billId,
@@ -159,13 +151,11 @@ public class BillController {
 
     @PostMapping("bills/start")
     @Operation(summary = "Start a bill", description = "Blocks all modifications on started bill")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully started bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Bill doesn't exist"),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-            @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully started bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Bill doesn't exist")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
+    @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource startBill(@Parameter(required = true, name = "id of bill", description = "id of bill")
                                        @RequestBody @Valid final StartBillResource startBillResource,
@@ -181,15 +171,13 @@ public class BillController {
 
     @PutMapping("bills/{billId}")
     @Operation(summary = "Edit bill", description = "Edit an unstarted bill")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully edited bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Bill doesn't exist. \t\n" +
-                    "Bill already started. \t\n" +
-                    "Item doesn't exists. \t\n" +
-                    "Account does not have the bill specified. \t\n" +
-                    "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The user making the request is not the Bill responsible."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully edited bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Bill doesn't exist. \t\n" +
+            "Bill already started. \t\n" +
+            "Item doesn't exists. \t\n" +
+            "Account does not have the bill specified. \t\n" +
+            "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The user making the request is not the Bill responsible.")
     @ResponseStatus(HttpStatus.OK)
     public BillSplitResource editBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                       @PathVariable("billId") final Long billId,

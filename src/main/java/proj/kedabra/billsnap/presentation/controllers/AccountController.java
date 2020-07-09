@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirements;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
@@ -49,12 +48,10 @@ public class AccountController {
 
     @PostMapping("/register")
     @Operation(summary = "Register Account", description = "Register an account in the application using minimum details")
-    @ApiResponses({
-            @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully registered an account!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot register account with wrong inputs."),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-    })
+    @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully registered an account!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot register account with wrong inputs.")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.CREATED)
     @ObfuscateArgs
     @SecurityRequirements
@@ -76,12 +73,10 @@ public class AccountController {
     @PostMapping(path = "/login", consumes = "application/json")
     @Operation(summary = "Login", description = "Login to the application")
     @SecurityRequirements
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseResource.class)), description = "Successfully logged in."),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with invalid inputs."),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with incorrect credentials."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginResponseResource.class)), description = "Successfully logged in.")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with invalid inputs.")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot login with incorrect credentials.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     public LoginResponseResource loginAccount(@Parameter(required = true, name = "Login Details", description = "Valid login details")
                                               @RequestBody @Valid LoginResource loginResource) {
@@ -90,11 +85,9 @@ public class AccountController {
 
     @GetMapping(path = "/account")
     @Operation(summary = "Get account information", description = "Get account information")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist"),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     public AccountResource getAccount(@AuthenticationPrincipal final Principal principal) {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));

@@ -18,7 +18,6 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import proj.kedabra.billsnap.business.dto.PaymentInformationDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
@@ -39,12 +38,10 @@ public class ResolveBillController {
 
     @PostMapping
     @Operation(summary = "Add a bill", description = "Pay a personal bill.")
-    @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RemainingPaymentResource.class)), description = "You've successfully paid a bill!"),
-            @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot pay a bill with wrong inputs."),
-            @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
-            @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
-    })
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RemainingPaymentResource.class)), description = "You've successfully paid a bill!")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot pay a bill with wrong inputs.")
+    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
+    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     public RemainingPaymentResource payBill(@RequestBody @Valid @Parameter(required = true, name = "Payment details", description = "Amount paid to bill") final PaymentResource payment,
                                             final BindingResult bindingResult,
