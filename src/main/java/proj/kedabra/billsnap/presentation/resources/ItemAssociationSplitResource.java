@@ -9,6 +9,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import lombok.Data;
 
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
+
 import proj.kedabra.billsnap.business.service.CalculatePaymentService;
 import proj.kedabra.billsnap.presentation.deserializers.MoneySerializer;
 
@@ -32,4 +35,8 @@ public class ItemAssociationSplitResource implements Serializable {
     public BigDecimal getTotal() {
         return subTotal.add(taxes).add(tip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
     }
+
+    private InvitationStatusEnum invitationStatus;
+
+    private PaymentStatusEnum paidStatus;
 }

@@ -12,6 +12,7 @@ import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 
 public final class BillEntityFixture {
@@ -140,6 +141,7 @@ public final class BillEntityFixture {
         accountBill.setBill(bill);
         accountBill.setAccount(account);
         accountBill.setPercentage(BigDecimal.ZERO);
+        accountBill.setStatus(InvitationStatusEnum.ACCEPTED);
         return accountBill;
     }
 }

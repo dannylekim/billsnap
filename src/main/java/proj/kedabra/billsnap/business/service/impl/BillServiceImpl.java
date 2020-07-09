@@ -44,6 +44,7 @@ import proj.kedabra.billsnap.business.service.ItemService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.SplitByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
@@ -137,6 +138,7 @@ public class BillServiceImpl implements BillService {
         verifyUserIsBillResponsible(bill, userEmail);
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
+        bill.getAccounts().stream().filter(ab -> ab.getStatus() == InvitationStatusEnum.ACCEPTED).forEach(ab -> ab.setPaymentStatus(PaymentStatusEnum.IN_PROGRESS));
         return bill;
     }
 

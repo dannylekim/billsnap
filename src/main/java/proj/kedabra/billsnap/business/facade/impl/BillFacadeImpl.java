@@ -15,11 +15,10 @@ import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
-import proj.kedabra.billsnap.business.dto.CostItemsPair;
+import proj.kedabra.billsnap.business.dto.DetailedAccountBillInformation;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
-import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
@@ -99,7 +98,7 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public PendingRegisteredBillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
+    public BillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
         final var bill = billService.getBill(billId);
         billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         billService.verifyUserIsBillResponsible(bill, userEmail);
@@ -115,14 +114,8 @@ public class BillFacadeImpl implements BillFacade {
 
         billService.inviteRegisteredToBill(bill, accountsList);
 
-        final var pendingAccounts = bill.getAccounts().stream()
-                .filter(a -> a.getStatus().equals(InvitationStatusEnum.PENDING))
-                .map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
 
-        final var billSplitDTO = getBillSplitDTO(bill);
-        final var pendingRegisteredBillSplitDTO = billMapper.toPendingRegisteredBillSplitDTO(billSplitDTO);
-        pendingRegisteredBillSplitDTO.setPendingAccounts(pendingAccounts);
-        return pendingRegisteredBillSplitDTO;
+        return getBillSplitDTO(bill);
     }
 
     @Override
@@ -194,20 +187,23 @@ public class BillFacadeImpl implements BillFacade {
 
     private void mapAccountSubTotalCostIntoBillSplitDTO(Bill bill, BillSplitDTO billSplitDTO) {
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
-        final HashMap<Account, CostItemsPair> accountPairMap = new HashMap<>();
-        bill.getAccounts().stream().map(AccountBill::getAccount).forEach(account -> {
-            final var costItemsPair = new CostItemsPair(BigDecimal.ZERO, new ArrayList<>());
-            accountPairMap.put(account, costItemsPair);
+        final HashMap<Account, DetailedAccountBillInformation> accountPairMap = new HashMap<>();
+        bill.getAccounts().forEach(accountBill -> {
+            final var costItemsPair = new DetailedAccountBillInformation(BigDecimal.ZERO, new ArrayList<>(), accountBill.getStatus(), accountBill.getPaymentStatus());
+            accountPairMap.put(accountBill.getAccount(), costItemsPair);
         });
         mapAllBillAccountItemsIntoHashMap(bill, accountPairMap);
-        mapHashMapIntoItemsPerAccount(accountPairMap, itemsPerAccount);
+        mapHashMapIntoItemAssociation(accountPairMap, itemsPerAccount);
         billSplitDTO.setInformationPerAccount(itemsPerAccount);
     }
 
-    private void mapAllBillAccountItemsIntoHashMap(Bill bill, HashMap<Account, CostItemsPair> accountPairMap) {
+    private void mapAllBillAccountItemsIntoHashMap(Bill bill, HashMap<Account, DetailedAccountBillInformation> accountPairMap) {
         bill.getItems().forEach(item -> {
             final BigDecimal percentageSum = item.getAccounts().stream()
-                    .peek(accountItem -> mapAccountItemIntoHashMap(item, accountItem, accountPairMap))
+                    .map(accountItem -> {
+                        mapAccountItemIntoHashMap(item, accountItem, accountPairMap);
+                        return accountItem;
+                    })
                     .map(AccountItem::getPercentage).reduce(BigDecimal.ZERO, BigDecimal::add);
 
             verifyItemPercentageSum(item, percentageSum);
@@ -220,17 +216,24 @@ public class BillFacadeImpl implements BillFacade {
         }
     }
 
-    private void mapHashMapIntoItemsPerAccount(HashMap<Account, CostItemsPair> accountPairMap, List<ItemAssociationSplitDTO> itemsPerAccount) {
-        accountPairMap.forEach((account, costItemsPair) -> {
+    private void mapHashMapIntoItemAssociation(HashMap<Account, DetailedAccountBillInformation> accountPairMap, List<ItemAssociationSplitDTO> itemsPerAccount) {
+        accountPairMap.forEach((account, detailedAccountBillInformation) -> {
             final var itemSplitDTO = new ItemAssociationSplitDTO();
             itemSplitDTO.setAccount(accountMapper.toDTO(account));
-            itemSplitDTO.setSubTotal(costItemsPair.getCost().setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
-            itemSplitDTO.setItems(costItemsPair.getItemList());
+            itemSplitDTO.setInvitationStatus(detailedAccountBillInformation.getInvitationStatus());
+            itemSplitDTO.setPaidStatus(detailedAccountBillInformation.getPaidStatus());
+
+            if (itemSplitDTO.getInvitationStatus() == InvitationStatusEnum.ACCEPTED) {
+                itemSplitDTO.setSubTotal(detailedAccountBillInformation.getCost().setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
+                itemSplitDTO.setItems(detailedAccountBillInformation.getItemList());
+            }
+
             itemsPerAccount.add(itemSplitDTO);
+
         });
     }
 
-    private void mapAccountItemIntoHashMap(Item item, AccountItem accountItem, HashMap<Account, CostItemsPair> accountPairMap) {
+    private void mapAccountItemIntoHashMap(Item item, AccountItem accountItem, HashMap<Account, DetailedAccountBillInformation> accountPairMap) {
         final Account thisAccount = accountItem.getAccount();
         final ItemPercentageSplitDTO itemPercentageSplitDTO = itemMapper.toItemPercentageSplitDTO(item);
         final BigDecimal itemPercentage = accountItem.getPercentage().setScale(CalculatePaymentService.PERCENT_SCALE, RoundingMode.HALF_UP);
