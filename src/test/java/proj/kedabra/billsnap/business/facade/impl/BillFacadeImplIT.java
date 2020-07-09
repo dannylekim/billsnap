@@ -13,7 +13,6 @@ import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -29,6 +28,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
@@ -36,7 +36,6 @@ import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
-import proj.kedabra.billsnap.business.dto.PendingRegisteredBillSplitDTO;
 import proj.kedabra.billsnap.business.dto.TaxDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.exception.FunctionalWorkflowException;
@@ -244,11 +243,11 @@ class BillFacadeImplIT {
                 .collect(Collectors.toList());
 
         if (allBillsByEmail.get(0).getId().equals(1000L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0), null);
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1), null);
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
         } else if (allBillsByEmail.get(0).getId().equals(1001L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0), null);
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1), null);
+            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
+            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
         }
     }
 
@@ -326,7 +325,7 @@ class BillFacadeImplIT {
         final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
 
         //Then
-        verifyBillSplitDTOToBill(returnBillSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
 
         assertThat(returnBillSplitDTO.getTotalTip()).isEqualTo(bill.getTipAmount());
         assertThat(returnBillSplitDTO.getInformationPerAccount().get(0).getSubTotal()).isEqualTo(item.getCost());
@@ -439,8 +438,8 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return mapped PendingRegisteredBillSplitDTO when Invite Registered Call with one new User")
-    void shouldReturnMappedPendingRegisteredBillSplitDTOInInviteRegistered() {
+    @DisplayName("Should return mapped BillSplitDTO when Invite Registered Call with one new User")
+    void shouldReturnMappedBillSplitDTOInInviteRegisteredWithPendingAccounts() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var billResponsible = "test@email.com";
@@ -450,14 +449,14 @@ class BillFacadeImplIT {
         inviteRegisteredResource.setAccounts(accountsList);
 
         //When
-        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
+        final var billSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
 
         //Then
         final var bill = billRepository.getBillById(existentBillId);
-        verifyBillSplitDTOToBill(null, bill, pendingRegisteredBillSplitDTO);
-        final List<String> dtoPendingAccounts = pendingRegisteredBillSplitDTO.getPendingAccounts();
-        assertThat(dtoPendingAccounts.size()).isEqualTo(1);
-        assertThat(dtoPendingAccounts.containsAll(accountsList)).isTrue();
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
+        final var informationPerAccount = billSplitDTO.getInformationPerAccount();
+        assertThat(informationPerAccount.stream().map(ItemAssociationSplitDTO::getAccount).map(AccountDTO::getEmail).collect(Collectors.toList())).containsAll(accountsList);
+        assertThat(informationPerAccount.stream().filter(info -> info.getAccount().getEmail().equals(accountNotInBill)).map(ItemAssociationSplitDTO::getInvitationStatus).collect(Collectors.toList())).containsExactly(InvitationStatusEnum.PENDING);
     }
 
     @ParameterizedTest
@@ -490,7 +489,7 @@ class BillFacadeImplIT {
 
         //Then
         final var bill = billRepository.getBillById(billId);
-        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
     }
 
     @Test
@@ -505,7 +504,7 @@ class BillFacadeImplIT {
 
         //Then
         final var bill = billRepository.getBillById(billId);
-        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
     }
 
     @Test
@@ -583,7 +582,7 @@ class BillFacadeImplIT {
         final BillSplitDTO billSplitDTO = billFacade.getBillSplitDTO(bill);
 
         //Then
-        verifyBillSplitDTOToBill(billSplitDTO, bill, null);
+        verifyBillSplitDTOToBill(billSplitDTO, bill);
     }
 
     @Test
@@ -860,6 +859,7 @@ class BillFacadeImplIT {
     void shouldReturnAccurateInformationsPerAccount() {
         //Given
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getAccounts().forEach(ab -> ab.setStatus(InvitationStatusEnum.ACCEPTED));
 
         //When
         final var billSplitDTO = billFacade.getBillSplitDTO(bill);
@@ -869,33 +869,78 @@ class BillFacadeImplIT {
             assertThat(info.getSubTotal()).isEqualByComparingTo(new BigDecimal("2.00"));
             assertThat(info.getTaxes()).isEqualByComparingTo(new BigDecimal("0.20"));
             assertThat(info.getTip()).isEqualByComparingTo(new BigDecimal("5.00"));
+            assertThat(info.getInvitationStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
+            assertThat(info.getPaidStatus()).isNull();
+        });
+    }
+
+    @Test
+    @DisplayName("Should return informations per account accurate to the specified account NOT ACCEPTED")
+    void shouldReturnAccurateInformationsPerAccountNotAccepted() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getAccounts().forEach(ab -> ab.setStatus(InvitationStatusEnum.PENDING));
+
+        //When
+        final var billSplitDTO = billFacade.getBillSplitDTO(bill);
+
+        //Then
+        billSplitDTO.getInformationPerAccount().forEach(info -> {
+            assertThat(info.getSubTotal()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTaxes()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTip()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getInvitationStatus()).isEqualTo(InvitationStatusEnum.PENDING);
+            assertThat(info.getPaidStatus()).isNull();
+        });
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = InvitationStatusEnum.class, names = "ACCEPTED", mode = EnumSource.Mode.EXCLUDE)
+    @DisplayName("Should return informations not accepted")
+    void shouldReturnAccurateDeclinedInformationsPerAccount(InvitationStatusEnum invitationStatus) {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        bill.getAccounts().forEach(ab -> {
+            ab.setStatus(invitationStatus);
+            // normally when declined or pending, payment status is null
+            ab.setPaymentStatus(null);
         });
 
 
+        //When
+        final var billSplitDTO = billFacade.getBillSplitDTO(bill);
+
+        //Then
+        billSplitDTO.getInformationPerAccount().forEach(info -> {
+            assertThat(info.getSubTotal()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTaxes()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getTip()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(info.getInvitationStatus()).isEqualTo(invitationStatus);
+            assertThat(info.getItems()).isEmpty();
+            assertThat(info.getPaidStatus()).isNull();
+        });
     }
 
 
-    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill, PendingRegisteredBillSplitDTO pendingRegisteredBillSplitDTO) {
-        var dto = Optional.ofNullable(pendingRegisteredBillSplitDTO).isPresent() ? pendingRegisteredBillSplitDTO : billSplitDTO;
-
+    private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {
         final Account billCreatorAccount = bill.getAccounts().stream().map(AccountBill::getAccount)
                 .filter(acc -> acc.equals(bill.getCreator()))
                 .iterator().next();
-        assertThat(dto.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(dto.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
-        assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
-        assertThat(dto.getId()).isEqualTo(bill.getId());
-        assertThat(dto.getName()).isEqualTo(bill.getName());
-        assertThat(dto.getStatus()).isEqualTo(bill.getStatus());
-        assertThat(dto.getCategory()).isEqualTo(bill.getCategory());
-        assertThat(dto.getCompany()).isEqualTo(bill.getCompany());
-        if (dto.getUpdated() != null) {
-            assertThat(dto.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
+        assertThat(billSplitDTO.getCreator().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(billSplitDTO.getResponsible().getId()).isEqualTo(billCreatorAccount.getId());
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
+        assertThat(billSplitDTO.getId()).isEqualTo(bill.getId());
+        assertThat(billSplitDTO.getName()).isEqualTo(bill.getName());
+        assertThat(billSplitDTO.getStatus()).isEqualTo(bill.getStatus());
+        assertThat(billSplitDTO.getCategory()).isEqualTo(bill.getCategory());
+        assertThat(billSplitDTO.getCompany()).isEqualTo(bill.getCompany());
+        if (billSplitDTO.getUpdated() != null) {
+            assertThat(billSplitDTO.getUpdated()).isCloseTo(bill.getUpdated(), within(200, ChronoUnit.MILLIS));
         }
-        if (dto.getCreated() != null) {
-            assertThat(dto.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
+        if (billSplitDTO.getCreated() != null) {
+            assertThat(billSplitDTO.getCreated()).isCloseTo(bill.getCreated(), within(200, ChronoUnit.MILLIS));
         }
-        final List<ItemAssociationSplitDTO> itemsPerAccount = dto.getInformationPerAccount();
+        final List<ItemAssociationSplitDTO> itemsPerAccount = billSplitDTO.getInformationPerAccount();
         final Set<AccountBill> accounts = bill.getAccounts();
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
@@ -907,13 +952,13 @@ class BillFacadeImplIT {
 
             assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
             assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-            assertThat(dto.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
+            assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
             // due to the difficulty of testing the calculations here without outright copying the math from the implementation, we'll simply check for null and leave specific tests to verify the cost.
             assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
             assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
         } else {
-            assertThat(dto.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
+            assertThat(billSplitDTO.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }
 
     }

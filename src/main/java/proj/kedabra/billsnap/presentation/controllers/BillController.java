@@ -38,7 +38,6 @@ import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
-import proj.kedabra.billsnap.presentation.resources.PendingRegisteredBillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 
@@ -137,19 +136,19 @@ public class BillController {
     @PostMapping("bills/{billId}/accounts")
     @Operation(summary = "Invite registered users to bill", description = "Sends notification invite to all registered users in given list")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = PendingRegisteredBillSplitResource.class)), description = "Successfully invited Registered users to bill!"),
+            @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully invited Registered users to bill!"),
             @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Error inviting registered users to bill."),
             @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource."),
             @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource."),
             @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status."),
     })
     @ResponseStatus(HttpStatus.OK)
-    public PendingRegisteredBillSplitResource inviteRegisteredToBill(@Parameter(required = true, name = "billId", description = "bill ID")
-                                                                     @PathVariable("billId") final Long billId,
-                                                                     @Parameter(required = true, name = "List of emails to invite", description = "List of emails to invite")
-                                                                     @RequestBody @Valid final InviteRegisteredResource inviteRegisteredResource,
-                                                                     final BindingResult bindingResult,
-                                                                     @AuthenticationPrincipal final Principal principal) {
+    public BillSplitResource inviteRegisteredToBill(@Parameter(required = true, name = "billId", description = "bill ID")
+                                                    @PathVariable("billId") final Long billId,
+                                                    @Parameter(required = true, name = "List of emails to invite", description = "List of emails to invite")
+                                                    @RequestBody @Valid final InviteRegisteredResource inviteRegisteredResource,
+                                                    final BindingResult bindingResult,
+                                                    @AuthenticationPrincipal final Principal principal) {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }

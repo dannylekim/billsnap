@@ -1,29 +1,23 @@
 package proj.kedabra.billsnap.business.dto;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
 import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 
+@AllArgsConstructor
 @Data
-public class ItemAssociationSplitDTO {
+public class DetailedAccountBillInformation {
 
-    private AccountDTO account;
+    private BigDecimal cost;
 
-    private List<ItemPercentageSplitDTO> items = new ArrayList<>();
-
-    private BigDecimal subTotal = BigDecimal.ZERO;
-
-    private BigDecimal tip = BigDecimal.ZERO;
-
-    private BigDecimal taxes = BigDecimal.ZERO;
+    private List<ItemPercentageSplitDTO> itemList;
 
     private InvitationStatusEnum invitationStatus;
 
     private PaymentStatusEnum paidStatus;
-
 }
