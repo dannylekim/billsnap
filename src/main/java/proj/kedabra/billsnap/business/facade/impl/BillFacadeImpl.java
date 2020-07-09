@@ -87,8 +87,9 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
+    public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO, final String responsibleEmail) {
         final var bill = billService.getBill(associateBillDTO.getId());
+        billService.verifyUserIsBillResponsible(bill, responsibleEmail);
         billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 

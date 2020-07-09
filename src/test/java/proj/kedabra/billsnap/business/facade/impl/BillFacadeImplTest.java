@@ -228,6 +228,23 @@ class BillFacadeImplTest {
     }
 
     @Test
+    @DisplayName("Should throw exception if responsible not the caller of associate bill")
+    void shouldThrowExceptionIfNotResponsibleAssociateBill() {
+        //Given bill with 1 item {name: yogurt, cost: 4}
+        final var dto = AssociateBillDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixtureGivenSplitPercentage(BigDecimal.valueOf(150));
+        final var billSplitDTO = BillSplitDTOFixture.getDefault();
+        billSplitDTO.setInformationPerAccount(null);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        doThrow(AccessForbiddenException.class).when(billService).verifyUserIsBillResponsible(any(), any());
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, "nonExistent@email.com"));
+    }
+
+    @Test
     @DisplayName("Should throw exception if bill items percentage split does not add up to hundred")
     void shouldThrowExceptionIfItemPercentagesDoNotAddToHundred() {
         //Given bill with 1 item {name: yogurt, cost: 4}
@@ -237,6 +254,7 @@ class BillFacadeImplTest {
         final var accountPercentageSplit = BigDecimal.valueOf(50);
         final var billSplitDTO = BillSplitDTOFixture.getDefault();
         billSplitDTO.setInformationPerAccount(null);
+        final var responsibleEmail = bill.getResponsible().getEmail();
 
         when(billService.associateItemsToAccountBill(any())).thenReturn(bill);
         when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
@@ -251,9 +269,11 @@ class BillFacadeImplTest {
                     return itemDTO;
                 }
         );
+
+
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(300)));
     }
 
@@ -294,7 +314,7 @@ class BillFacadeImplTest {
         );
 
         //When
-        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
+        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto, bill.getResponsible().getEmail());
 
         //Then
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
