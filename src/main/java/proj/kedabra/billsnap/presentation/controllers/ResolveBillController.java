@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -25,6 +26,7 @@ import proj.kedabra.billsnap.business.facade.PaymentFacade;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.PaymentResource;
 import proj.kedabra.billsnap.presentation.resources.RemainingPaymentResource;
+import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
 @RequestMapping("/resolve/bills")
@@ -36,6 +38,7 @@ public class ResolveBillController {
         this.paymentFacade = paymentFacade;
     }
 
+    @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PostMapping
     @Operation(summary = "Add a bill", description = "Pay a personal bill.")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RemainingPaymentResource.class)), description = "You've successfully paid a bill!")

@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,6 +21,7 @@ import proj.kedabra.billsnap.business.facade.PaymentFacade;
 import proj.kedabra.billsnap.business.mapper.PaymentMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.PaymentOwedResource;
+import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
 public class PaymentController {
@@ -33,6 +35,7 @@ public class PaymentController {
         this.paymentMapper = paymentMapper;
     }
 
+    @Cacheable(value = CacheNames.PAYMENTS, key = "#principal.name")
     @GetMapping("/payments")
     @Operation(summary = "Get amounts", description = "Get all amounts owed by account")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved all amounts owed!")

@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
@@ -29,6 +30,7 @@ import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
+import proj.kedabra.billsnap.utils.CacheNames;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 
@@ -83,6 +85,7 @@ public class AccountController {
         throw new IllegalStateException("loginAccount() shouldn't be called from Controller: it is implemented by custom AuthenticationFilter.");
     }
 
+    @Cacheable(value = CacheNames.PROFILE, key = "#principal.name")
     @GetMapping(path = "/account")
     @Operation(summary = "Get account information", description = "Get account information")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")

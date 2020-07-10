@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -54,7 +56,7 @@ public class BillController {
         this.billFacade = billFacade;
     }
 
-
+    @CacheEvict(value = {CacheNames.BILL, CacheNames.PAYMENTS}, key = "#principal.name")
     @PostMapping("/bills")
     @Operation(summary = "Add personal bill", description = "Add a personal bill to a user account.")
     @ApiResponse(responseCode = "201", content = @Content(schema = @Schema(implementation = BillResource.class)), description = "Successfully added a bill!")
@@ -76,9 +78,9 @@ public class BillController {
         return billMapper.toResource(createdBill);
     }
 
+    @Cacheable(value = CacheNames.BILLS, key = "#principal.name")
     @GetMapping("/bills")
     @Operation(summary = "Get all bills", description = "Get all bills associated to an account")
-    @Cacheable(value = CacheNames.BILLS, key = "#principal.name")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved all bills!")
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
@@ -90,6 +92,7 @@ public class BillController {
 
     }
 
+    @Cacheable(value = CacheNames.BILL, key = "#billId + #principal.name")
     @GetMapping("/bills/{billId}")
     @Operation(summary = "Get detailed bill", description = "Get detailed bill associated to account")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully retrieved detailed bill!")
@@ -105,6 +108,8 @@ public class BillController {
         return billMapper.toResource(detailedBill);
     }
 
+    @CachePut(value = CacheNames.BILL, key = "#associateBillResource.id + #principal.name")
+    @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PutMapping("/bills")
     @Operation(summary = "Associate users/modify bill", description = "Modify bill's users/items and user-item association")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully modified bill!")
@@ -127,6 +132,7 @@ public class BillController {
         return billMapper.toResource(billSplit);
     }
 
+    @CachePut(value = CacheNames.BILL, key = "#billId + #principal.name")
     @PostMapping("bills/{billId}/accounts")
     @Operation(summary = "Invite registered users to bill", description = "Sends notification invite to all registered users in given list")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully invited Registered users to bill!")
@@ -149,6 +155,8 @@ public class BillController {
         return billMapper.toResource(pendingRegisteredBillSplitDTO);
     }
 
+    @CachePut(value = CacheNames.BILL, key = "#startBillResource.id + #principal.name")
+    @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PostMapping("bills/start")
     @Operation(summary = "Start a bill", description = "Blocks all modifications on started bill")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully started bill!")
@@ -169,6 +177,8 @@ public class BillController {
         return billMapper.toResource(billSplitDTO);
     }
 
+    @CachePut(value = CacheNames.BILL, key = "#billId + #principal.name")
+    @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PutMapping("bills/{billId}")
     @Operation(summary = "Edit bill", description = "Edit an unstarted bill")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully edited bill!")
