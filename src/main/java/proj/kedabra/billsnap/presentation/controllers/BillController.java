@@ -43,7 +43,9 @@ import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
+import proj.kedabra.billsnap.presentation.resources.OrderByEnum;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
+import proj.kedabra.billsnap.presentation.resources.SortByEnum;
 import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.utils.CacheNames;
 
@@ -88,10 +90,12 @@ public class BillController {
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
-    public List<ShortBillResource> getAllBills(@RequestParam(value = "statuses", defaultValue = "OPEN") final List<BillStatusEnum> statuses,
-                                               @RequestParam(value = "start", required = false) LocalDate start,
-                                               @RequestParam(value = "end", required = false) LocalDate end,
+    public List<ShortBillResource> getAllBills(@RequestParam(value = "statuses", defaultValue = "OPEN, IN_PROGRESS, RESOLVED") final List<BillStatusEnum> statuses,
+                                               @RequestParam(value = "start", required = false) LocalDate startDate,
+                                               @RequestParam(value = "end", required = false) LocalDate endDate,
                                                @RequestParam(value = "category", required = false) String category,
+                                               @RequestParam(value = "sort_by", defaultValue = "START_DATE") final SortByEnum sortBy,
+                                               @RequestParam(value = "order_by", defaultValue = "DESC") final OrderByEnum orderBy,
                                                @AuthenticationPrincipal final Principal principal) {
 
         final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
