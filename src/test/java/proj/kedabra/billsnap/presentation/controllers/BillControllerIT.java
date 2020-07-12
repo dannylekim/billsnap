@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -566,46 +565,6 @@ class BillControllerIT {
         assertThat(errorList.size()).isEqualTo(error.getErrors().size());
     }
 
-    @Test
-    @DisplayName("Should return empty List if no bills")
-    void shouldReturnEmptyListOfResourceIfNoBills() throws Exception {
-        //Given
-        final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-
-        //When/Then
-        final MvcResult result = performMvcGetRequest(bearerToken, BILL_ENDPOINT, 200);
-        final String content = result.getResponse().getContentAsString();
-        final List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
-        });
-        assertThat(response).isEmpty();
-    }
-
-    @Test
-    @DisplayName("Should return list of 2 ShortBillResources after adding 2 bills")
-    void shouldReturnListOf2Resources() throws Exception {
-        //Given
-        final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var billCreationResource = BillCreationResourceFixture.getDefault();
-
-        MvcResult result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
-        String content = result.getResponse().getContentAsString();
-        final BillResource billOne = mapper.readValue(content, BillResource.class);
-
-        result = performMvcPostRequest(bearerToken, BILL_ENDPOINT, billCreationResource, 201);
-        content = result.getResponse().getContentAsString();
-        final BillResource billTwo = mapper.readValue(content, BillResource.class);
-
-        //When/Then
-        result = performMvcGetRequest(bearerToken, BILL_ENDPOINT, 200);
-        content = result.getResponse().getContentAsString();
-        final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
-        });
-
-        verifyShortBillResources(billOne, response.get(0));
-        verifyShortBillResources(billTwo, response.get(1));
-    }
 
     @Test
     @DisplayName("Should return exception if null bill id is given for PUT /bills")
