@@ -47,6 +47,9 @@ public class BillSplitResource implements Serializable {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy HH:mm:ss Z")
     private ZonedDateTime updated;
 
+    @Schema(description = "List of items in the bill")
+    private List<ItemResource> items;
+
     @Schema(description = "List of items associated per account on the bill")
     private List<ItemAssociationSplitResource> informationPerAccount;
 

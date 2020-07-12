@@ -584,7 +584,7 @@ class BillFacadeImplTest {
         //Given
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         final var billId = 1000L;
-        bill.setId(1000L);
+        bill.setId(billId);
         final var userEmail = "nonexistent@email.com";
 
         when(billService.getBill(any())).thenReturn(bill);

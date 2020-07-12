@@ -31,6 +31,8 @@ public class BillSplitDTO {
 
     private ZonedDateTime updated;
 
+    private List<ItemDTO> items;
+
     private List<ItemAssociationSplitDTO> informationPerAccount;
 
     private SplitByEnum splitBy;
