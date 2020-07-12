@@ -182,6 +182,9 @@ public class BillFacadeImpl implements BillFacade {
                     item.setTip(accountTip);
                 });
 
+        final var itemDTOs = bill.getItems().stream().map(itemMapper::toDTO).collect(Collectors.toList());
+        billSplitDTO.setItems(itemDTOs);
+
         return billSplitDTO;
     }
 

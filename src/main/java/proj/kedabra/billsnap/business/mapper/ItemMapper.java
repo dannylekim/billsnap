@@ -18,5 +18,7 @@ public interface ItemMapper {
 
     Item toEntity(ItemDTO itemDTO);
 
+    ItemDTO toDTO(Item item);
+
     void updateItem(ItemDTO source, @MappingTarget Item target);
 }

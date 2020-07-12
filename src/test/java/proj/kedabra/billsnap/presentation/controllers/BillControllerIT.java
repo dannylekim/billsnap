@@ -1004,9 +1004,9 @@ class BillControllerIT {
     @DisplayName("Should return 200 when getting successfully detailed bill")
     void shouldReturn200WhenGettingSuccessfullyDetailedBill() throws Exception {
         // Given
-        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var user = UserFixture.getDefaultWithEmailAndPassword("user@hasbills.com", "$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var existentBillId = 1000L;
+        final var existentBillId = 2000L; //bill with items
         final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
 
         // When
@@ -1016,6 +1016,7 @@ class BillControllerIT {
 
         // Then
         assertThat(response.getId()).isEqualTo(existentBillId);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @Test
