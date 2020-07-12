@@ -499,8 +499,8 @@ class BillFacadeImplIT {
     @DisplayName("Should return BillSplitDTO in getDetailedBill where user is Bill Creator")
     void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
         //Given user that is bill's creator
-        final var billId = 1000L;
-        final var userEmail = "test@email.com";
+        final var billId = 2000L;
+        final var userEmail = "user@hasbills.com";
 
         //When
         final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
@@ -508,6 +508,7 @@ class BillFacadeImplIT {
         //Then
         final var bill = billRepository.getBillById(billId);
         verifyBillSplitDTOToBill(billSplitDTO, bill);
+        assertThat(billSplitDTO.getItems()).isNotEmpty();
     }
 
     @Test
@@ -963,18 +964,27 @@ class BillFacadeImplIT {
         assertThat(itemsPerAccount.size()).isEqualTo(accounts.size());
 
         if (!bill.getItems().isEmpty()) {
-            //for the time being we verify a bill with only 1 item. Should be generic when needed.
-            final Item item = bill.getItems().iterator().next();
-            final var itemAssociationSplitDTO = itemsPerAccount.get(0);
-            final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemAssociationSplitDTO.getItems().get(0);
+            assertThat(bill.getItems()).hasSameSizeAs(billSplitDTO.getItems());
 
-            assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
-            assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
-            assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
-            // due to the difficulty of testing the calculations here without outright copying the math from the implementation, we'll simply check for null and leave specific tests to verify the cost.
-            assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
-            assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
-            assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
+            //for the time being we verify a bill with only 1 item. Should be generic when needed.
+            if (bill.getItems().size() == 1) {
+                final Item item = bill.getItems().iterator().next();
+                final var itemAssociationSplitDTO = itemsPerAccount.stream().filter(it -> it.getSubTotal().compareTo(BigDecimal.ZERO) > 0).findFirst().get();
+                final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemAssociationSplitDTO.getItems().get(0);
+
+                assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());
+                assertThat(returnItemPercentageSplitDTO.getCost()).isEqualTo(item.getCost());
+                if (bill.getTipAmount() != null) { //bill has a tip amount
+                    assertThat(billSplitDTO.getBalance()).isEqualTo(item.getCost().add(bill.getTipAmount()).setScale(2, RoundingMode.HALF_UP));
+                } else { //bill has a tip percent
+                    assertThat(billSplitDTO.getBalance()).isEqualByComparingTo(item.getCost().multiply(
+                            bill.getTipPercent().divide(new BigDecimal("100"), RoundingMode.HALF_UP).add(BigDecimal.ONE)));
+                }
+                // due to the difficulty of testing the calculations here without outright copying the math from the implementation, we'll simply check for null and leave specific tests to verify the cost.
+                assertThat(itemAssociationSplitDTO.getSubTotal()).isNotNull();
+                assertThat(itemAssociationSplitDTO.getTaxes()).isNotNull();
+                assertThat(itemAssociationSplitDTO.getTip()).isNotNull();
+            }
         } else {
             assertThat(billSplitDTO.getBalance()).isEqualByComparingTo(BigDecimal.ZERO);
         }
