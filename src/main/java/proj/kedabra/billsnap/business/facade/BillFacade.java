@@ -2,11 +2,14 @@ package proj.kedabra.billsnap.business.facade;
 
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillCompleteDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
+import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 
 public interface BillFacade {
@@ -14,6 +17,9 @@ public interface BillFacade {
     BillCompleteDTO addPersonalBill(String email, BillDTO billDTO);
 
     List<BillSplitDTO> getAllBillsByEmail(String email);
+
+    @Transactional(readOnly = true)
+    List<BillSplitDTO> getAllBillsByEmailPageable(GetBillPaginationDTO dto);
 
     BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO, String responsibleEmail);
 

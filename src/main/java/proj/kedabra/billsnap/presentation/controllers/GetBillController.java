@@ -49,7 +49,7 @@ public class GetBillController {
         this.billFacade = billFacade;
     }
 
-    @Cacheable(value = CacheNames.BILLS, key = "#principal.name")
+    @Cacheable(value = CacheNames.BILLS)
     @GetMapping("/bills")
     @Operation(summary = "Get all bills", description = "Get all bills associated to an account")
     @ApiResponse(responseCode = "200", description = "Successfully retrieved all bills!")
@@ -70,7 +70,7 @@ public class GetBillController {
             @RequestParam(value = "page_number", defaultValue = "0")
             @Range(message = "the number must be positive") final int pageNumber,
             @RequestParam(value = "category", required = false) String category,
-            @RequestParam(value = "sort_by", defaultValue = "START_DATE, STATUS")
+            @RequestParam(value = "sort_by", defaultValue = "CREATED, STATUS")
             @NotEmpty(message = "Can not have empty list of sort by") final List<SortByEnum> sortBy,
             @RequestParam(value = "order_by", defaultValue = "DESC") final OrderByEnum orderBy,
             @AuthenticationPrincipal final Principal principal) {
@@ -81,11 +81,11 @@ public class GetBillController {
         billPaginationDTO.setStartDate(startDate);
         billPaginationDTO.setEndDate(endDate);
         billPaginationDTO.setCategory(category);
-        final var sort = Sort.by(Sort.Direction.fromString(orderBy.name()), sortBy.stream().map(Enum::name).toArray(String[]::new));
+        final var sort = Sort.by(Sort.Direction.fromString(orderBy.name()), sortBy.stream().map(Enum::name).map(String::toLowerCase).toArray(String[]::new));
         final var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
         billPaginationDTO.setPageable(pageRequest);
 
-        final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
+        final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmailPageable(billPaginationDTO);
         return billsFromEmail.stream().map(billMapper::toShortBillResource).collect(Collectors.toList());
 
     }

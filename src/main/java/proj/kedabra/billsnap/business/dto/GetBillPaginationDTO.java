@@ -1,6 +1,8 @@
 package proj.kedabra.billsnap.business.dto;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -18,12 +20,21 @@ public class GetBillPaginationDTO {
 
     private List<BillStatusEnum> statuses;
 
-    private LocalDate startDate;
+    private ZonedDateTime startDate;
 
-    private LocalDate endDate;
+    private ZonedDateTime endDate;
 
     private String category;
 
     private Pageable pageable;
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate.atStartOfDay(ZoneId.systemDefault());
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate.atStartOfDay(ZoneId.systemDefault());
+    }
+
 
 }

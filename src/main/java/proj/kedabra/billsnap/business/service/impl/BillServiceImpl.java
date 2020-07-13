@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
+import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
@@ -110,6 +111,19 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Stream<Bill> getAllBillsByAccount(Account account) {
         return accountBillRepository.getAllByAccount(account).map(AccountBill::getBill);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Stream<Bill> getAllBillsByAccountPageable(final GetBillPaginationDTO billPaginationDTO) {
+        return billRepository.findBillsPageable(
+                billPaginationDTO.getStartDate(),
+                billPaginationDTO.getEndDate(),
+                billPaginationDTO.getCategory(),
+                billPaginationDTO.getStatuses(),
+                billPaginationDTO.getEmail(),
+                billPaginationDTO.getPageable()
+        );
     }
 
     @Override
