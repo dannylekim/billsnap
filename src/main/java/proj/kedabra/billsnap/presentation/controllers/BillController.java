@@ -1,8 +1,6 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
 import java.security.Principal;
-import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -40,7 +38,6 @@ import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.EditBillResource;
 import proj.kedabra.billsnap.presentation.resources.InviteRegisteredResource;
-import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
 import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.utils.CacheNames;
 
@@ -76,20 +73,6 @@ public class BillController {
         final BillDTO billDTO = billMapper.toBillDTO(billCreationResource);
         final BillCompleteDTO createdBill = billFacade.addPersonalBill(principal.getName(), billDTO);
         return billMapper.toResource(createdBill);
-    }
-
-    @Cacheable(value = CacheNames.BILLS, key = "#principal.name")
-    @GetMapping("/bills")
-    @Operation(summary = "Get all bills", description = "Get all bills associated to an account")
-    @ApiResponse(responseCode = "200", description = "Successfully retrieved all bills!")
-    @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
-    @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
-    @ResponseStatus(HttpStatus.OK)
-    public List<ShortBillResource> getAllBills(@AuthenticationPrincipal final Principal principal) {
-
-        final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmail(principal.getName());
-        return billsFromEmail.stream().map(billMapper::toShortBillResource).collect(Collectors.toList());
-
     }
 
     @Cacheable(value = CacheNames.BILL, key = "#billId + #principal.name")
