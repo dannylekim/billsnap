@@ -86,6 +86,11 @@ INSERT INTO account (id, email, password, first_name, middle_name, last_name, ge
 VALUES (10000, 'editBill@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
         current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
 
+INSERT INTO account (id, email, password, first_name, middle_name, last_name, gender, phone_number, birth_date, status,
+                     created, updated, location_id)
+VALUES (11000, 'billPagination@email.com', 'notEncrypted', 'firstTest', 'middleTest', 'lastTest', 'MALE', '123456789',
+        current_date, 'REGISTERED', current_timestamp, current_timestamp, null);
+
 
 
 INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
@@ -170,6 +175,37 @@ INSERT INTO bill (id, name, responsible, creator, status, created, updated, cate
 VALUES (1221, 'bill with invitations', 5000, 5000, 'OPEN', current_timestamp, current_timestamp, null, null, 0, 15, null, 'ITEM', null,
         1);
 
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1300, 'bill pagination 1', 11000, 11000, 'OPEN', to_date('2018-12-31', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1301, 'bill pagination 2', 11000, 11000, 'OPEN', to_date('2019-01-01', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1302, 'bill pagination 3', 11000, 11000, 'RESOLVED', to_date('2019-01-02', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1303, 'bill pagination 4', 11000, 11000, 'OPEN', to_date('2019-12-30', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1304, 'bill pagination 5', 11000, 11000, 'OPEN', to_date('2019-12-30', 'yyyy-MM-dd'), current_timestamp, 'bus', null, 0, 15, null, 'ITEM', null,
+        1);
+
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1305, 'bill pagination 6', 11000, 11000, 'OPEN', to_date('2020-01-01', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
+
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -217,6 +253,16 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1102, 10000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (2001, 1002, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1300, 11000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1301, 11000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1302, 11000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1303, 11000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1304, 11000, 100, 'ACCEPTED');
 
 INSERT INTO item (id, bill_id, name, cost)
 VALUES (1000, 1004, 'potatoes', 69.00);
