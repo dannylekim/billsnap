@@ -27,6 +27,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
 import proj.kedabra.billsnap.fixtures.BillCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
+import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.BillResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
@@ -66,7 +67,7 @@ class GetBillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
 
         //When/Then
-        final MvcResult result = performMvcGetRequest(bearerToken, 200);
+        final MvcResult result = performMvcGetRequest(bearerToken, 200, BILL_ENDPOINT);
         final String content = result.getResponse().getContentAsString();
         final List<BillSplitResource> response = mapper.readValue(content, new TypeReference<>() {
         });
@@ -90,17 +91,98 @@ class GetBillControllerIT {
         final BillResource billTwo = mapper.readValue(content, BillResource.class);
 
         //When/Then
-        result = performMvcGetRequest(bearerToken, 200);
+        result = performMvcGetRequest(bearerToken, 200, BILL_ENDPOINT);
         content = result.getResponse().getContentAsString();
         final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
         });
 
-        verifyShortBillResources(billOne, response.get(0));
-        verifyShortBillResources(billTwo, response.get(1));
+        if (response.get(0).getId() == 1L) {
+            verifyShortBillResources(billOne, response.get(0));
+            verifyShortBillResources(billTwo, response.get(1));
+        } else {
+            verifyShortBillResources(billTwo, response.get(0));
+            verifyShortBillResources(billOne, response.get(1));
+        }
     }
 
-    private MvcResult performMvcGetRequest(final String bearerToken, final int resultCode) throws Exception {
-        return mockMvc.perform(get(GetBillControllerIT.BILL_ENDPOINT).header(JWT_HEADER, bearerToken))
+    @Test
+    @DisplayName("Should return bill according to pagination when sorted by creation")
+    void shouldReturnBillAccordingToPaginationWhenSortedByCreation() throws Exception {
+        //Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var path1 = "/bills?statuses=OPEN&&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=restaurant&sort_by=CREATED&order_by=ASC";
+        final var path2 = "/bills?statuses=OPEN&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=bus&sort_by=CREATED&order_by=ASC";
+
+        //When
+        final MvcResult result1 = performMvcGetRequest(bearerToken, 200, path1);
+        final String content1 = result1.getResponse().getContentAsString();
+        final List<ShortBillResource> response1 = mapper.readValue(content1, new TypeReference<>() {
+        });
+
+        final MvcResult result2 = performMvcGetRequest(bearerToken, 200, path2);
+        final String content2 = result2.getResponse().getContentAsString();
+        final List<ShortBillResource> response2 = mapper.readValue(content2, new TypeReference<>() {
+        });
+
+        //Then
+        assertThat(response1).hasSize(2);
+        assertThat(response1.stream().filter(o -> o.getName().equals("bill pagination 2")).findFirst()).isNotNull();
+        assertThat(response1.stream().filter(o -> o.getName().equals("bill pagination 4")).findFirst()).isNotNull();
+
+        assertThat(response2).hasSize(1);
+        assertThat(response2.get(0).getName()).isEqualTo("bill pagination 5");
+    }
+
+    @Test
+    @DisplayName("Should return bill according to pagination when sorted by status")
+    void shouldReturnBillAccordingToPaginationWhenSortedByStatus() throws Exception {
+        //Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var path1 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=restaurant&sort_by=STATUS&order_by=DESC";
+        final var path2 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=5&page_number=0&category=restaurant&sort_by=STATUS&order_by=ASC";
+
+        //When
+        final MvcResult result1 = performMvcGetRequest(bearerToken, 200, path1);
+        final String content1 = result1.getResponse().getContentAsString();
+        final List<ShortBillResource> response1 = mapper.readValue(content1, new TypeReference<>() {
+        });
+
+        final MvcResult result2 = performMvcGetRequest(bearerToken, 200, path2);
+        final String content2 = result2.getResponse().getContentAsString();
+        final List<ShortBillResource> response2 = mapper.readValue(content2, new TypeReference<>() {
+        });
+
+        //Then
+        assertThat(response1).hasSize(2);
+        assertThat(response1.get(0).getName()).isEqualTo("bill pagination 4");
+
+        assertThat(response2).hasSize(3);
+        assertThat(response2.get(0).getName()).isEqualTo("bill pagination 3");
+    }
+
+    @Test
+    @DisplayName("Should return bill according to pagination when sorted by category")
+    void shouldReturnBillAccordingToPaginationWhenSortedByCategory() throws Exception {
+        //Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var path = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&sort_by=CATEGORY&order_by=ASC";
+
+        //When
+        final MvcResult result = performMvcGetRequest(bearerToken, 200, path);
+        final String content = result.getResponse().getContentAsString();
+        final List<ShortBillResource> response = mapper.readValue(content, new TypeReference<>() {
+        });
+
+        //Then
+        assertThat(response).hasSize(2);
+        assertThat(response.get(0).getName()).isEqualTo("bill pagination 5");
+    }
+
+    private MvcResult performMvcGetRequest(final String bearerToken, final int resultCode, final String status) throws Exception {
+        return mockMvc.perform(get(status).header(JWT_HEADER, bearerToken))
                 .andExpect(status().is(resultCode)).andReturn();
     }
 
