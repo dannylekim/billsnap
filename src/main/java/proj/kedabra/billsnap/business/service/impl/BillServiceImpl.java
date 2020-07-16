@@ -108,12 +108,6 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Stream<Bill> getAllBillsByAccount(Account account) {
-        return accountBillRepository.getAllByAccount(account).map(AccountBill::getBill);
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public Stream<Bill> getAllBillsByAccountPageable(final GetBillPaginationDTO billPaginationDTO) {
         return billRepository.findBillsPageable(

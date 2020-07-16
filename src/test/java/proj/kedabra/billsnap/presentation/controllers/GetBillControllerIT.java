@@ -38,7 +38,6 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @ActiveProfiles(SpringProfiles.TEST)
 @SpringBootTest
 @AutoConfigureMockMvc
-@SuppressWarnings("squid:S00112")
 @AutoConfigureTestDatabase
 @Transactional
 class GetBillControllerIT {

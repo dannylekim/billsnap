@@ -80,13 +80,6 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public List<BillSplitDTO> getAllBillsByEmail(final String email) {
-        final var account = accountService.getAccount(email);
-        return billService.getAllBillsByAccount(account).map(this::getBillSplitDTO).collect(Collectors.toList());
-    }
-
-    @Override
     @Transactional(readOnly = true)
     public List<BillSplitDTO> getAllBillsByEmailPageable(final GetBillPaginationDTO dto) {
         return billService.getAllBillsByAccountPageable(dto).map(this::getBillSplitDTO).collect(Collectors.toList());

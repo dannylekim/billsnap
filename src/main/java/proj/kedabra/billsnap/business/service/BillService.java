@@ -16,8 +16,6 @@ public interface BillService {
 
     Bill createBillToAccount(BillDTO billDTO, Account account, List<Account> accountList);
 
-    Stream<Bill> getAllBillsByAccount(Account account);
-
     Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO);
 
     Stream<Bill> getAllBillsByAccountPageable(GetBillPaginationDTO billPaginationDTO);

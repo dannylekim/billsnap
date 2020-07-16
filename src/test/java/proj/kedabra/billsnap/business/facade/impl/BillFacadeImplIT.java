@@ -217,58 +217,6 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return an exception if the account does not exist in getAllBills")
-    void shouldReturnExceptionIfAccountDoesNotExistInGetAllBills() {
-        // Given
-        final String testEmail = "abc@123.ca";
-
-        // When/Then
-        final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
-                () -> billFacade.getAllBillsByEmail(testEmail));
-        assertEquals("Account does not exist", resourceNotFoundException.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should return two mapped BillSplitDTO in getAllBills")
-    void shouldReturn2BillSplitDTOInGetAllBills() {
-        //Given
-        final var testEmail = "test@email.com";
-        final var billIdsToCompare = new HashSet<Long>();
-        billIdsToCompare.add(1000L);
-        billIdsToCompare.add(1001L);
-
-        //When
-        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
-
-        //Then
-        assertEquals(2, allBillsByEmail.size());
-        final Iterable<Bill> billsByTwoIds = billRepository.findAllById(billIdsToCompare);
-        final List<Bill> billsListByTwoIdsList = StreamSupport.stream(billsByTwoIds.spliterator(), false)
-                .collect(Collectors.toList());
-
-        if (allBillsByEmail.get(0).getId().equals(1000L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
-        } else if (allBillsByEmail.get(0).getId().equals(1001L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
-        }
-    }
-
-    @Test
-    @DisplayName("Should return emptyList in getAllBills")
-    void shouldReturnEmptyList() {
-        //Given existent user with 0 bills
-        final var testEmail = "user@user.com";
-
-        //When
-        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
-
-        //Then
-        assertEquals(0, allBillsByEmail.size());
-    }
-
-    @Test
     @DisplayName("Should return bill according to pagination when sorted by creation")
     void shouldReturnBillAccordingToPaginationWhenSortedByCreation() {
         //Given

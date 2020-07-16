@@ -142,34 +142,6 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should return all bills saved in database to account")
-    void shouldReturnAllBillsInDb() {
-        //Given
-        //Account with 2 bills
-        final Account account = accountRepository.getAccountByEmail("test@email.com");
-
-        //When
-        final Stream<Bill> allBillsByAccount = billService.getAllBillsByAccount(account);
-
-        //Then
-        assertEquals(2, allBillsByAccount.count());
-    }
-
-    @Test
-    @DisplayName("Should return empty stream if no bills in account")
-    void shouldReturnEmptyList() {
-        //Given
-        //Account with 0 bills
-        final Account account = accountRepository.getAccountByEmail("nobills@inthisemail.com");
-
-        //When
-        final Stream<Bill> allBillsByAccount = billService.getAllBillsByAccount(account);
-
-        //Then
-        assertEquals(0, allBillsByAccount.count());
-    }
-
-    @Test
     @DisplayName("Should return bill according to pagination when sorted by creation")
     void shouldReturnBillAccordingToPaginationWhenSortedByCreation() {
         //Given

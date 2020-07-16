@@ -16,8 +16,6 @@ public interface BillFacade {
 
     BillCompleteDTO addPersonalBill(String email, BillDTO billDTO);
 
-    List<BillSplitDTO> getAllBillsByEmail(String email);
-
     @Transactional(readOnly = true)
     List<BillSplitDTO> getAllBillsByEmailPageable(GetBillPaginationDTO dto);
 
