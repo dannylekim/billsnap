@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
+import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageDTO;
 import proj.kedabra.billsnap.business.dto.PaymentOwedDTO;
@@ -36,7 +37,6 @@ import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.entities.Tax;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
-import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
 import proj.kedabra.billsnap.business.service.BillService;
@@ -54,8 +54,6 @@ public class BillServiceImpl implements BillService {
 
     private final BillRepository billRepository;
 
-    private final AccountBillRepository accountBillRepository;
-
     private final PaymentRepository paymentRepository;
 
     private final BillMapper billMapper;
@@ -72,7 +70,6 @@ public class BillServiceImpl implements BillService {
     public BillServiceImpl(
             final BillRepository billRepository,
             final BillMapper billMapper,
-            final AccountBillRepository accountBillRepository,
             final PaymentMapper paymentMapper,
             final PaymentRepository paymentRepository,
             final NotificationService notificationService,
@@ -80,7 +77,6 @@ public class BillServiceImpl implements BillService {
             final EntityManager entityManager) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
-        this.accountBillRepository = accountBillRepository;
         this.paymentMapper = paymentMapper;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
@@ -107,9 +103,16 @@ public class BillServiceImpl implements BillService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Stream<Bill> getAllBillsByAccount(Account account) {
-        return accountBillRepository.getAllByAccount(account).map(AccountBill::getBill);
+    @Transactional(readOnly = true)
+    public Stream<Bill> getAllBillsByAccountPageable(final GetBillPaginationDTO billPaginationDTO) {
+        return billRepository.findBillsPageable(
+                billPaginationDTO.getStartDate(),
+                billPaginationDTO.getEndDate(),
+                billPaginationDTO.getCategory(),
+                billPaginationDTO.getStatuses(),
+                billPaginationDTO.getEmail(),
+                billPaginationDTO.getPageable()
+        );
     }
 
     @Override

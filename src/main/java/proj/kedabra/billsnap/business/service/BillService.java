@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
 import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
+import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
@@ -15,9 +16,9 @@ public interface BillService {
 
     Bill createBillToAccount(BillDTO billDTO, Account account, List<Account> accountList);
 
-    Stream<Bill> getAllBillsByAccount(Account account);
-
     Bill associateItemsToAccountBill(AssociateBillDTO associateBillDTO);
+
+    Stream<Bill> getAllBillsByAccountPageable(GetBillPaginationDTO billPaginationDTO);
 
     Stream<PaymentOwed> getAllAmountOwedByStatusAndAccount(BillStatusEnum status, Account account);
 

@@ -17,6 +17,7 @@ import proj.kedabra.billsnap.business.dto.BillDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.dto.DetailedAccountBillInformation;
 import proj.kedabra.billsnap.business.dto.EditBillDTO;
+import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
@@ -79,10 +80,9 @@ public class BillFacadeImpl implements BillFacade {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public List<BillSplitDTO> getAllBillsByEmail(final String email) {
-        final var account = accountService.getAccount(email);
-        return billService.getAllBillsByAccount(account).map(this::getBillSplitDTO).collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<BillSplitDTO> getAllBillsByEmailPageable(final GetBillPaginationDTO dto) {
+        return billService.getAllBillsByAccountPageable(dto).map(this::getBillSplitDTO).collect(Collectors.toList());
     }
 
     @Override

@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -53,8 +54,11 @@ import proj.kedabra.billsnap.fixtures.AssociateBillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillDTOFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
 import proj.kedabra.billsnap.fixtures.EditBillDTOFixture;
+import proj.kedabra.billsnap.fixtures.GetBillPaginationDTOFixture;
 import proj.kedabra.billsnap.fixtures.InviteRegisteredResourceFixture;
 import proj.kedabra.billsnap.fixtures.ItemPercentageDTOFixture;
+import proj.kedabra.billsnap.presentation.resources.OrderByEnum;
+import proj.kedabra.billsnap.presentation.resources.SortByEnum;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 import proj.kedabra.billsnap.utils.SpringProfiles;
 import proj.kedabra.billsnap.utils.tuples.AccountStatusPair;
@@ -213,55 +217,69 @@ class BillFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should return an exception if the account does not exist in getAllBills")
-    void shouldReturnExceptionIfAccountDoesNotExistInGetAllBills() {
-        // Given
-        final String testEmail = "abc@123.ca";
-
-        // When/Then
-        final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class,
-                () -> billFacade.getAllBillsByEmail(testEmail));
-        assertEquals("Account does not exist", resourceNotFoundException.getMessage());
-    }
-
-    @Test
-    @DisplayName("Should return two mapped BillSplitDTO in getAllBills")
-    void shouldReturn2BillSplitDTOInGetAllBills() {
+    @DisplayName("Should return bill according to pagination when sorted by creation")
+    void shouldReturnBillAccordingToPaginationWhenSortedByCreation() {
         //Given
-        final var testEmail = "test@email.com";
-        final var billIdsToCompare = new HashSet<Long>();
-        billIdsToCompare.add(1000L);
-        billIdsToCompare.add(1001L);
+        final var billPagination1 = GetBillPaginationDTOFixture.getDefault();
+
+        final List<SortByEnum> sortByList = new ArrayList<>();
+        sortByList.add(SortByEnum.CREATED);
+        final var billPagination2 = GetBillPaginationDTOFixture.getCustom("restaurant", OrderByEnum.ASC, sortByList, 1, 2);
+        final var billPagination3 = GetBillPaginationDTOFixture.getCustom("restaurant", OrderByEnum.DESC, sortByList, 0, 2);
 
         //When
-        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
+        final List<BillSplitDTO> result1 = billFacade.getAllBillsByEmailPageable(billPagination1);
+        final List<BillSplitDTO> result2 = billFacade.getAllBillsByEmailPageable(billPagination2);
+        final List<BillSplitDTO> result3 = billFacade.getAllBillsByEmailPageable(billPagination3);
 
         //Then
-        assertEquals(2, allBillsByEmail.size());
-        final Iterable<Bill> billsByTwoIds = billRepository.findAllById(billIdsToCompare);
-        final List<Bill> billsListByTwoIdsList = StreamSupport.stream(billsByTwoIds.spliterator(), false)
-                .collect(Collectors.toList());
+        assertThat(result1).hasSize(2);
+        assertThat(result1.get(0).getName()).isEqualTo("bill pagination 2");
+        assertThat(result1.get(1).getName()).isEqualTo("bill pagination 3");
 
-        if (allBillsByEmail.get(0).getId().equals(1000L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(0));
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(1));
-        } else if (allBillsByEmail.get(0).getId().equals(1001L)) {
-            verifyBillSplitDTOToBill(allBillsByEmail.get(1), billsListByTwoIdsList.get(0));
-            verifyBillSplitDTOToBill(allBillsByEmail.get(0), billsListByTwoIdsList.get(1));
-        }
+        assertThat(result2).hasSize(1);
+        assertThat(result2.get(0).getName()).isEqualTo("bill pagination 4");
+
+        assertThat(result3).hasSize(2);
+        assertThat(result3.get(0).getName()).isEqualTo("bill pagination 4");
+        assertThat(result3.get(1).getName()).isEqualTo("bill pagination 3");
     }
 
     @Test
-    @DisplayName("Should return emptyList in getAllBills")
-    void shouldReturnEmptyList() {
-        //Given existent user with 0 bills
-        final var testEmail = "user@user.com";
+    @DisplayName("Should return bill according to pagination when sorted by status")
+    void shouldReturnBillAccordingToPaginationWhenSortedByStatus() {
+        //Given
+        final List<SortByEnum> sortByList = new ArrayList<>();
+        sortByList.add(SortByEnum.STATUS);
+        final var billPagination = GetBillPaginationDTOFixture.getCustom("restaurant" , OrderByEnum.DESC, sortByList, 0, 2);
+        final var billPagination1 = GetBillPaginationDTOFixture.getCustom("restaurant" , OrderByEnum.ASC, sortByList, 0, 5);
 
         //When
-        final List<BillSplitDTO> allBillsByEmail = billFacade.getAllBillsByEmail(testEmail);
+        final List<BillSplitDTO> result = billFacade.getAllBillsByEmailPageable(billPagination);
+        final List<BillSplitDTO> result1 = billFacade.getAllBillsByEmailPageable(billPagination1);
 
         //Then
-        assertEquals(0, allBillsByEmail.size());
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName()).isEqualTo("bill pagination 4");
+
+        assertThat(result1).hasSize(3);
+        assertThat(result1.get(0).getName()).isEqualTo("bill pagination 3");
+    }
+
+    @Test
+    @DisplayName("Should return bill according to pagination when sorted by category")
+    void shouldReturnBillAccordingToPaginationWhenSortedByCategory() {
+        //Given
+        final List<SortByEnum> sortByList = new ArrayList<>();
+        sortByList.add(SortByEnum.CATEGORY);
+        final var billPagination = GetBillPaginationDTOFixture.getCustom(null, OrderByEnum.ASC, sortByList, 0, 2);
+
+        //When
+        final List<BillSplitDTO> result = billFacade.getAllBillsByEmailPageable(billPagination);
+
+        //Then
+        assertThat(result).hasSize(2);
+        assertThat(result.get(0).getName()).isEqualTo("bill pagination 5");
     }
 
     @Test

@@ -1,5 +1,6 @@
 package proj.kedabra.billsnap.business.model.entities;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
@@ -37,7 +38,7 @@ import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
         name = "pgsql_enum",
         typeClass = PostgreSQLEnumType.class
 )
-public class Account {
+public class Account implements Serializable {
 
     @Id
     @Column(name = "id")

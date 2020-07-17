@@ -151,19 +151,6 @@ class BillFacadeImplTest {
     }
 
     @Test
-    @DisplayName("Should return exception if email does not exist in GetAllBills")
-    void shouldThrowExceptionIfEmailDoesNotExistInGetAllBills() {
-        //Given
-        final String nonExistentEmail = "nonexistent@email.ca";
-        when(accountService.getAccount(nonExistentEmail)).thenThrow(new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
-
-        //When/Then
-        assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.getAllBillsByEmail(nonExistentEmail))
-                .withMessage(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage());
-    }
-
-    @Test
     @DisplayName("Should return exception if both tipping methods are null")
     void shouldThrowExceptionIfBothTipNull() {
         //Given

@@ -42,7 +42,6 @@ import proj.kedabra.billsnap.business.model.entities.AccountItem;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.model.projections.PaymentOwed;
-import proj.kedabra.billsnap.business.repository.AccountBillRepository;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
 import proj.kedabra.billsnap.business.repository.PaymentRepository;
@@ -68,9 +67,6 @@ class BillServiceImplTest {
 
     @Mock
     private BillRepository billRepository;
-
-    @Mock
-    private AccountBillRepository accountBillRepository;
 
     @Mock
     private PaymentRepository paymentRepository;

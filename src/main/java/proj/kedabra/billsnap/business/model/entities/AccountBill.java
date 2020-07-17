@@ -31,8 +31,6 @@ import proj.kedabra.billsnap.business.utils.enums.PaymentStatusEnum;
 )
 public class AccountBill implements Serializable {
 
-    private static final long serialVersionUID = 7692602917199916186L;
-
     @EmbeddedId
     private AccountBillId id = new AccountBillId();
 
