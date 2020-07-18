@@ -1420,6 +1420,8 @@ class BillControllerIT {
             assertThat(info.getTip()).isNotNull();
             assertThat(info.getTotal()).isEqualByComparingTo(info.getSubTotal().add(info.getTaxes()).add(info.getTip()).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
             assertThat(info.getInvitationStatus()).isNotNull();
+            assertThat(info.getAmountPaid()).isNotNull();
+            assertThat(info.getAmountRemaining()).isNotNull();
             if (info.getInvitationStatus() == InvitationStatusEnum.ACCEPTED && actualBillResource.getStatus() == BillStatusEnum.IN_PROGRESS) {
                 assertThat(info.getPaidStatus()).isNotNull();
             } else {
