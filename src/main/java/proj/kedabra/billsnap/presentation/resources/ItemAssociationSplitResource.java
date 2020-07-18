@@ -36,6 +36,12 @@ public class ItemAssociationSplitResource implements Serializable {
         return subTotal.add(taxes).add(tip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
     }
 
+    @JsonSerialize(using = MoneySerializer.class)
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    @JsonSerialize(using = MoneySerializer.class)
+    private BigDecimal amountRemaining = BigDecimal.ZERO;
+
     private InvitationStatusEnum invitationStatus;
 
     private PaymentStatusEnum paidStatus;

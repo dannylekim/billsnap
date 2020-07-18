@@ -22,6 +22,10 @@ public class ItemAssociationSplitDTO {
 
     private BigDecimal taxes = BigDecimal.ZERO;
 
+    private BigDecimal amountPaid = BigDecimal.ZERO;
+
+    private BigDecimal amountRemaining = BigDecimal.ZERO;
+
     private InvitationStatusEnum invitationStatus;
 
     private PaymentStatusEnum paidStatus;

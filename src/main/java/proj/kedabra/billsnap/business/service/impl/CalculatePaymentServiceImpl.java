@@ -59,6 +59,11 @@ public class CalculatePaymentServiceImpl implements CalculatePaymentService {
         return tipAmount.add(tipPercentAmount).setScale(DOLLAR_SCALE, RoundingMode.HALF_UP);
     }
 
+    @Override
+    public BigDecimal calculateAmountRemaining(final BigDecimal total, final BigDecimal amountPaid) {
+        return total.subtract(amountPaid);
+    }
+
     private static BigDecimal getDecimalPercentage(BigDecimal tipPercent) {
         return tipPercent.divide(ONE_HUNDRED, RoundingMode.DOWN);
     }
