@@ -897,6 +897,8 @@ class BillFacadeImplIT {
         //Given
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         bill.getAccounts().forEach(ab -> ab.setStatus(InvitationStatusEnum.ACCEPTED));
+        final var accountBills = new ArrayList<>(bill.getAccounts());
+        accountBills.get(0).setAmountPaid(BigDecimal.valueOf(3.00));
 
         //When
         final var billSplitDTO = billFacade.getBillSplitDTO(bill);
@@ -908,6 +910,14 @@ class BillFacadeImplIT {
             assertThat(info.getTip()).isEqualByComparingTo(new BigDecimal("5.00"));
             assertThat(info.getInvitationStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
             assertThat(info.getPaidStatus()).isNull();
+
+            if (!info.getAmountRemaining().equals(new BigDecimal("7.20"))) {
+                assertThat(info.getAmountPaid()).isEqualByComparingTo(new BigDecimal("3.0"));
+                assertThat(info.getAmountRemaining()).isEqualByComparingTo(new BigDecimal("4.20"));
+            } else {
+                assertThat(info.getAmountPaid()).isEqualByComparingTo(BigDecimal.ZERO);
+                assertThat(info.getAmountRemaining()).isEqualByComparingTo(new BigDecimal("7.20"));
+            }
         });
     }
 

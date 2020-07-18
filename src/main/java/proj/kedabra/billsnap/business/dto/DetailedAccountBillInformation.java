@@ -20,4 +20,6 @@ public class DetailedAccountBillInformation {
     private InvitationStatusEnum invitationStatus;
 
     private PaymentStatusEnum paidStatus;
+
+    private BigDecimal amountPaid;
 }
