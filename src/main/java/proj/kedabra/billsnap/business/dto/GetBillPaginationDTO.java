@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.business.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.List;
@@ -28,12 +29,12 @@ public class GetBillPaginationDTO {
 
     private Pageable pageable;
 
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate.atStartOfDay(ZoneId.systemDefault());
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate.atZone(ZoneId.systemDefault());
     }
 
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate.atStartOfDay(ZoneId.systemDefault());
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate.atZone(ZoneId.systemDefault());
     }
 
 

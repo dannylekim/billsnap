@@ -1,7 +1,7 @@
 package proj.kedabra.billsnap.presentation.controllers;
 
 import java.security.Principal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,13 +62,13 @@ public class GetBillController {
             @RequestParam(value = "statuses", defaultValue = "OPEN, IN_PROGRESS, RESOLVED")
             @NotEmpty(message = "Can not have empty list of statuses") final List<BillStatusEnum> statuses,
             @Parameter(name = "start date", description = "Start date, input value format should be yyyy-MM-dd")
-            @RequestParam(value = "start", defaultValue = "1970-01-01")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate startDate,
+            @RequestParam(value = "start", defaultValue = "1970-01-01T12:11:10.000")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                    LocalDateTime startDate,
             @Parameter(name = "end date", description = "End date, input value format should be yyyy-MM-dd")
-            @RequestParam(value = "end", defaultValue = "9999-12-31")
-            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
-                    LocalDate endDate,
+            @RequestParam(value = "end", defaultValue = "9999-12-31T12:11:10.000")
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                    LocalDateTime endDate,
             @Parameter(name = "page size", description = "Number of bills in a single request")
             @RequestParam(value = "page_size", defaultValue = "100")
             @Range(message = "the number must be positive") final int pageSize,
