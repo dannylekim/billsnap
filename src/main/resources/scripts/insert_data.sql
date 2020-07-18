@@ -216,10 +216,10 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1002, 4000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1003, 5000, 100, 'ACCEPTED');
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
-VALUES (2000, 5000, 100, 'ACCEPTED');
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
-VALUES (2000, 9000, 100, 'DECLINED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status, amount_paid)
+VALUES (2000, 5000, 100, 'ACCEPTED', 0);
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status, amount_paid)
+VALUES (2000, 9000, 100, 'DECLINED', 0);
 
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1004, 4000, 100, 'ACCEPTED');
@@ -233,8 +233,8 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1005, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1006, 8000, 100, 'ACCEPTED');
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
-VALUES (1250, 7000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status, amount_paid)
+VALUES (1250, 7000, 100, 'ACCEPTED', 0);
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1251, 7001, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
@@ -249,8 +249,8 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1221, 5000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1221, 50, 0, 'ACCEPTED');
-INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
-VALUES (1102, 10000, 100, 'ACCEPTED');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status, amount_paid)
+VALUES (1102, 10000, 100, 'ACCEPTED', 0);
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (2001, 1002, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)

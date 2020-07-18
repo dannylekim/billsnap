@@ -180,6 +180,8 @@ public class BillFacadeImpl implements BillFacade {
                     item.setTaxes(calculatePaymentService.calculateTaxes(item.getSubTotal(), bill.getTaxes()));
                     final var accountTip = item.getSubTotal().divide(billSubTotal, RoundingMode.HALF_UP).multiply(totalTip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
                     item.setTip(accountTip);
+                    final var total = item.getSubTotal().add(item.getTaxes()).add(item.getTip());
+                    item.setAmountRemaining(calculatePaymentService.calculateAmountRemaining(total, item.getAmountPaid()));
                 });
 
         final var itemDTOs = bill.getItems().stream().map(itemMapper::toDTO).collect(Collectors.toList());
@@ -192,7 +194,7 @@ public class BillFacadeImpl implements BillFacade {
         final List<ItemAssociationSplitDTO> itemsPerAccount = new ArrayList<>();
         final HashMap<Account, DetailedAccountBillInformation> accountPairMap = new HashMap<>();
         bill.getAccounts().forEach(accountBill -> {
-            final var costItemsPair = new DetailedAccountBillInformation(BigDecimal.ZERO, new ArrayList<>(), accountBill.getStatus(), accountBill.getPaymentStatus());
+            final var costItemsPair = new DetailedAccountBillInformation(BigDecimal.ZERO, new ArrayList<>(), accountBill.getStatus(), accountBill.getPaymentStatus(), accountBill.getAmountPaid());
             accountPairMap.put(accountBill.getAccount(), costItemsPair);
         });
         mapAllBillAccountItemsIntoHashMap(bill, accountPairMap);
@@ -229,6 +231,7 @@ public class BillFacadeImpl implements BillFacade {
             if (itemSplitDTO.getInvitationStatus() == InvitationStatusEnum.ACCEPTED) {
                 itemSplitDTO.setSubTotal(detailedAccountBillInformation.getCost().setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP));
                 itemSplitDTO.setItems(detailedAccountBillInformation.getItemList());
+                itemSplitDTO.setAmountPaid(detailedAccountBillInformation.getAmountPaid());
             }
 
             itemsPerAccount.add(itemSplitDTO);

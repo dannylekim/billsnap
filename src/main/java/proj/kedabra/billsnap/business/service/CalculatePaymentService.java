@@ -32,6 +32,7 @@ public interface CalculatePaymentService {
      */
     BigDecimal calculateSubTotal(Bill bill);
 
+
     /**
      * Calculate the taxes for a subtotal. It will return a value at the end set to 2 decimal places and rounded {@link java.math.RoundingMode#HALF_UP}
      *
@@ -52,4 +53,13 @@ public interface CalculatePaymentService {
      * @return a value with 2 decimal places rounded {@link java.math.RoundingMode#HALF_UP}
      */
     BigDecimal calculateTip(@Nullable BigDecimal tipAmount, @Nullable BigDecimal tipPercent, BigDecimal total);
+
+    /**
+     * Calculate the remaining amount to pay in bill
+     *
+     * @param total      A total amount to pay in the bill
+     * @param amountPaid An amount paid up until now
+     * @return the remaining amount to pay set to 2 decimal places and rounded {@link java.math.RoundingMode#HALF_UP}
+     */
+    BigDecimal calculateAmountRemaining(BigDecimal total, BigDecimal amountPaid);
 }
