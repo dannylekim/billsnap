@@ -95,4 +95,18 @@ class CalculatePaymentServiceImplTest {
         //Then
         assertThat(balance).isEqualByComparingTo(new BigDecimal("4.84"));
     }
+
+    @Test
+    @DisplayName("Must calculate the amount remaining")
+    void shouldCalculateAmountRemaining() {
+        // Given
+        final var total = new BigDecimal("10.00");
+        final var amountPaid = new BigDecimal("2.00");
+
+        // When
+        final var balance = calculatePaymentService.calculateAmountRemaining(total, amountPaid);
+
+        //Then
+        assertThat(balance).isEqualByComparingTo(new BigDecimal("8.00"));
+    }
 }

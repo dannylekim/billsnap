@@ -912,11 +912,11 @@ class BillFacadeImplIT {
             assertThat(info.getPaidStatus()).isNull();
 
             if (!info.getAmountRemaining().toString().equals("7.20")) {
-                assertThat(info.getAmountPaid().toString()).isEqualTo("3.0");
-                assertThat(info.getAmountRemaining().toString()).isEqualTo("4.20");
+                assertThat(info.getAmountPaid()).isEqualByComparingTo(new BigDecimal("3.0"));
+                assertThat(info.getAmountRemaining()).isEqualByComparingTo(new BigDecimal("4.20"));
             } else {
-                assertThat(info.getAmountPaid().toString()).isEqualTo("0");
-                assertThat(info.getAmountRemaining().toString()).isEqualTo("7.20");
+                assertThat(info.getAmountPaid()).isEqualByComparingTo(new BigDecimal("0"));
+                assertThat(info.getAmountRemaining()).isEqualByComparingTo(new BigDecimal("7.20"));
             }
         });
     }
