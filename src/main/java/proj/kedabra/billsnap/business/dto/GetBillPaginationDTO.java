@@ -1,6 +1,5 @@
 package proj.kedabra.billsnap.business.dto;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
