@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap.fixtures;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +23,10 @@ public final class GetBillPaginationDTOFixture {
         final var billPagination = new GetBillPaginationDTO();
 
         billPagination.setEmail("billPagination@email.com");
-        final LocalDate startDate = LocalDate.of(2019, Month.JANUARY, 1);
+        final LocalDateTime startDate = LocalDateTime.of(2019, Month.JANUARY, 1, 0, 0, 0);
         billPagination.setStartDate(startDate);
 
-        final LocalDate endDate = LocalDate.of(2020, Month.JANUARY, 1);
+        final LocalDateTime endDate = LocalDateTime.of(2020, Month.JANUARY, 1, 0, 0,0);
         billPagination.setEndDate(endDate);
         billPagination.setCategory("restaurant");
 
@@ -50,10 +51,10 @@ public final class GetBillPaginationDTOFixture {
 
         billPagination.setEmail("billPagination@email.com");
 
-        final LocalDate startDate = LocalDate.of(2019, Month.JANUARY, 1);
+        final LocalDateTime startDate = LocalDateTime.of(2019, Month.JANUARY, 1, 0, 0 ,0);
         billPagination.setStartDate(startDate);
 
-        final LocalDate endDate = LocalDate.of(2019, Month.DECEMBER, 31);
+        final LocalDateTime endDate = LocalDateTime.of(2019, Month.DECEMBER, 31, 0, 0, 0);
         billPagination.setEndDate(endDate);
 
         final List<BillStatusEnum> statuses = new ArrayList<>();

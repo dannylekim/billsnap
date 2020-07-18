@@ -110,8 +110,8 @@ class GetBillControllerIT {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var path1 = "/bills?statuses=OPEN&&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=restaurant&sort_by=CREATED&order_by=ASC";
-        final var path2 = "/bills?statuses=OPEN&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=bus&sort_by=CREATED&order_by=ASC";
+        final var path1 = "/bills?statuses=OPEN&&start=2019-01-01T00:00:00.000&end=2020-01-01T00:00:00.000&page_size=2&page_number=0&category=restaurant&sort_by=CREATED&order_by=ASC";
+        final var path2 = "/bills?statuses=OPEN&start=2019-01-01T00:00:00.000&end=2020-01-01T00:00:00.000&page_size=2&page_number=0&category=bus&sort_by=CREATED&order_by=ASC";
 
         //When
         final MvcResult result1 = performMvcGetRequest(bearerToken, 200, path1);
@@ -139,8 +139,8 @@ class GetBillControllerIT {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var path1 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&category=restaurant&sort_by=STATUS&order_by=DESC";
-        final var path2 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=5&page_number=0&category=restaurant&sort_by=STATUS&order_by=ASC";
+        final var path1 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01T00:00:00.000&end=2020-01-01T00:00:00.000&page_size=2&page_number=0&category=restaurant&sort_by=STATUS&order_by=DESC";
+        final var path2 = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01T00:00:00.000&end=2020-01-01T00:00:00.000&page_size=5&page_number=0&category=restaurant&sort_by=STATUS&order_by=ASC";
 
         //When
         final MvcResult result1 = performMvcGetRequest(bearerToken, 200, path1);
@@ -167,7 +167,7 @@ class GetBillControllerIT {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("billPagination@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final var path = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01&end=2020-01-01&page_size=2&page_number=0&sort_by=CATEGORY&order_by=ASC";
+        final var path = "/bills?statuses=OPEN&statuses=IN_PROGRESS&statuses=RESOLVED&start=2019-01-01T00:00:00.000&end=2020-01-01T00:00:00.000&page_size=2&page_number=0&sort_by=CATEGORY&order_by=ASC";
 
         //When
         final MvcResult result = performMvcGetRequest(bearerToken, 200, path);
