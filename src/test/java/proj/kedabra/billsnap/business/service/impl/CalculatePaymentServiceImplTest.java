@@ -100,7 +100,7 @@ class CalculatePaymentServiceImplTest {
     @DisplayName("Must calculate the amount remaining")
     void shouldCalculateAmountRemaining() {
         // Given
-        final var total = new BigDecimal("10.00");
+        final var total = BigDecimal.TEN;
         final var amountPaid = new BigDecimal("2.00");
 
         // When
