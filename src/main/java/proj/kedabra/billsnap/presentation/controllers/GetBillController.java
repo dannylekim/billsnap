@@ -87,8 +87,8 @@ public class GetBillController {
         final var billPaginationDTO = new GetBillPaginationDTO();
         billPaginationDTO.setEmail(principal.getName());
         billPaginationDTO.setStatuses(statuses);
-        billPaginationDTO.setStartDate(startDate.atStartOfDay());
-        billPaginationDTO.setEndDate(endDate.atStartOfDay());
+        billPaginationDTO.setStartDate(startDate);
+        billPaginationDTO.setEndDate(endDate);
         billPaginationDTO.setCategory(category);
         final var sort = Sort.by(Sort.Direction.fromString(orderBy.name()), sortBy.stream().map(Enum::name).map(String::toLowerCase).toArray(String[]::new));
         final var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
