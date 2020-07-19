@@ -9,7 +9,7 @@ import java.time.ZonedDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-public class GetBillPaginationDTOTest {
+class GetBillPaginationDTOTest {
 
     @Test
     @DisplayName("Should convert LocalDate to ZonedDateTime")
@@ -30,15 +30,15 @@ public class GetBillPaginationDTOTest {
         assertThat(startDateZone.getYear()).isEqualTo(2019);
         assertThat(startDateZone.getMonth()).isEqualTo(Month.DECEMBER);
         assertThat(startDateZone.getDayOfMonth()).isEqualTo(1);
-        assertThat(startDateZone.getHour()).isEqualTo(0);
-        assertThat(startDateZone.getMinute()).isEqualTo(0);
-        assertThat(startDateZone.getSecond()).isEqualTo(0);
+        assertThat(startDateZone.getHour()).isZero();
+        assertThat(startDateZone.getMinute()).isZero();
+        assertThat(startDateZone.getSecond()).isZero();
         assertThat(endDateZone.getYear()).isEqualTo(2020);
         assertThat(endDateZone.getMonth()).isEqualByComparingTo(Month.APRIL);
         assertThat(endDateZone.getDayOfMonth()).isEqualTo(4);
-        assertThat(endDateZone.getHour()).isEqualTo(0);
-        assertThat(endDateZone.getMinute()).isEqualTo(0);
-        assertThat(endDateZone.getSecond()).isEqualTo(0);
+        assertThat(endDateZone.getHour()).isZero();
+        assertThat(endDateZone.getMinute()).isZero();
+        assertThat(endDateZone.getSecond()).isZero();
 
     }
 
