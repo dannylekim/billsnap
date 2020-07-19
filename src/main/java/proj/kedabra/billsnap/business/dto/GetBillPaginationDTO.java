@@ -29,11 +29,11 @@ public class GetBillPaginationDTO {
     private Pageable pageable;
 
     public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate.atStartOfDay(ZoneId.systemDefault());
+        this.startDate = startDate.atStartOfDay().atZone(ZoneId.systemDefault());
     }
 
     public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate.atStartOfDay(ZoneId.systemDefault());
+        this.endDate = endDate.atStartOfDay().atZone(ZoneId.systemDefault());
     }
 
 
