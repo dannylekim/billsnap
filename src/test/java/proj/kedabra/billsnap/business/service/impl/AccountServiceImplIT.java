@@ -181,5 +181,4 @@ class AccountServiceImplIT {
                 .withMessage(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage());
 
     }
-
 }
