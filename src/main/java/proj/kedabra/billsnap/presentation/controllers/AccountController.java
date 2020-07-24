@@ -29,6 +29,7 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.presentation.resources.BaseAccountResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 import proj.kedabra.billsnap.utils.CacheNames;
@@ -97,8 +98,16 @@ public class AccountController {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));
     }
 
-//    @PutMapping(path = "/account")
-//    @Operation(summary = "Edit account information", description = "Edit account information")
-//    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
+    @PutMapping(path = "/account")
+    @Operation(summary = "Edit account information", description = "Edit account information")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist \t\n" + "FirstName and LastName cannot be empty.")
+    @ResponseStatus(HttpStatus.OK)
+    public AccountResource editAccount(
+            @RequestBody @Valid final BaseAccountResource editAccountResource,
+            final BindingResult bindingResult,
+            @AuthenticationPrincipal final Principal principal) {
+        return null;
+    }
 
 }
