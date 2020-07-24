@@ -158,24 +158,4 @@ class AccountServiceImplTest {
                 .withMessage(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage());
     }
 
-    @Test
-    @DisplayName("Should throw exception if input is Incorrect")
-    void shouldThrowExceptionIfInputIsIncorrect() {
-        //Given
-        final String email = "test@email.com";
-        final Account accountEntity = AccountEntityFixture.getDefaultAccount();
-        final BaseAccountDTO editAccount1 = BaseAccountDTOFixture.getDefault();
-        editAccount1.setFirstName("");
-        final BaseAccountDTO editAccount2 = BaseAccountDTOFixture.getDefault();
-        editAccount2.setLastName(null);
-
-        when(accountRepository.getAccountByEmail(email)).thenReturn(accountEntity);
-
-        //when/then
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accountServiceImpl.edit(email, editAccount1))
-                .withMessage(ErrorMessageEnum.INCORRECT_LN_FN_INPUT.getMessage());
-
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accountServiceImpl.edit(email, editAccount2))
-                .withMessage(ErrorMessageEnum.INCORRECT_LN_FN_INPUT.getMessage());
-    }
 }

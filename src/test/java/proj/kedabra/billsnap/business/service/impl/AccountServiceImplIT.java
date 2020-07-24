@@ -182,23 +182,4 @@ class AccountServiceImplIT {
 
     }
 
-    @Test
-    @DisplayName("Should throw exception if input is Incorrect")
-    void shouldThrowExceptionIfInputIsIncorrect() {
-        //Given
-        final String email = "test@email.com";
-        final Account accountEntity = AccountEntityFixture.getDefaultAccount();
-        final BaseAccountDTO editAccount1 = BaseAccountDTOFixture.getDefault();
-        editAccount1.setFirstName("");
-        final BaseAccountDTO editAccount2 = BaseAccountDTOFixture.getDefault();
-        editAccount2.setLastName(null);
-
-        //when/then
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accountService.edit(email, editAccount1))
-                .withMessage(ErrorMessageEnum.INCORRECT_LN_FN_INPUT.getMessage());
-
-        assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> accountService.edit(email, editAccount2))
-                .withMessage(ErrorMessageEnum.INCORRECT_LN_FN_INPUT.getMessage());
-    }
-
 }
