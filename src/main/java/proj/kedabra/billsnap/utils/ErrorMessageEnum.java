@@ -35,7 +35,6 @@ public enum ErrorMessageEnum {
     WRONG_TIP_FORMAT("Tip format is incorrect."),
     WRONG_INVITATION_STATUS("The invitation is not in {} status."),
     TAX_ID_DOES_NOT_EXIST("No tax exists with that id: {}"),
-    INCORRECT_LN_FN_INPUT("FirstName and LastName cannot be empty."),
 
     //=========================================TESTING ONLY===============================================
     TEST_DIFFERENT_POSITION_PARAMS("First Param: {} , Second Param: {} , Third Param: {}");
