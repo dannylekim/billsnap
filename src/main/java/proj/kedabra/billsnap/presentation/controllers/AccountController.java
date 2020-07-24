@@ -10,6 +10,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -95,5 +96,9 @@ public class AccountController {
     public AccountResource getAccount(@AuthenticationPrincipal final Principal principal) {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));
     }
+
+//    @PutMapping(path = "/account")
+//    @Operation(summary = "Edit account information", description = "Edit account information")
+//    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
 
 }

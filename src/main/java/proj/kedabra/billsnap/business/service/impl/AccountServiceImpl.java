@@ -10,6 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import io.micrometer.core.instrument.util.StringUtils;
+
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.BaseAccountDTO;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
@@ -63,7 +65,10 @@ public class AccountServiceImpl implements AccountService {
         var account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
 
-        mapper.update(account, editInfo);
+        if (StringUtils.isBlank(editInfo.getFirstName()) || StringUtils.isBlank(editInfo.getLastName()))
+            throw new IllegalArgumentException(ErrorMessageEnum.INCORRECT_LN_FN_INPUT.getMessage());
+
+        mapper.updateAccount(account, editInfo);
 
         return accountRepository.save(account);
     }

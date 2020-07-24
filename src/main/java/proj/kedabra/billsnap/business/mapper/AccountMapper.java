@@ -31,6 +31,6 @@ public interface AccountMapper {
     @Mapping(source = "editInfo.phoneNumber", target = "phoneNumber")
     @Mapping(source = "editInfo.birthDate", target = "birthDate")
     @Mapping(source = "editInfo.location", target = "location")
-    void update(@MappingTarget Account account, BaseAccountDTO editInfo);
+    void updateAccount(@MappingTarget Account account, BaseAccountDTO editInfo);
 
 }
