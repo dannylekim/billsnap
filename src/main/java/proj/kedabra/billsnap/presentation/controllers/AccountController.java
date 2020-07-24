@@ -4,6 +4,7 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -98,7 +99,7 @@ public class AccountController {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));
     }
 
-    @Cacheable(value = CacheNames.PROFILE, key = "#principal.name")
+    @CachePut(value = CacheNames.PROFILE, key = "#principal.name")
     @PutMapping(path = "/account")
     @Operation(summary = "Edit account information", description = "Edit account information")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")

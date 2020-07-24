@@ -29,6 +29,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
 import proj.kedabra.billsnap.fixtures.AccountCreationResourceFixture;
 import proj.kedabra.billsnap.fixtures.BaseAccountResourceFixture;
 import proj.kedabra.billsnap.fixtures.UserFixture;
@@ -435,7 +436,7 @@ class AccountControllerIT {
         assertThat(accountResource.getLastName()).isEqualTo("lastName");
         assertThat(accountResource.getMiddleName()).isEqualTo("middleName");
         assertThat(accountResource.getEmail()).isEqualTo(user.getUsername());
-        assertThat(accountResource.getGender()).isEqualTo("MALE");
+        assertThat(accountResource.getGender()).isEqualTo(GenderEnum.MALE);
         assertThat(accountResource.getPhoneNumber()).isEqualTo("123456789");
     }
 

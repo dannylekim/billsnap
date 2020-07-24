@@ -8,7 +8,7 @@ import javax.validation.constraints.NotBlank;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
-import proj.kedabra.billsnap.business.model.entities.Location;
+import proj.kedabra.billsnap.business.utils.enums.GenderEnum;
 
 @Data
 public class BaseAccountResource implements Serializable {
@@ -25,7 +25,7 @@ public class BaseAccountResource implements Serializable {
     protected String lastName;
 
     @Schema(description = "Gender of the user")
-    protected String gender;
+    protected GenderEnum gender;
 
     @Schema(description = "Phone number of the user")
     protected String phoneNumber;
@@ -34,5 +34,5 @@ public class BaseAccountResource implements Serializable {
     protected LocalDate birthDate;
 
     @Schema(description = "Location of the User")
-    protected Location location;
+    protected LocationResource location;
 }
