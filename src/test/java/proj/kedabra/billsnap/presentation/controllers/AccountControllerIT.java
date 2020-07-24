@@ -450,9 +450,9 @@ class AccountControllerIT {
         final var editAccountResource = BaseAccountResourceFixture.getDefault();
 
         //When
-        MvcResult result = performMvcPutRequest(bearerToken, path, editAccountResource,200);
-        String content = result.getResponse().getContentAsString();
-        AccountResource accountResource = mapper.readValue(content, AccountResource.class);
+        final MvcResult result = performMvcPutRequest(bearerToken, path, editAccountResource,200);
+        final String content = result.getResponse().getContentAsString();
+        final AccountResource accountResource = mapper.readValue(content, AccountResource.class);
 
         //Then
         assertThat(accountResource.getId()).isEqualTo(3000L);
@@ -464,6 +464,34 @@ class AccountControllerIT {
         assertThat(accountResource.getPhoneNumber()).isEqualTo(editAccountResource.getPhoneNumber());
         assertThat(accountResource.getBirthDate().getYear()).isEqualTo(editAccountResource.getBirthDate().getYear());
         assertThat(accountResource.getLocation().getCity()).isEqualTo(editAccountResource.getLocation().getCity());
+    }
+
+    @Test
+    @DisplayName("Should return error when first name or last name are blank")
+    void shouldReturnErrorWhenFirstNameOrLastNameAreBlank() throws Exception {
+        //Given
+        final var user = UserFixture.getDefault();
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var path = "/account";
+
+        final var editAccountResource1 = BaseAccountResourceFixture.getDefault();
+        editAccountResource1.setFirstName("");
+
+        final var editAccountResource2 = BaseAccountResourceFixture.getDefault();
+        editAccountResource2.setLastName(null);
+
+        //When
+        final MvcResult result1 = performMvcPutRequest(bearerToken, path, editAccountResource1,400);
+        final String content1 = result1.getResponse().getContentAsString();
+        final ApiError error1 = mapper.readValue(content1, ApiError.class);
+
+        final MvcResult result2 = performMvcPutRequest(bearerToken, path, editAccountResource2,400);
+        final String content2 = result2.getResponse().getContentAsString();
+        final ApiError error2 = mapper.readValue(content2, ApiError.class);
+
+        //Then
+        assertThat(error1.getMessage()).isEqualTo("Invalid Inputs. Please fix the following errors");
+        assertThat(error2.getMessage()).isEqualTo("Invalid Inputs. Please fix the following errors");
     }
 
     private MvcResult performMvcGetRequest(String bearerToken, String path, int resultCode) throws Exception {
