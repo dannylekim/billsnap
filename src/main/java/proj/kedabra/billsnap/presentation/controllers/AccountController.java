@@ -107,7 +107,14 @@ public class AccountController {
             @RequestBody @Valid final BaseAccountResource editAccountResource,
             final BindingResult bindingResult,
             @AuthenticationPrincipal final Principal principal) {
-        return null;
+
+        if (bindingResult.hasErrors()) {
+            throw new FieldValidationException(bindingResult.getAllErrors());
+        }
+
+        final var editAccount = mapper.toDTO(editAccountResource);
+
+        return mapper.toResource(accountFacade.edit(principal.getName(), editAccount));
     }
 
 }
