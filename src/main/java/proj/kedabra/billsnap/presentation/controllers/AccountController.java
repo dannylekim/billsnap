@@ -97,8 +97,4 @@ public class AccountController {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));
     }
 
-//    @PutMapping(path = "/account")
-//    @Operation(summary = "Edit account information", description = "Edit account information")
-//    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
-
 }
