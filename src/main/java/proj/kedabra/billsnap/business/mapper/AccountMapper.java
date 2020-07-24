@@ -1,8 +1,11 @@
 package proj.kedabra.billsnap.business.mapper;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.BaseAccountDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
@@ -20,5 +23,14 @@ public interface AccountMapper {
     AccountDTO toDTO(AccountCreationResource accountCreationResource);
 
     AccountResource toResource(AccountDTO accountDTO);
+
+    @Mapping(source = "editInfo.firstName", target = "firstName")
+    @Mapping(source = "editInfo.middleName", target = "middleName")
+    @Mapping(source = "editInfo.lastName", target = "lastName")
+    @Mapping(source = "editInfo.gender", target = "gender")
+    @Mapping(source = "editInfo.phoneNumber", target = "phoneNumber")
+    @Mapping(source = "editInfo.birthDate", target = "birthDate")
+    @Mapping(source = "editInfo.location", target = "location")
+    void update(@MappingTarget Account account, BaseAccountDTO editInfo);
 
 }

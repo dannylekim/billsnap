@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.BaseAccountDTO;
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.model.entities.Account;
@@ -55,6 +56,16 @@ public class AccountServiceImpl implements AccountService {
     public Account getAccount(String email) {
         return Optional.ofNullable(accountRepository.getAccountByEmail(email))
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
+    }
+
+    @Override
+    public Account edit(String email, BaseAccountDTO editInfo) {
+        var account = Optional.ofNullable(accountRepository.getAccountByEmail(email))
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorMessageEnum.ACCOUNT_DOES_NOT_EXIST.getMessage()));
+
+        mapper.update(account, editInfo);
+
+        return accountRepository.save(account);
     }
 
     @Override
