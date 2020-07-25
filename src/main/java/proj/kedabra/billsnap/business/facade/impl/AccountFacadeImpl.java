@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
+import proj.kedabra.billsnap.business.dto.BaseAccountDTO;
 import proj.kedabra.billsnap.business.facade.AccountFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.service.AccountService;
@@ -34,6 +35,11 @@ public class AccountFacadeImpl implements AccountFacade {
     @Override
     public AccountDTO getAccount(String email) {
         return accountMapper.toDTO(accountService.getAccount(email));
+    }
+
+    @Override
+    public AccountDTO edit(String email, BaseAccountDTO editAccount) {
+        return accountMapper.toDTO(accountService.edit(email, editAccount));
     }
 
 }

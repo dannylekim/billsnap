@@ -4,12 +4,14 @@ import java.security.Principal;
 
 import javax.validation.Valid;
 
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,6 +30,7 @@ import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.presentation.resources.BaseAccountResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResource;
 import proj.kedabra.billsnap.presentation.resources.LoginResponseResource;
 import proj.kedabra.billsnap.utils.CacheNames;
@@ -94,6 +97,26 @@ public class AccountController {
     @ResponseStatus(HttpStatus.OK)
     public AccountResource getAccount(@AuthenticationPrincipal final Principal principal) {
         return mapper.toResource(accountFacade.getAccount(principal.getName()));
+    }
+
+    @CachePut(value = CacheNames.PROFILE, key = "#principal.name")
+    @PutMapping(path = "/account")
+    @Operation(summary = "Edit account information", description = "Edit account information")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully edited account information")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist \t\n" + "FirstName and LastName cannot be empty.")
+    @ResponseStatus(HttpStatus.OK)
+    public AccountResource editAccount(
+            @RequestBody @Valid final BaseAccountResource editAccountResource,
+            final BindingResult bindingResult,
+            @AuthenticationPrincipal final Principal principal) {
+
+        if (bindingResult.hasErrors()) {
+            throw new FieldValidationException(bindingResult.getAllErrors());
+        }
+
+        final var editAccount = mapper.toDTO(editAccountResource);
+
+        return mapper.toResource(accountFacade.edit(principal.getName(), editAccount));
     }
 
 }
