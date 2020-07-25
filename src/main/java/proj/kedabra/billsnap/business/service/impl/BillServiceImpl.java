@@ -308,15 +308,12 @@ public class BillServiceImpl implements BillService {
     }
 
     private void setBillTip(final Bill bill, final EditBillDTO editBill) {
-        if ((bill.getTipAmount() == null && editBill.getTipPercent() == null) || (bill.getTipPercent() == null && editBill.getTipAmount() == null)) {
-            throw new IllegalArgumentException(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+        if ((editBill.getTipAmount() == null) == (editBill.getTipPercent() == null)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
         }
 
-        if (bill.getTipAmount() == null) {
-            bill.setTipPercent(editBill.getTipPercent());
-        } else {
-            bill.setTipAmount(editBill.getTipAmount());
-        }
+        bill.setTipPercent(editBill.getTipPercent());
+        bill.setTipAmount(editBill.getTipAmount());
     }
 
     private void mapItems(final Item item, final Bill bill, final Account account, int percentage) {

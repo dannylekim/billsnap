@@ -737,7 +737,7 @@ class BillServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should throw if edit bill with wrong tip format")
+    @DisplayName("Should throw if edit bill with wrong tip format where both tips have values")
     void shouldThrowIfEditBillWithWrongTipFormat() {
         //Given
         final long billId = 123L;
@@ -745,6 +745,32 @@ class BillServiceImplTest {
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
         editBill.setResponsible(account.getEmail());
         editBill.setTipAmount(BigDecimal.valueOf(20));
+        editBill.setTipPercent(BigDecimal.TEN);
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+        bill.setTipAmount(null);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw if edit bill with wrong tip format where both tips do not have values")
+    void shouldThrowIfEditBillWithTipBeingNull() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible(account.getEmail());
+        editBill.setTipAmount(null);
         editBill.setTipPercent(null);
 
         final var accountBill = AccountBillEntityFixture.getDefault();
@@ -759,34 +785,9 @@ class BillServiceImplTest {
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(billId, account, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
     }
 
-    @Test
-    @DisplayName("Should throw if edit bill with wrong tip format")
-    void shouldThrowIfEditBillWithWrongTipFormatType2() {
-        //Given
-        final long billId = 123L;
-        final Account account = AccountEntityFixture.getDefaultAccount();
-        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.setResponsible(account.getEmail());
-        editBill.setTipAmount(BigDecimal.valueOf(20));
-        editBill.setTipAmount(null);
-
-        final var accountBill = AccountBillEntityFixture.getDefault();
-        accountBill.setAccount(account);
-
-        final Bill bill = BillEntityFixture.getDefault();
-        bill.setAccounts(Set.of(accountBill));
-        bill.setTipPercent(null);
-
-        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
-
-        //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billService.editBill(billId, account, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
-    }
 
     @Test
     @DisplayName("Should throw if Tax Id does not exist in the current bill")

@@ -32,7 +32,6 @@ public enum ErrorMessageEnum {
     NOTIFICATION_ID_DOES_NOT_EXIST("No notification exists with id: {}"),
     ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION("Account is not associated to the specified notification."),
     WRONG_BILL_STATUS("The bill is not in {} status."),
-    WRONG_TIP_FORMAT("Tip format is incorrect."),
     WRONG_INVITATION_STATUS("The invitation is not in {} status."),
     TAX_ID_DOES_NOT_EXIST("No tax exists with that id: {}"),
 

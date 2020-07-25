@@ -833,32 +833,34 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should throw exception if tip format is incorrect tip percentage")
-    void shouldThrowExceptionIfTipFormatIsIncorrectTipPercentage() {
+    @DisplayName("Should throw exception if have both tip values for edit bill")
+    void shouldThrowExceptionIfTipFormatHasBothTipValues() {
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
         editBill.getTaxes().clear();
-        editBill.setTipPercent(null);
+        editBill.setTipPercent(BigDecimal.ONE);
         editBill.setTipAmount(BigDecimal.valueOf(69));
         final var existentBillId = 1000L;
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
     }
 
     @Test
-    @DisplayName("Should throw exception if tip format is incorrectTipAmount")
+    @DisplayName("Should throw exception if both tip is null")
     void shouldThrowExceptionIfTipFormatIsIncorrectTipAmount() {
         final Account account = accountRepository.getAccountByEmail("editbill@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        editBill.setTipAmount(null);
+        editBill.setTipPercent(null);
         editBill.getTaxes().clear();
         editBill.setResponsible("editbill@email.com");
         final var existentBillId = 2001L;
 
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
     }
 
     @Test

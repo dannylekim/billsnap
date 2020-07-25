@@ -771,19 +771,36 @@ class BillFacadeImplIT {
 
     @Test
     @DisplayName("Should throw exception if tip format is incorrect when editing bill")
-    void shouldThrowExceptionWhenResponsibleIsNotPartOfBillWhenEditingBillWhenEditingBill() {
+    void shouldThrowExceptionWhenBothValuesOfTipEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.setResponsible("editBill@email.com");
+        editBill.setTipPercent(BigDecimal.TEN);
+        editBill.setTipAmount(BigDecimal.valueOf(69));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should throw exception if tip format is incorrect when editing bill")
+    void shouldThrowExceptionForNullTipsWhenEditingBill() {
         //Given
         final var billId = 1102L;
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
         editBill.setResponsible("editBill@email.com");
         editBill.setTipPercent(null);
-        editBill.setTipAmount(BigDecimal.valueOf(69));
+        editBill.setTipAmount(null);
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
                 .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
-                .withMessage(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+                .withMessage(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
     }
 
     @Test
@@ -997,7 +1014,7 @@ class BillFacadeImplIT {
             //for the time being we verify a bill with only 1 item. Should be generic when needed.
             if (bill.getItems().size() == 1) {
                 final Item item = bill.getItems().iterator().next();
-                final var itemAssociationSplitDTO = itemsPerAccount.stream().filter(it -> it.getSubTotal().compareTo(BigDecimal.ZERO) > 0).findFirst().get();
+                final var itemAssociationSplitDTO = itemsPerAccount.stream().filter(it -> it.getSubTotal().compareTo(BigDecimal.ZERO) > 0).findFirst().orElseThrow();
                 final ItemPercentageSplitDTO returnItemPercentageSplitDTO = itemAssociationSplitDTO.getItems().get(0);
 
                 assertThat(returnItemPercentageSplitDTO.getName()).isEqualTo(item.getName());

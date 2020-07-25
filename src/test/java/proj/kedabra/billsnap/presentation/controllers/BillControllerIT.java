@@ -1216,15 +1216,15 @@ class BillControllerIT {
     }
 
     @Test
-    @DisplayName("Should return error if tip format is incorrect when editing bill")
-    void shouldReturnErrorIfTipFormatIsIncorrectWhenEditingBill() throws Exception {
+    @DisplayName("Should return error if tip format is incorrect with both values when editing bill")
+    void shouldReturnErrorIfTipFormatIsIncorrectBothValuesWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
-        editBillResource.setTipPercent(null);
+        editBillResource.setTipPercent(BigDecimal.TEN);
         editBillResource.setTipAmount(BigDecimal.valueOf(15));
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
@@ -1234,7 +1234,29 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_TIP_FORMAT.getMessage());
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should return error if tip format is incorrect when editing bill")
+    void shouldReturnErrorIfTipBothNullWhenEditingBill() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        editBillResource.setTipPercent(null);
+        editBillResource.setTipAmount(null);
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        // When
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.MULTIPLE_TIP_METHOD.getMessage());
     }
 
     @Test
