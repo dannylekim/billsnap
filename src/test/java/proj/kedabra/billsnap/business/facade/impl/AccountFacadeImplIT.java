@@ -24,7 +24,7 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @SpringBootTest
 @AutoConfigureTestDatabase
 @Transactional
-public class AccountFacadeImplIT {
+class AccountFacadeImplIT {
 
     @Autowired
     private AccountFacadeImpl accountFacade;
@@ -80,7 +80,7 @@ public class AccountFacadeImplIT {
         assertThat(result.getFirstName()).isEqualTo(editAccount.getFirstName());
         assertThat(result.getLastName()).isEqualTo(editAccount.getLastName());
         assertThat(result.getMiddleName()).isEqualTo(editAccount.getMiddleName());
-        assertThat(result.getGender()).isEqualTo(GenderEnum.FEMALE.toString());
+        assertThat(result.getGender()).isEqualTo(GenderEnum.FEMALE.name());
         assertThat(result.getPhoneNumber()).isEqualTo(editAccount.getPhoneNumber());
         assertThat(result.getBirthDate().getYear()).isEqualTo(2000);
         assertThat(result.getLocation().getCity()).isEqualTo(editAccount.getLocation().getCity());

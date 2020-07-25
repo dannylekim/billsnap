@@ -23,9 +23,9 @@ public interface AccountMapper {
     @ObfuscateArgs
     AccountDTO toDTO(AccountCreationResource accountCreationResource);
 
-    AccountResource toResource(AccountDTO accountDTO);
-
     BaseAccountDTO toDTO(BaseAccountResource baseAccountResource);
+
+    AccountResource toResource(AccountDTO accountDTO);
 
     @Mapping(source = "editInfo.firstName", target = "firstName")
     @Mapping(source = "editInfo.middleName", target = "middleName")

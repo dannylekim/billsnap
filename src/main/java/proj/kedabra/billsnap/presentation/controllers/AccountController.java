@@ -102,7 +102,7 @@ public class AccountController {
     @CachePut(value = CacheNames.PROFILE, key = "#principal.name")
     @PutMapping(path = "/account")
     @Operation(summary = "Edit account information", description = "Edit account information")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully get account information")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = AccountResource.class)), description = "Successfully edited account information")
     @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account doesn't exist \t\n" + "FirstName and LastName cannot be empty.")
     @ResponseStatus(HttpStatus.OK)
     public AccountResource editAccount(
