@@ -8,9 +8,6 @@ import lombok.Data;
 @Data
 public final class LocationResource implements Serializable {
 
-    @Schema(description = "Unique ID of the location")
-    private long id;
-
     @Schema(description = "Name of location")
     private String name;
 
