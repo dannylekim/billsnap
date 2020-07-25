@@ -3,6 +3,7 @@ package proj.kedabra.billsnap.business.service.impl;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.exception.ResourceNotFoundException;
+import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Item;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.business.repository.BillRepository;
@@ -26,7 +28,7 @@ import proj.kedabra.billsnap.utils.SpringProfiles;
 @ActiveProfiles(SpringProfiles.TEST)
 @SpringBootTest
 @Transactional
-public class ItemServiceImplIT {
+class ItemServiceImplIT {
 
     @Autowired
     private ItemServiceImpl itemService;
@@ -48,7 +50,7 @@ public class ItemServiceImplIT {
 
         // Then
         assertThat(res.getId()).isEqualTo(existingItemId);
-        assertThat(res.getCost().toString()).isEqualTo("69.00");
+        assertThat(res.getCost()).isEqualByComparingTo(new BigDecimal("69.00"));
     }
 
     @Test
@@ -81,7 +83,8 @@ public class ItemServiceImplIT {
         itemService.editNewItems(persistedBill, account, editBill);
 
         // item
-        final var items = new ArrayList<>(persistedBill.getItems());
+        final var editedBill = billRepository.save(persistedBill);
+        final var items = new ArrayList<>(editedBill.getItems());
 
         assertThat(items).hasSameSizeAs(editBill.getItems());
 

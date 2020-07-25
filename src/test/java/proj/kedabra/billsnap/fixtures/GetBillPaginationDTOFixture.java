@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 
 import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.presentation.resources.OrderByEnum;
 import proj.kedabra.billsnap.presentation.resources.SortByEnum;
 
@@ -38,6 +39,8 @@ public final class GetBillPaginationDTOFixture {
         final List<SortByEnum> sortByList = new ArrayList<>();
         sortByList.add(SortByEnum.CREATED);
 
+        billPagination.setInvitationStatus(InvitationStatusEnum.ACCEPTED);
+
         final var sort = Sort.by(Sort.Direction.fromString(OrderByEnum.ASC.name()), sortByList.stream().map(Enum::name).map(String::toLowerCase).toArray(String[]::new));
         final Pageable pageable = PageRequest.of(0, 2, sort);
         billPagination.setPageable(pageable);
@@ -61,6 +64,8 @@ public final class GetBillPaginationDTOFixture {
         statuses.add(BillStatusEnum.RESOLVED);
         statuses.add(BillStatusEnum.IN_PROGRESS);
         billPagination.setStatuses(statuses);
+
+        billPagination.setInvitationStatus(InvitationStatusEnum.ACCEPTED);
 
         billPagination.setCategory(category);
 
