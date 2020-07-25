@@ -143,7 +143,7 @@ class BillServiceImplIT {
 
     @Test
     @DisplayName("Should return bill according to pagination when sorted by creation")
-    void shouldReturnBillAccordingToPaginationWhenSortedByCreation() {
+    void shouldReturnBillAccordingToPaginationWhenSortedByCreationAndAccepted() {
         //Given
         final var billPagination1 = GetBillPaginationDTOFixture.getDefault();
 
@@ -168,6 +168,11 @@ class BillServiceImplIT {
         assertThat(result3).hasSize(2);
         assertThat(result3.get(0).getName()).isEqualTo("bill pagination 4");
         assertThat(result3.get(1).getName()).isEqualTo("bill pagination 3");
+
+        assertThat(result1.stream().map(Bill::getAccounts).findFirst().orElse(Set.of()).stream().map(AccountBill::getStatus).allMatch(InvitationStatusEnum.ACCEPTED::equals)).isTrue();
+        assertThat(result2.stream().map(Bill::getAccounts).findFirst().orElse(Set.of()).stream().map(AccountBill::getStatus).allMatch(InvitationStatusEnum.ACCEPTED::equals)).isTrue();
+        assertThat(result3.stream().map(Bill::getAccounts).findFirst().orElse(Set.of()).stream().map(AccountBill::getStatus).allMatch(InvitationStatusEnum.ACCEPTED::equals)).isTrue();
+
     }
 
     @Test
@@ -208,6 +213,21 @@ class BillServiceImplIT {
     }
 
     @Test
+    @DisplayName("Should return pending bills")
+    void shouldReturnBillPendingInvitationStatus() {
+        //Given
+        final var billPagination = GetBillPaginationDTOFixture.getDefault();
+        billPagination.setInvitationStatus(InvitationStatusEnum.PENDING);
+
+        //When
+        final List<Bill> result = billService.getAllBillsByAccountPageable(billPagination).collect(Collectors.toList());
+
+        //Then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).getName()).isEqualTo("bill pagination 7");
+    }
+
+    @Test
     @DisplayName("Should return correct summation amount of amount owed per email")
     void shouldReturnCorrectSummationAmountOfOwedPerEmail() {
         //Given
@@ -219,9 +239,9 @@ class BillServiceImplIT {
 
         //Then
         assertThat(paymentOwedList.get(0).getEmail()).isEqualTo("user@user.com");
-        assertThat(paymentOwedList.get(0).getAmount()).isEqualTo("133.00");
+        assertThat(paymentOwedList.get(0).getAmount()).isEqualByComparingTo(new BigDecimal("133.00"));
         assertThat(paymentOwedList.get(1).getEmail()).isEqualTo("userdetails@service.com");
-        assertThat(paymentOwedList.get(1).getAmount()).isEqualTo("489.00");
+        assertThat(paymentOwedList.get(1).getAmount()).isEqualByComparingTo(new BigDecimal("489.00"));
     }
 
     @Test
@@ -235,7 +255,7 @@ class BillServiceImplIT {
         final List<PaymentOwed> paymentOwedList = billService.getAllAmountOwedByStatusAndAccount(BillStatusEnum.OPEN, account).collect(Collectors.toList());
 
         //Then
-        assertThat(paymentOwedList.size()).isEqualTo(0);
+        assertThat(paymentOwedList.size()).isZero();
     }
 
     @Test
@@ -704,10 +724,10 @@ class BillServiceImplIT {
             assertThat(items.get(0).getId()).isEqualTo(editBill.getItems().get(0).getId());
             assertThat(items.get(0).getCost()).isEqualByComparingTo(BigDecimal.TEN);
             assertThat(items.get(1).getId()).isNotNull();
-            assertThat(items.get(1).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(1).getCost()).isEqualByComparingTo(editBill.getItems().get(1).getCost());
         } else {
             assertThat(items.get(0).getId()).isNotNull();
-            assertThat(items.get(0).getCost().toString()).isEqualTo(editBill.getItems().get(1).getCost().toString());
+            assertThat(items.get(0).getCost()).isEqualByComparingTo(editBill.getItems().get(1).getCost());
             assertThat(items.get(1).getId()).isEqualTo(editBill.getItems().get(0).getId());
             assertThat(items.get(1).getCost()).isEqualByComparingTo(BigDecimal.TEN);
 
