@@ -9,6 +9,7 @@ import proj.kedabra.billsnap.business.dto.BaseAccountDTO;
 import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.presentation.resources.AccountCreationResource;
 import proj.kedabra.billsnap.presentation.resources.AccountResource;
+import proj.kedabra.billsnap.presentation.resources.BaseAccountResource;
 import proj.kedabra.billsnap.utils.annotations.ObfuscateArgs;
 
 
@@ -23,6 +24,8 @@ public interface AccountMapper {
     AccountDTO toDTO(AccountCreationResource accountCreationResource);
 
     AccountResource toResource(AccountDTO accountDTO);
+
+    BaseAccountDTO toDTO(BaseAccountResource baseAccountResource);
 
     @Mapping(source = "editInfo.firstName", target = "firstName")
     @Mapping(source = "editInfo.middleName", target = "middleName")
