@@ -110,6 +110,7 @@ public class BillServiceImpl implements BillService {
                 billPaginationDTO.getEndDate(),
                 billPaginationDTO.getCategory(),
                 billPaginationDTO.getStatuses(),
+                billPaginationDTO.getInvitationStatus(),
                 billPaginationDTO.getEmail(),
                 billPaginationDTO.getPageable()
         );
