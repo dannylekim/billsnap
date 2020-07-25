@@ -31,7 +31,7 @@ import proj.kedabra.billsnap.fixtures.ItemEntityFixture;
 import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @ExtendWith(MockitoExtension.class)
-public class ItemServiceImplTest {
+class ItemServiceImplTest {
 
     @Mock
     private ItemRepository itemRepository;
@@ -86,7 +86,6 @@ public class ItemServiceImplTest {
 
         when(itemMapper.toEntity(any())).thenReturn(newItem);
         when(itemRepository.findById(any())).thenReturn(Optional.of(repoItem));
-        when(itemRepository.save(any())).thenAnswer(s -> s.getArgument(0));
         doAnswer((invocation) -> {
             final var source = invocation.getArgument(0, ItemDTO.class);
             final var target = invocation.getArgument(1, Item.class);

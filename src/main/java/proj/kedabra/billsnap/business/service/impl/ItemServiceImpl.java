@@ -55,7 +55,7 @@ public class ItemServiceImpl implements ItemService {
                 accountItem.setItem(item);
 
                 item.getAccounts().add(accountItem);
-                items.add(itemRepository.save(item));
+                items.add(item);
             } else {
                 final var existingItem = getItem(it.getId());
 

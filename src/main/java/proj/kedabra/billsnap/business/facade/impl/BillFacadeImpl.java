@@ -5,6 +5,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -181,7 +182,7 @@ public class BillFacadeImpl implements BillFacade {
                     final var accountTip = item.getSubTotal().divide(billSubTotal, RoundingMode.HALF_UP).multiply(totalTip).setScale(CalculatePaymentService.DOLLAR_SCALE, RoundingMode.HALF_UP);
                     item.setTip(accountTip);
                     final var total = item.getSubTotal().add(item.getTaxes()).add(item.getTip());
-                    item.setAmountRemaining(calculatePaymentService.calculateAmountRemaining(total, item.getAmountPaid()));
+                    item.setAmountRemaining(calculatePaymentService.calculateAmountRemaining(total, Optional.ofNullable(item.getAmountPaid()).orElse(BigDecimal.ZERO)));
                 });
 
         final var itemDTOs = bill.getItems().stream().map(itemMapper::toDTO).collect(Collectors.toList());
