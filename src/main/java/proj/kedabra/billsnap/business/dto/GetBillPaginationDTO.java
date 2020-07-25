@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 
 @Getter
 @Setter
@@ -19,6 +20,8 @@ public class GetBillPaginationDTO {
     private String email;
 
     private List<BillStatusEnum> statuses;
+
+    private InvitationStatusEnum invitationStatus;
 
     private ZonedDateTime startDate;
 

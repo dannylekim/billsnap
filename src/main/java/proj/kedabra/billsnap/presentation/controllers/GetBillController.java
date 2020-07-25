@@ -31,6 +31,7 @@ import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
+import proj.kedabra.billsnap.business.utils.enums.InvitationStatusEnum;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.OrderByEnum;
 import proj.kedabra.billsnap.presentation.resources.ShortBillResource;
@@ -58,9 +59,11 @@ public class GetBillController {
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     public List<ShortBillResource> getAllBills(
-            @Parameter(name = "statuses", description = "Available statuses")
+            @Parameter(name = "statuses", description = "Bill status")
             @RequestParam(value = "statuses", defaultValue = "OPEN, IN_PROGRESS, RESOLVED")
             @NotEmpty(message = "Can not have empty list of statuses") final List<BillStatusEnum> statuses,
+            @Parameter(name = "invitation_status", description = "User's invitation status on the bill")
+            @RequestParam(value = "invitation_status", defaultValue = "ACCEPTED") final InvitationStatusEnum invitationStatus,
             @Parameter(name = "start", description = "Start date, input value format should be yyyy-MM-dd")
             @RequestParam(value = "start", defaultValue = "1970-01-01")
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
@@ -72,15 +75,15 @@ public class GetBillController {
             @Parameter(name = "page_size", description = "Number of bills in a single request")
             @RequestParam(value = "page_size", defaultValue = "100")
             @Range(message = "the number must be positive") final int pageSize,
-            @Parameter(name = "page_number", description = "Get bills according to page number")
+            @Parameter(name = "page_number", description = "Page number of the request")
             @RequestParam(value = "page_number", defaultValue = "0")
             @Range(message = "the number must be positive") final int pageNumber,
-            @Parameter(name = "category", description = "Category of bill")
+            @Parameter(name = "category", description = "Category of bills")
             @RequestParam(value = "category", required = false) String category,
             @RequestParam(value = "sort_by", defaultValue = "CREATED, STATUS")
             @Parameter(name = "sort_by", description = "Sort bills by created, status and category")
             @NotEmpty(message = "Can not have empty list of sort by") final List<SortByEnum> sortBy,
-            @Parameter(name = "order_by", description = "Sort bills by ascendant or descendant")
+            @Parameter(name = "order_by", description = "Sort bills by ascending or descending")
             @RequestParam(value = "order_by", defaultValue = "DESC") final OrderByEnum orderBy,
             @AuthenticationPrincipal final Principal principal) {
 
@@ -90,6 +93,7 @@ public class GetBillController {
         billPaginationDTO.setStartDate(startDate);
         billPaginationDTO.setEndDate(endDate);
         billPaginationDTO.setCategory(category);
+        billPaginationDTO.setInvitationStatus(invitationStatus);
         final var sort = Sort.by(Sort.Direction.fromString(orderBy.name()), sortBy.stream().map(Enum::name).map(String::toLowerCase).toArray(String[]::new));
         final var pageRequest = PageRequest.of(pageNumber, pageSize, sort);
         billPaginationDTO.setPageable(pageRequest);
