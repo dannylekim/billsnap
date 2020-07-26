@@ -63,12 +63,13 @@ class NotificationControllerIT {
 
     @Test
     @DisplayName("Should return 200 when answering invitation with ACCEPT")
-    public void shouldReturn200WhenAnsweringInvitationWithAccept() throws Exception {
+    void shouldReturn200WhenAnsweringInvitationWithAccept() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 101L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1220L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
         //When/Then
@@ -77,20 +78,21 @@ class NotificationControllerIT {
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
         assertThat(response).isNotNull();
-        final Notifications notification = notificationsRepository.findById(invitationId).get();
-        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).get();
+        final Notifications notification = notificationsRepository.findById(invitationId).orElseThrow();
+        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
 
     }
 
     @Test
     @DisplayName("Should return 200 when answering invitation with DECLINE")
-    public void shouldReturn200WhenAnsweringInvitationWithDecline() throws Exception {
+    void shouldReturn200WhenAnsweringInvitationWithDecline() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 101L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1220L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(false);
 
@@ -98,37 +100,37 @@ class NotificationControllerIT {
         final MvcResult result = performMvcPostRequest(bearerToken, path, answer, 200);
         final String content = result.getResponse().getContentAsString();
 
-        assertThat(content).isEqualTo("");
-        final Notifications notification = notificationsRepository.findById(invitationId).get();
-        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).get();
+        assertThat(content).isEmpty();
+        final Notifications notification = notificationsRepository.findById(invitationId).orElseThrow();
+        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.DECLINED);
 
     }
 
     @Test
     @DisplayName("Should return 400 when invitation answer is null")
-    public void shouldReturn400WhenAnswerInvitationNull() throws Exception {
+    void shouldReturn400WhenAnswerInvitationNull() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 101L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1220L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(null);
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 400);
-        verifyInvalidInputs(mvcResult, 1);
+        verifyInvalidInputs(mvcResult);
     }
 
     @Test
     @DisplayName("Should return 403 when user answering invitation is not associated to invitation")
-    public void shouldReturn403WhenUserAnsweringInvitationNotAssociated() throws Exception {
+    void shouldReturn403WhenUserAnsweringInvitationNotAssociated() throws Exception {
         //Given
-        final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
+        final var user = UserFixture.getDefaultWithEmailAndPassword("userNot@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 102L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1220L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
         //When/Then
@@ -139,30 +141,30 @@ class NotificationControllerIT {
     }
 
     @Test
-    @DisplayName("Should return 404 when invitation id does not exist")
-    public void shouldReturn404WhenInvitationIdDoesNotExist() throws Exception {
+    @DisplayName("Should return 404 when bill id does not exist")
+    void shouldReturn404WhenBillIdDoesNotExist() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 123456789L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 123456789L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 404);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage(Long.toString(invitationId)));
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(Long.toString(billId)));
     }
 
     @Test
     @DisplayName("Should return 405 when the bill that the user is invited to is not Open status")
-    public void shouldReturn405WhenBillNotOpenStatus() throws Exception {
+    void shouldReturn405WhenBillNotOpenStatus() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 103L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1101L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
         //When/Then
@@ -174,12 +176,12 @@ class NotificationControllerIT {
 
     @Test
     @DisplayName("Should return 405 when the invitation status is not PENDING")
-    public void shouldReturn405WhenInvitationStatusNotPending() throws Exception {
+    void shouldReturn405WhenInvitationStatusNotPending() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-        final long invitationId = 104L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
+        final long billId = 1221L;
+        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
 
         //When/Then
@@ -195,13 +197,12 @@ class NotificationControllerIT {
                 .andExpect(status().is(resultCode)).andReturn();
     }
 
-    private ApiError verifyInvalidInputs(MvcResult result, int expectedErrorsAmount) throws java.io.IOException {
+    private void verifyInvalidInputs(MvcResult result) throws java.io.IOException {
         String content = result.getResponse().getContentAsString();
         ApiError error = mapper.readValue(content, ApiError.class);
 
         assertThat(error.getMessage()).isEqualTo(INVALID_INPUTS);
-        assertThat(error.getErrors().size()).isEqualTo(expectedErrorsAmount);
-        return error;
+        assertThat(error.getErrors().size()).isEqualTo(1);
     }
 
 }

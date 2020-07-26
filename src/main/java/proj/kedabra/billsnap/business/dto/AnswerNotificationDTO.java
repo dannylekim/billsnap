@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AnswerNotificationDTO implements Serializable {
 
-    private Long invitationId;
+    private Long billId;
 
     private boolean answer;
 

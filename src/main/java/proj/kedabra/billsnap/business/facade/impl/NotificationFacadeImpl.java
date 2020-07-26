@@ -8,9 +8,6 @@ import proj.kedabra.billsnap.business.dto.BillSplitDTO;
 import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.facade.NotificationFacade;
-import proj.kedabra.billsnap.business.model.entities.Account;
-import proj.kedabra.billsnap.business.model.entities.Bill;
-import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
@@ -34,18 +31,14 @@ public class NotificationFacadeImpl implements NotificationFacade {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public BillSplitDTO answerInvitation(AnswerNotificationDTO answerNotificationDTO) {
-        final Notifications notification = notificationService.getNotification(answerNotificationDTO.getInvitationId());
-        billService.verifyBillStatus(notification.getBill(), BillStatusEnum.OPEN);
-        verifyUserAssociatedToNotification(answerNotificationDTO.getEmail(), notification.getAccount());
+        final var bill = billService.getBill(answerNotificationDTO.getBillId());
+        billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
+        final var usersNotification = bill.getNotifications().stream()
+                .filter(notification -> notification.getAccount().getEmail().equals(answerNotificationDTO.getEmail()))
+                .findFirst()
+                .orElseThrow(() -> new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage()));
+        final var notifiedBill = notificationService.answerInvitation(usersNotification.getId(), answerNotificationDTO.isAnswer());
 
-        final Bill bill = notificationService.answerInvitation(answerNotificationDTO.getInvitationId(), answerNotificationDTO.isAnswer());
-
-        return billFacade.getBillSplitDTO(bill);
-    }
-
-    private void verifyUserAssociatedToNotification(final String userEmail, final Account account) {
-        if (!userEmail.equals(account.getEmail())) {
-            throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
-        }
+        return billFacade.getBillSplitDTO(notifiedBill);
     }
 }
