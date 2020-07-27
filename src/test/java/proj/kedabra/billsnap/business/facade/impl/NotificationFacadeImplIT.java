@@ -42,11 +42,12 @@ class NotificationFacadeImplIT {
     @DisplayName("Should set AccountBill status to ACCEPTED if answer is Accept")
     void shouldSetAccountBillStatusToAcceptedIfAnswerIsAccept() {
         //Given
+        final long billId = 1220L;
         final long invitationId = 101L;
         final boolean answer = true;
         final String email = "user@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setBillId(billId);
         answerNotificationDTO.setAnswer(answer);
         answerNotificationDTO.setEmail(email);
 
@@ -54,8 +55,8 @@ class NotificationFacadeImplIT {
         final BillSplitDTO billSplitDTO = notificationFacade.answerInvitation(answerNotificationDTO);
 
         //Then
-        final Notifications notification = notificationsRepository.findById(invitationId).get();
-        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).get();
+        final Notifications notification = notificationsRepository.findById(invitationId).orElseThrow();
+        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.ACCEPTED);
         assertThat(billSplitDTO).isInstanceOf(BillSplitDTO.class);
     }
@@ -64,11 +65,12 @@ class NotificationFacadeImplIT {
     @DisplayName("Should set AccountBill status to DECLINED if answer is Decline")
     void shouldSetAccountBillStatusToDeclinedIfAnswerIsDecline() {
         //Given
+        final long billId = 1220L;
         final long invitationId = 101L;
         final boolean answer = false;
         final String email = "user@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setBillId(billId);
         answerNotificationDTO.setAnswer(answer);
         answerNotificationDTO.setEmail(email);
 
@@ -76,39 +78,39 @@ class NotificationFacadeImplIT {
         final BillSplitDTO billSplitDTO = notificationFacade.answerInvitation(answerNotificationDTO);
 
         //Then
-        final Notifications notification = notificationsRepository.findById(invitationId).get();
-        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).get();
+        final Notifications notification = notificationsRepository.findById(invitationId).orElseThrow();
+        final AccountBill accountBill = notification.getBill().getAccountBill(notification.getAccount()).orElseThrow();
         assertThat(accountBill.getStatus()).isEqualTo(InvitationStatusEnum.DECLINED);
         assertThat(billSplitDTO).isInstanceOf(BillSplitDTO.class);
     }
 
     @Test
-    @DisplayName("Should throw exception if invitation id is not valid")
-    void shouldThrowExceptionIfInvitationIdDoesNotExist() {
+    @DisplayName("Should throw exception if bill id is not valid")
+    void shouldThrowExceptionIfBillIdDoesNotExist() {
         //Given
         final long nonExistentId = 99929141L;
         final boolean answer = false;
         final String email = "user@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(nonExistentId);
+        answerNotificationDTO.setBillId(nonExistentId);
         answerNotificationDTO.setAnswer(answer);
         answerNotificationDTO.setEmail(email);
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
                 .isThrownBy(() -> notificationFacade.answerInvitation(answerNotificationDTO))
-                .withMessage(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentId)));
+                .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentId)));
 
     }
 
     @Test
-    @DisplayName("Should throw exception if user not associated to notification")
+    @DisplayName("Should throw exception if user not associated to any notification")
     void shouldThrowExceptionIfUserNotAssociatedToNotification() {
         //Given
-        final long invitationId = 102L;
-        final String email = "user@inbill.com";
+        final long billId = 1220;
+        final String email = "userNot@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setBillId(billId);
         answerNotificationDTO.setEmail(email);
 
         //When/Then
@@ -122,10 +124,10 @@ class NotificationFacadeImplIT {
     @DisplayName("Should throw exception if bill is not Open status")
     void shouldThrowExceptionIfBillNotOpenStatus() {
         //Given
-        final long invitationId = 103L;
+        final long billId = 1101;
         final String email = "user@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setBillId(billId);
         answerNotificationDTO.setEmail(email);
 
         //When/Then
@@ -139,10 +141,10 @@ class NotificationFacadeImplIT {
     @DisplayName("Should throw exception if invitation status is not PENDING")
     void shouldThrowExceptionIfInvitationStatusIsNotPending() {
         //Given
-        final long invitationId = 104L;
+        final long billId = 1221;
         final String email = "user@inbill.com";
         final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
+        answerNotificationDTO.setBillId(billId);
         answerNotificationDTO.setEmail(email);
 
         //When/Then
