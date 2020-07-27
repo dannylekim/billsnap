@@ -8,6 +8,8 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +44,7 @@ import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
+@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class BillController {
 
     private final BillMapper billMapper;
@@ -172,6 +175,9 @@ public class BillController {
             "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The user making the request is not the Bill responsible.")
     @ResponseStatus(HttpStatus.OK)
+//    @PreAuthorize(hasPermission('RESPONSIBLE_' +'#billId'))
+//    @PreAuthorize("hasAuthority(#billId)")
+    @PreAuthorize("hasAuthority('RESPONSIBLE_' + #billId)")
     public BillSplitResource editBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                       @PathVariable("billId") final Long billId,
                                       @RequestBody @Valid final EditBillResource editBillResource,

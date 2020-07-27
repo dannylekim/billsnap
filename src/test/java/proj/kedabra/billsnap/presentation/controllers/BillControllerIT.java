@@ -1121,7 +1121,7 @@ class BillControllerIT {
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 200);
+        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 500);
         final var content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplit = mapper.readValue(content, BillSplitResource.class);
 
