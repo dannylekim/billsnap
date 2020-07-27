@@ -210,6 +210,11 @@ INSERT INTO bill (id, name, responsible, creator, status, created, updated, cate
 VALUES (1306, 'bill pagination 7', 11000, 11000, 'OPEN', to_date('2019-05-05', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
         1);
 
+INSERT INTO bill (id, name, responsible, creator, status, created, updated, category, company, occurrence, tip_percent,
+                  tip_amount, split_by, location_id, active)
+VALUES (1400, 'user details resp', 2000, 2000, 'OPEN', to_date('2019-05-05', 'yyyy-MM-dd'), current_timestamp, 'restaurant', null, 0, 15, null, 'ITEM', null,
+        1);
+
 
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1100, 5000, 100, 'ACCEPTED');
@@ -272,6 +277,8 @@ INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1305, 11000, 100, 'ACCEPTED');
 INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
 VALUES (1306, 11000, 100, 'PENDING');
+INSERT INTO bills_vs_accounts (bill_id, account_id, percentage, status)
+VALUES (1400, 2000, 100, 'ACCEPTED');
 
 INSERT INTO item (id, bill_id, name, cost)
 VALUES (1000, 1004, 'potatoes', 69.00);
