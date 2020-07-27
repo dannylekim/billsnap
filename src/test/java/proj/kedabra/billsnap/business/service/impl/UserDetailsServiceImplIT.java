@@ -38,11 +38,11 @@ class UserDetailsServiceImplIT {
     @DisplayName("Should return UserDetails object built from inputted Account object")
     void shouldReturnUserDetailsBuiltFromAccount() {
         //Given
-        var existingEmail = "userdetails@service.com";
-        Account accountObj = accountRepository.getAccountByEmail(existingEmail);
+        final var existingEmail = "userdetails@service.com";
+        final Account accountObj = accountRepository.getAccountByEmail(existingEmail);
 
         //When
-        UserDetails userDetailsObj = userDetailsServiceImpl.loadUserByUsername(existingEmail);
+        final UserDetails userDetailsObj = userDetailsServiceImpl.loadUserByUsername(existingEmail);
 
         //Then
         assertThat(userDetailsObj.getUsername()).isEqualTo(accountObj.getEmail());
@@ -55,10 +55,10 @@ class UserDetailsServiceImplIT {
     @DisplayName("Should return exception if User cannot be loaded by Username (email)")
     void shouldReturnExceptionIfUserCannotBeLoadedByUsername() {
         //Given
-        var nonExistentEmail = "nonexistent@email.com";
+        final var nonExistentEmail = "nonexistent@email.com";
 
         //When/Then
-        UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class,
+        final UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class,
                 () -> userDetailsServiceImpl.loadUserByUsername(nonExistentEmail));
         assertThat(ex.getMessage()).isEqualTo(String.format("No user found with email '%s'", nonExistentEmail));
     }

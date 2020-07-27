@@ -31,7 +31,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String email) {
-        Optional<Account> optionalUser = Optional.ofNullable(accountRepository.getAccountByEmail(email));
+        final Optional<Account> optionalUser = Optional.ofNullable(accountRepository.getAccountByEmail(email));
         return optionalUser.map(this::toUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException(ErrorMessageEnum.NO_USER_FOUND_WITH_EMAIL.getMessage(email)));
 
@@ -39,7 +39,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     private UserDetails toUserDetails(Account user) {
 
-        var authorities = new ArrayList<GrantedAuthority>();
+        final var authorities = new ArrayList<GrantedAuthority>();
 
         user.getBills().stream().map(AccountBill::getBill).forEach(bill -> {
             //for all bills where the user is responsible, we set them to have the authority prefix: RESPONSIBLE_

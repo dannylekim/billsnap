@@ -39,7 +39,7 @@ class UserDetailsServiceImplTest {
         when(accountRepository.getAccountByEmail(nonExistentEmail)).thenReturn(null);
 
         //When /Then
-        UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(nonExistentEmail));
+        final UsernameNotFoundException ex = assertThrows(UsernameNotFoundException.class, () -> userDetailsService.loadUserByUsername(nonExistentEmail));
         assertThat(ex.getMessage()).isEqualTo(String.format("No user found with email '%s'", nonExistentEmail));
     }
 
@@ -47,13 +47,13 @@ class UserDetailsServiceImplTest {
     @DisplayName("Should return UserDetails built from inputted Account")
     void ShouldReturnUserDetailsBuiltFromAccount() {
         //Given
-        var accountObj = AccountEntityFixture.getDefaultAccount();
+        final var accountObj = AccountEntityFixture.getDefaultAccount();
         final String email = "userdetails@unittest.com";
         accountObj.setEmail(email);
         when(accountRepository.getAccountByEmail(email)).thenReturn(accountObj);
 
         //When
-        UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
+        final UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
 
         //Then
         assertThat(userDetailsObj.getUsername()).isEqualTo(accountObj.getEmail());
@@ -65,7 +65,7 @@ class UserDetailsServiceImplTest {
     @DisplayName("Should return UserDetails built from inputted Account with rights of responsible and normal participants")
     void ShouldReturnUserDetailsBuiltFromAccountWithResponsibleAndNormalRights() {
         //Given
-        var accountObj = AccountEntityFixture.getDefaultAccount();
+        final var accountObj = AccountEntityFixture.getDefaultAccount();
         final String email = "userdetails@unittest.com";
         accountObj.setEmail(email);
         when(accountRepository.getAccountByEmail(email)).thenReturn(accountObj);
@@ -82,7 +82,7 @@ class UserDetailsServiceImplTest {
         accountObj.setBills(Set.of(accountBill1, accountBill2));
 
         //When
-        UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
+        final UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
 
         //Then
         assertThat(userDetailsObj.getUsername()).isEqualTo(accountObj.getEmail());
