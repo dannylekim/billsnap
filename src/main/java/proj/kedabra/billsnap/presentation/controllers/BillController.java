@@ -9,7 +9,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -44,7 +43,6 @@ import proj.kedabra.billsnap.presentation.resources.StartBillResource;
 import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
-@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class BillController {
 
     private final BillMapper billMapper;
@@ -78,7 +76,7 @@ public class BillController {
         return billMapper.toResource(createdBill);
     }
 
-    @Cacheable(value = CacheNames.BILL, key = "#billId + #principal.name")
+    @Cacheable(value = CacheNames.BILL, key = "#billId")
     @GetMapping("/bills/{billId}")
     @Operation(summary = "Get detailed bill", description = "Get detailed bill associated to account")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully retrieved detailed bill!")
@@ -86,6 +84,7 @@ public class BillController {
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Access is unauthorized!")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Account does not have the bill specified.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#billId)")
     public BillSplitResource getDetailedBill(
             @AuthenticationPrincipal final Principal principal,
             @Parameter(required = true, name = "billId", description = "bill ID")
@@ -94,7 +93,7 @@ public class BillController {
         return billMapper.toResource(detailedBill);
     }
 
-    @CachePut(value = CacheNames.BILL, key = "#associateBillResource.id + #principal.name")
+    @CachePut(value = CacheNames.BILL, key = "#associateBillResource.id")
     @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PutMapping("/bills")
     @Operation(summary = "Associate users/modify bill", description = "Modify bill's users/items and user-item association")
@@ -104,6 +103,7 @@ public class BillController {
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('RESPONSIBLE_' + #associateBillResource.id)")
     public BillSplitResource modifyBill(@Parameter(required = true, name = "Bill modification details", description = "Minimum bill modification details")
                                         @RequestBody @Valid final AssociateBillResource associateBillResource,
                                         final BindingResult bindingResult,
@@ -118,7 +118,7 @@ public class BillController {
         return billMapper.toResource(billSplit);
     }
 
-    @CachePut(value = CacheNames.BILL, key = "#billId + #principal.name")
+    @CachePut(value = CacheNames.BILL, key = "#billId")
     @PostMapping("bills/{billId}/accounts")
     @Operation(summary = "Invite registered users to bill", description = "Sends notification invite to all registered users in given list")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully invited Registered users to bill!")
@@ -127,6 +127,7 @@ public class BillController {
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('RESPONSIBLE_' + #billId)")
     public BillSplitResource inviteRegisteredToBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                                     @PathVariable("billId") final Long billId,
                                                     @Parameter(required = true, name = "List of emails to invite", description = "List of emails to invite")
@@ -141,7 +142,7 @@ public class BillController {
         return billMapper.toResource(pendingRegisteredBillSplitDTO);
     }
 
-    @CachePut(value = CacheNames.BILL, key = "#startBillResource.id + #principal.name")
+    @CachePut(value = CacheNames.BILL, key = "#startBillResource.id")
     @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PostMapping("bills/start")
     @Operation(summary = "Start a bill", description = "Blocks all modifications on started bill")
@@ -151,6 +152,7 @@ public class BillController {
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('RESPONSIBLE_' + #startBillResource.id)")
     public BillSplitResource startBill(@Parameter(required = true, name = "id of bill", description = "id of bill")
                                        @RequestBody @Valid final StartBillResource startBillResource,
                                        final BindingResult bindingResult,
@@ -163,7 +165,7 @@ public class BillController {
         return billMapper.toResource(billSplitDTO);
     }
 
-    @CachePut(value = CacheNames.BILL, key = "#billId + #principal.name")
+    @CachePut(value = CacheNames.BILL, key = "#billId")
     @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PutMapping("bills/{billId}")
     @Operation(summary = "Edit bill", description = "Edit an unstarted bill")
@@ -175,8 +177,6 @@ public class BillController {
             "Only one type of tipping is supported. Please make sure only either tip amount or tip percent is set.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The user making the request is not the Bill responsible.")
     @ResponseStatus(HttpStatus.OK)
-//    @PreAuthorize(hasPermission('RESPONSIBLE_' +'#billId'))
-//    @PreAuthorize("hasAuthority(#billId)")
     @PreAuthorize("hasAuthority('RESPONSIBLE_' + #billId)")
     public BillSplitResource editBill(@Parameter(required = true, name = "billId", description = "bill ID")
                                       @PathVariable("billId") final Long billId,

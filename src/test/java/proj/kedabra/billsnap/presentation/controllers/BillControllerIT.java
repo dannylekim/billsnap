@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.get;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.put;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
@@ -29,6 +30,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -571,14 +574,15 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullBillIdGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.setId(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
-        ApiError error = verifyInvalidInputs(result, 1);
-        assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 403, user.getUsername(), authorities);
+        final String content = result.getResponse().getContentAsString();
+        final ApiError apiError = mapper.readValue(content, ApiError.class);
+        assertThat(apiError.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -586,12 +590,14 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullItemsPerAccountGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.setItemsPerAccount(null);
 
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId().toString()));
+
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -601,12 +607,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullEmailInItemAssociationResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).setEmail(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId().toString()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_BLANK);
     }
@@ -616,12 +623,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfBlankEmailInItemAssociationResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).setEmail(" ");
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -638,12 +646,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfTooLongEmailInItemAssociationResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).setEmail("toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com");
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId().toString()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -660,12 +669,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullItemsListInItemAssociationResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).setItems(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId().toString()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -675,12 +685,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullItemIdInItemPercentageResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setItemId(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId().toString()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -693,9 +704,11 @@ class BillControllerIT {
         final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_NULL);
     }
@@ -705,12 +718,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfOver3IntegerPercentageInItemPercentageResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(1234.50));
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
@@ -720,12 +734,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfOver4DecimalPercentageInItemPercentageResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(50.12345));
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_OUT_OF_BOUNDS_3_4);
     }
@@ -735,12 +750,13 @@ class BillControllerIT {
     void shouldReturnExceptionIfNegativePercentageInItemPercentageResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(-50));
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
 
         //When/Then
-        MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 400);
+        MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 400, user.getUsername(), authorities);
         ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NUMBER_MUST_BE_POSITIVE);
     }
@@ -752,15 +768,15 @@ class BillControllerIT {
         final var associateBillResource = AssociateBillFixture.getDefault();
         final var user = UserFixture.getDefault();
 
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(associateBillResource.getId().toString()));
 
         //When/Then
-        final MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 403);
+        final MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 403, user.getUsername(), authorities);
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
-        assertThat(apiError.getMessage()).isEqualTo(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+        assertThat(apiError.getMessage()).isEqualTo("Access is denied");
     }
 
     @ParameterizedTest
@@ -772,12 +788,11 @@ class BillControllerIT {
         final Bill billById = billRepository.getBillById(associateBillResource.getId());
         billById.setStatus(status);
         final var user = UserFixture.getDefaultWithEmailAndPassword(billById.getResponsible().getEmail(), "somepass");
-
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
-
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + billById.getId()));
 
         //When/Then
-        final MvcResult result = performMvcPutRequest(bearerToken, BILL_ENDPOINT, associateBillResource, 405);
+        final MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 405, user.getUsername(), authorities);
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
@@ -790,7 +805,6 @@ class BillControllerIT {
     void shouldReturnExceptionIfBillIsNotOpenInInviteRegisteredPost(BillStatusEnum status) throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentEmail = "test@email.com";
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         inviteRegisteredResource.setAccounts(List.of(existentEmail));
@@ -798,9 +812,11 @@ class BillControllerIT {
         final Bill billById = billRepository.getBillById(existentBillId);
         billById.setStatus(status);
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 405);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 405, user.getUsername(), authorities);
         final String content = result.getResponse().getContentAsString();
         final ApiError apiError = mapper.readValue(content, ApiError.class);
 
@@ -813,15 +829,16 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentEmail = "test@email.com";
         final var invalidEmail = "notemailformatcom";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 400, user.getUsername(), authorities);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(NOT_IN_EMAIL_FORMAT);
     }
@@ -838,9 +855,11 @@ class BillControllerIT {
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 400, existentEmail, authorities);
         final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -858,15 +877,16 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentEmail = "test@email.com";
         final var invalidEmail = "toolongggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggg@email.com";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
         final var existentBillId = 1000L;
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 400, user.getUsername(), authorities);
         final ApiError error = verifyInvalidInputs(result, 2);
 
         final var errorList = error.getErrors().stream()
@@ -884,13 +904,14 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(new ArrayList<>());
         final var existentBillId = 1000L;
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 400, user.getUsername(), authorities);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
@@ -901,13 +922,14 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         inviteRegisteredResource.setAccounts(null);
         final var existentBillId = 1000L;
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 400);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 400, user.getUsername(), authorities);
         final ApiError error = verifyInvalidInputs(result, 1);
         assertThat(error.getErrors().get(0).getMessage()).isEqualTo(MUST_NOT_BE_EMPTY);
     }
@@ -918,14 +940,15 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1000L;
         inviteRegisteredResource.setAccounts(List.of(accountNotInBill));
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When
-        final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
+        final var mvcResult = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 200, user.getUsername(), authorities);
         final String content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
@@ -941,15 +964,16 @@ class BillControllerIT {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var accountNotInBill = "nobills@inthisemail.com";
         final var secondAccountNotInBill = "user@withABill.com";
         final var existentBillId = 1000L;
         inviteRegisteredResource.setAccounts(List.of(accountNotInBill, secondAccountNotInBill));
         final var path = String.format(BILL_BILLID_ACCOUNTS_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         //When
-        final var mvcResult = performMvcPostRequest(bearerToken, path, inviteRegisteredResource, 200);
+        final var mvcResult = performMvcPostRequestWithoutBearer(path, inviteRegisteredResource, 200, user.getUsername(), authorities);
         final String content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
@@ -963,13 +987,14 @@ class BillControllerIT {
     @DisplayName("Should return 200 when getting successfully detailed bill")
     void shouldReturn200WhenGettingSuccessfullyDetailedBill() throws Exception {
         // Given
-        final var user = UserFixture.getDefaultWithEmailAndPassword("user@hasbills.com", "$2a$04$IV55Yhr.ICvWxGm/6hj8iua3gium/Yzyg0XBE8Nb2q1BvEzG21RiK");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var email = "user@hasbills.com";
         final var existentBillId = 2000L; //bill with items
         final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(existentBillId)));
 
         // When
-        final var mvcResult = performMvcGetRequest(bearerToken, path, 200);
+        final var mvcResult = performMvcGetRequestWithoutBearer(path, 200, email, authorities);
         final String content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
@@ -992,8 +1017,11 @@ class BillControllerIT {
 
         final var path = String.format(BILL_BILLID_ENDPOINT, createdBill.getId());
 
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(createdBill.getId().toString()));
+
         //When/Then
-        final var mvcResult = performMvcGetRequest(bearerToken, path, 200);
+        final var mvcResult = performMvcGetRequestWithoutBearer(path, 200, user.getUsername(), authorities);
         final String getContent = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplitResource = mapper.readValue(getContent, BillSplitResource.class);
 
@@ -1004,13 +1032,14 @@ class BillControllerIT {
     @DisplayName("Should return 404 when bill is not found with billId")
     void shouldReturn404WhenBillIsNotFoundWithBillId() throws Exception {
         // Given
-        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
+        final var email = "test@email.com";
         final Long nonExistentBillId = 69420L;
         final var path = String.format(BILL_BILLID_ENDPOINT, nonExistentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(nonExistentBillId)));
 
         // When
-        final var mvcResult = performMvcGetRequest(bearerToken, path, 404);
+        final var mvcResult = performMvcGetRequestWithoutBearer(path, 404, email, authorities);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1040,17 +1069,18 @@ class BillControllerIT {
     void shouldReturn403GettingBillWhenUserIsNotPartOf() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1006L;
         final var path = String.format(BILL_BILLID_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        final var mvcResult = performMvcGetRequest(bearerToken, path, 403);
+        final var mvcResult = performMvcGetRequestWithoutBearer(path, 403, user.getUsername(), authorities);
         final String content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -1058,12 +1088,13 @@ class BillControllerIT {
     void shouldReturnSplitBillWhenStartWhenStartBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1000L;
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
+        final var mvcResult = performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 200, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplitResource = mapper.readValue(content, BillSplitResource.class);
 
@@ -1077,17 +1108,17 @@ class BillControllerIT {
     void shouldReturnErrorBillIdNonExistentWhenBillStart() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final Long nonExistentBillId = 694206942069420L;
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(nonExistentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
 
         // When
-        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 404);
+        final var mvcResult = performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 403, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -1095,13 +1126,14 @@ class BillControllerIT {
     void shouldReturnErrorBillIsNotOpen() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1000L;
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
-        final var mvcResult = performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 405);
+        performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 200, user.getUsername(), authorities);
+        final var mvcResult = performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 405, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1114,14 +1146,16 @@ class BillControllerIT {
     void shouldEditBillSuccessfully() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
 
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
+
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 500);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 200, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final BillSplitResource billSplit = mapper.readValue(content, BillSplitResource.class);
 
@@ -1170,7 +1204,7 @@ class BillControllerIT {
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage(List.of(existentBillId).toString()));
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -1178,16 +1212,18 @@ class BillControllerIT {
     void shouldReturnErrorWhenBillAlreadyStartedWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
         final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(existentBillId);
-        performMvcPostRequest(bearerToken, BILL_START_ENDPOINT, startBillResource, 200);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
+
+        performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 200, user.getUsername(), authorities);
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 405);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 405, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1200,19 +1236,20 @@ class BillControllerIT {
     void shouldReturnErrorWhenResponsibleIsNotPartOfBillWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("test@email.com");
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(existentBillId)));
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 403, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
         // Then
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage("test@email.com"));
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -1220,16 +1257,17 @@ class BillControllerIT {
     void shouldReturnErrorIfTipFormatIsIncorrectBothValuesWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
         editBillResource.setTipPercent(BigDecimal.TEN);
         editBillResource.setTipAmount(BigDecimal.valueOf(15));
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 400, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1242,16 +1280,17 @@ class BillControllerIT {
     void shouldReturnErrorIfTipBothNullWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
         editBillResource.setTipPercent(null);
         editBillResource.setTipAmount(null);
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 400);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 400, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1264,16 +1303,17 @@ class BillControllerIT {
     void shouldReturnErrorWhenEditBillDoesNotHaveReferencedItemWhenEditingBill() throws Exception {
         // Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentBillId = 1102L;
         final var nonExistentItem = 6969L;
         final var editBillResource = EditBillResourceFixture.getDefault();
         editBillResource.setResponsible("editBill@email.com");
         editBillResource.getItems().get(0).setId(nonExistentItem);
         final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
 
         // When
-        final var mvcResult = performMvcPutRequest(bearerToken, endpoint, editBillResource, 404);
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 404, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
 
@@ -1471,14 +1511,31 @@ class BillControllerIT {
                 .andExpect(status().is(resultCode)).andReturn();
     }
 
+    private MvcResult performMvcGetRequestWithoutBearer(String path, int resultCode, String email, List<GrantedAuthority> authorities) throws Exception {
+        return mockMvc.perform(get(path).with(user(email).authorities(authorities)))
+                .andExpect(status().is(resultCode)).andReturn();
+    }
+
     private <T> MvcResult performMvcPostRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
         return mockMvc.perform(post(path).header(JWT_HEADER, bearerToken)
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
                 .andExpect(status().is(resultCode)).andReturn();
     }
 
+    private <T> MvcResult performMvcPostRequestWithoutBearer(String path, T body, int resultCode, String email, List<GrantedAuthority> authorities) throws Exception {
+        return mockMvc.perform(post(path).with(user(email).authorities(authorities))
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
+                .andExpect(status().is(resultCode)).andReturn();
+    }
+
     private <T> MvcResult performMvcPutRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
         return mockMvc.perform(put(path).header(JWT_HEADER, bearerToken)
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
+                .andExpect(status().is(resultCode)).andReturn();
+    }
+
+    private <T> MvcResult performMvcPutRequestWithoutBearer(String path, T body, int resultCode, String email, List<GrantedAuthority> authorities) throws Exception {
+        return mockMvc.perform(put(path).with(user(email).authorities(authorities))
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
                 .andExpect(status().is(resultCode)).andReturn();
     }
