@@ -102,23 +102,6 @@ class NotificationFacadeImplIT {
     }
 
     @Test
-    @DisplayName("Should throw exception if user not associated to notification")
-    void shouldThrowExceptionIfUserNotAssociatedToNotification() {
-        //Given
-        final long invitationId = 102L;
-        final String email = "user@inbill.com";
-        final AnswerNotificationDTO answerNotificationDTO = AnswerNotificationDTOFixture.getDefault();
-        answerNotificationDTO.setInvitationId(invitationId);
-        answerNotificationDTO.setEmail(email);
-
-        //When/Then
-        assertThatExceptionOfType(AccessForbiddenException.class)
-                .isThrownBy(() -> notificationFacade.answerInvitation(answerNotificationDTO))
-                .withMessage(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
-
-    }
-
-    @Test
     @DisplayName("Should throw exception if bill is not Open status")
     void shouldThrowExceptionIfBillNotOpenStatus() {
         //Given

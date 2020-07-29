@@ -36,16 +36,10 @@ public class NotificationFacadeImpl implements NotificationFacade {
     public BillSplitDTO answerInvitation(AnswerNotificationDTO answerNotificationDTO) {
         final Notifications notification = notificationService.getNotification(answerNotificationDTO.getInvitationId());
         billService.verifyBillStatus(notification.getBill(), BillStatusEnum.OPEN);
-        verifyUserAssociatedToNotification(answerNotificationDTO.getEmail(), notification.getAccount());
 
         final Bill bill = notificationService.answerInvitation(answerNotificationDTO.getInvitationId(), answerNotificationDTO.isAnswer());
 
         return billFacade.getBillSplitDTO(bill);
     }
 
-    private void verifyUserAssociatedToNotification(final String userEmail, final Account account) {
-        if (!userEmail.equals(account.getEmail())) {
-            throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
-        }
-    }
 }

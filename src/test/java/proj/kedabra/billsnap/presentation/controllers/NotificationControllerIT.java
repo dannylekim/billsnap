@@ -2,7 +2,11 @@ package proj.kedabra.billsnap.presentation.controllers;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -15,6 +19,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -48,16 +54,9 @@ class NotificationControllerIT {
     private ObjectMapper mapper;
 
     @Autowired
-    private JwtService jwtService;
-
-    @Autowired
     private NotificationsRepository notificationsRepository;
 
     private static final String INVITATION_INVITATIONID_ENDPOINT = "/invitations/%d";
-
-    private static final String JWT_HEADER = "Authorization";
-
-    private static final String JWT_PREFIX = "Bearer ";
 
     private static final String INVALID_INPUTS = "Invalid Inputs. Please fix the following errors";
 
@@ -66,13 +65,14 @@ class NotificationControllerIT {
     public void shouldReturn200WhenAnsweringInvitationWithAccept() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 101L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, answer, 200);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, answer, 200, user.getUsername(), authorities);
         final String content = result.getResponse().getContentAsString();
         final BillSplitResource response = mapper.readValue(content, BillSplitResource.class);
 
@@ -88,14 +88,15 @@ class NotificationControllerIT {
     public void shouldReturn200WhenAnsweringInvitationWithDecline() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 101L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(false);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult result = performMvcPostRequest(bearerToken, path, answer, 200);
+        final MvcResult result = performMvcPostRequestWithoutBearer(path, answer, 200, user.getUsername(), authorities);
         final String content = result.getResponse().getContentAsString();
 
         assertThat(content).isEqualTo("");
@@ -110,14 +111,15 @@ class NotificationControllerIT {
     public void shouldReturn400WhenAnswerInvitationNull() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 101L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 400);
+        final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 400, user.getUsername(), authorities);
         verifyInvalidInputs(mvcResult, 1);
     }
 
@@ -126,16 +128,16 @@ class NotificationControllerIT {
     public void shouldReturn403WhenUserAnsweringInvitationNotAssociated() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 102L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+        final var authorities = new ArrayList<GrantedAuthority>();
 
         //When/Then
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 403);
+        final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 403, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test
@@ -143,13 +145,14 @@ class NotificationControllerIT {
     public void shouldReturn404WhenInvitationIdDoesNotExist() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 123456789L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 404);
+        final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 404, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.NOTIFICATION_ID_DOES_NOT_EXIST.getMessage(Long.toString(invitationId)));
@@ -160,13 +163,14 @@ class NotificationControllerIT {
     public void shouldReturn405WhenBillNotOpenStatus() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 103L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 405);
+        final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
@@ -177,20 +181,21 @@ class NotificationControllerIT {
     public void shouldReturn405WhenInvitationStatusNotPending() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long invitationId = 104L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
 
         //When/Then
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 405);
+        final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.WRONG_INVITATION_STATUS.getMessage(InvitationStatusEnum.PENDING.toString()));
     }
 
-    private <T> MvcResult performMvcPostRequest(String bearerToken, String path, T body, int resultCode) throws Exception {
-        return mockMvc.perform(post(path).header(JWT_HEADER, bearerToken)
+    private <T> MvcResult performMvcPostRequestWithoutBearer(String path, T body, int resultCode, String email, List<GrantedAuthority> authorities) throws Exception {
+        return mockMvc.perform(post(path).with(user(email).authorities(authorities))
                 .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
                 .andExpect(status().is(resultCode)).andReturn();
     }

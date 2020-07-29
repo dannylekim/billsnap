@@ -701,7 +701,6 @@ class BillControllerIT {
     void shouldReturnExceptionIfNullPercentageInItemPercentageResourceGivenPut() throws Exception {
         //Given
         final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var associateBillResource = AssociateBillFixture.getDefault();
         associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(null);
         final var authorities = new ArrayList<GrantedAuthority>();
@@ -848,8 +847,6 @@ class BillControllerIT {
     void shouldReturnExceptionIfListEmailsBlankInInviteRegisteredResourceGivenPost() throws Exception {
         //Given the User makes a request for a bill where User is the responsible
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
-        final var user = UserFixture.getDefault();
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final var existentEmail = "test@email.com";
         final var invalidEmail = " ";
         inviteRegisteredResource.setAccounts(List.of(existentEmail, invalidEmail));
