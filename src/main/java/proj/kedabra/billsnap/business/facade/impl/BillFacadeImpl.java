@@ -21,7 +21,6 @@ import proj.kedabra.billsnap.business.dto.EditBillDTO;
 import proj.kedabra.billsnap.business.dto.GetBillPaginationDTO;
 import proj.kedabra.billsnap.business.dto.ItemAssociationSplitDTO;
 import proj.kedabra.billsnap.business.dto.ItemPercentageSplitDTO;
-import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.mapper.AccountMapper;
 import proj.kedabra.billsnap.business.mapper.BillMapper;
