@@ -89,7 +89,7 @@ public class BillController {
             @AuthenticationPrincipal final Principal principal,
             @Parameter(required = true, name = "billId", description = "bill ID")
             @PathVariable("billId") final Long billId) {
-        final BillSplitDTO detailedBill = billFacade.getDetailedBill(billId, principal.getName());
+        final BillSplitDTO detailedBill = billFacade.getDetailedBill(billId);
         return billMapper.toResource(detailedBill);
     }
 
@@ -114,7 +114,7 @@ public class BillController {
         }
 
         final AssociateBillDTO associateBill = billMapper.toAssociateBillDTO(associateBillResource);
-        final BillSplitDTO billSplit = billFacade.associateAccountsToBill(associateBill, principal.getName());
+        final BillSplitDTO billSplit = billFacade.associateAccountsToBill(associateBill);
         return billMapper.toResource(billSplit);
     }
 
@@ -138,7 +138,7 @@ public class BillController {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
 
-        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(billId, principal.getName(), inviteRegisteredResource.getAccounts());
+        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(billId, inviteRegisteredResource.getAccounts());
         return billMapper.toResource(pendingRegisteredBillSplitDTO);
     }
 
@@ -161,7 +161,7 @@ public class BillController {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
 
-        final var billSplitDTO = billFacade.startBill(startBillResource.getId(), principal.getName());
+        final var billSplitDTO = billFacade.startBill(startBillResource.getId());
         return billMapper.toResource(billSplitDTO);
     }
 

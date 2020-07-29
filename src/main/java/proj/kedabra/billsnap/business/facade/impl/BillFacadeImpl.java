@@ -88,9 +88,8 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO, final String responsibleEmail) {
+    public BillSplitDTO associateAccountsToBill(final AssociateBillDTO associateBillDTO) {
         final var bill = billService.getBill(associateBillDTO.getId());
-        billService.verifyUserIsBillResponsible(bill, responsibleEmail);
         billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
         final Bill associatedBill = billService.associateItemsToAccountBill(associateBillDTO);
 
@@ -99,10 +98,9 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BillSplitDTO inviteRegisteredToBill(final Long billId, final String userEmail, final List<String> accounts) {
+    public BillSplitDTO inviteRegisteredToBill(final Long billId, final List<String> accounts) {
         final var bill = billService.getBill(billId);
         billService.verifyBillStatus(bill, BillStatusEnum.OPEN);
-        billService.verifyUserIsBillResponsible(bill, userEmail);
 
         final List<Account> accountsList = accountService.getAccounts(accounts);
         final List<String> emailsList = accountsList.stream().map(Account::getEmail).collect(Collectors.toList());
@@ -121,22 +119,13 @@ public class BillFacadeImpl implements BillFacade {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public BillSplitDTO getDetailedBill(final Long billId, final String userEmail) {
-        final var bill = billService.getBill(billId);
-        final boolean isNotCreator = !bill.getCreator().getEmail().equals(userEmail);
-        final boolean isNotInBillsAccount = bill.getAccounts().stream()
-                .map(AccountBill::getAccount)
-                .map(Account::getEmail)
-                .noneMatch(email -> email.equals(userEmail));
-
-        if (isNotCreator && isNotInBillsAccount) {
-            throw new AccessForbiddenException(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
-        }
-        return getBillSplitDTO(bill);
+    public BillSplitDTO getDetailedBill(final Long billId) {
+        return getBillSplitDTO(billService.getBill(billId));
     }
+
     @Override
-    public BillSplitDTO startBill(Long billId, String userEmail) {
-        final Bill bill = billService.startBill(billId, userEmail);
+    public BillSplitDTO startBill(Long billId) {
+        final Bill bill = billService.startBill(billId);
         return getBillSplitDTO(bill);
     }
 
