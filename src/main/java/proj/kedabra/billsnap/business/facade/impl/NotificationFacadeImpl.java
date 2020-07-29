@@ -5,16 +5,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import proj.kedabra.billsnap.business.dto.AnswerNotificationDTO;
 import proj.kedabra.billsnap.business.dto.BillSplitDTO;
-import proj.kedabra.billsnap.business.exception.AccessForbiddenException;
 import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.facade.NotificationFacade;
-import proj.kedabra.billsnap.business.model.entities.Account;
 import proj.kedabra.billsnap.business.model.entities.Bill;
 import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.service.BillService;
 import proj.kedabra.billsnap.business.service.NotificationService;
 import proj.kedabra.billsnap.business.utils.enums.BillStatusEnum;
-import proj.kedabra.billsnap.utils.ErrorMessageEnum;
 
 @Service
 public class NotificationFacadeImpl implements NotificationFacade {
