@@ -41,4 +41,5 @@ public class NotificationFacadeImpl implements NotificationFacade {
 
         return billFacade.getBillSplitDTO(notifiedBill);
     }
+
 }

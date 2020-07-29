@@ -6,6 +6,7 @@ import javax.validation.Valid;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -46,6 +47,7 @@ public class ResolveBillController {
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#payment.id)")
     public RemainingPaymentResource payBill(@RequestBody @Valid @Parameter(required = true, name = "Payment details", description = "Amount paid to bill") final PaymentResource payment,
                                             final BindingResult bindingResult,
                                             @AuthenticationPrincipal Principal principal) {

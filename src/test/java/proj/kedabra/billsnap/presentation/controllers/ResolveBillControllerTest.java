@@ -4,10 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.transaction.Transactional;
 
@@ -23,8 +26,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import proj.kedabra.billsnap.business.dto.PaymentInformationDTO;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
@@ -48,9 +54,6 @@ class ResolveBillControllerTest {
     @Autowired
     private ObjectMapper mapper;
 
-    @Autowired
-    private JwtService jwtService;
-
     @MockBean
     private PaymentFacade paymentFacade;
 
@@ -59,63 +62,60 @@ class ResolveBillControllerTest {
 
     private static final String PAY_BILL_ENDPOINT = "/resolve/bills";
 
-    private static final String JWT_HEADER = "Authorization";
-
-    private static final String JWT_PREFIX = "Bearer ";
-
-
     @Test
     @DisplayName("Should return 400 for null amount")
     void shouldReturn400ForNullAmount() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
         param.setPaymentAmount(null);
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
 
         //when/then
-        this.mockMvc.perform(post(PAY_BILL_ENDPOINT).contentType(MediaType.APPLICATION_JSON).content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault()))).andExpect(status().isBadRequest());
+        performMvcPostRequest(PAY_BILL_ENDPOINT, param, 400, user.getUsername(), authorities);
     }
 
     @Test
     @DisplayName("Should return 400 for negative amount")
     void shouldReturn400ForNegativeAmount() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
         param.setPaymentAmount(new BigDecimal("-1"));
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
 
         //when/then
-        this.mockMvc.perform(post(PAY_BILL_ENDPOINT).contentType(MediaType.APPLICATION_JSON).content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault()))).andExpect(status().isBadRequest());
+        performMvcPostRequest(PAY_BILL_ENDPOINT, param, 400, user.getUsername(), authorities);
     }
 
     @Test
     @DisplayName("Should return 400 for 0 amount")
     void shouldReturn400ForZeroAmount() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
         param.setPaymentAmount(BigDecimal.ZERO);
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
 
         //when/then
-        this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault())))
-                .andExpect(status().isBadRequest());
+        performMvcPostRequest(PAY_BILL_ENDPOINT, param, 400, user.getUsername(), authorities);
     }
 
     @Test
-    @DisplayName("Should return 400 for null id")
+    @DisplayName("Should return 403 for null id")
     void shouldReturn400ForNullId() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
         param.setId(null);
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
 
         //when/then
-        this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault())))
-                .andExpect(status().isBadRequest());
+        performMvcPostRequest(PAY_BILL_ENDPOINT, param, 403, user.getUsername(), authorities);
     }
 
 
@@ -123,15 +123,14 @@ class ResolveBillControllerTest {
     @DisplayName("Should return 200 with value")
     void payBillOK() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
         when(paymentFacade.payBill(any())).thenReturn(BigDecimal.TEN);
 
         //when
-        final var mvcResult = this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault())))
-                .andExpect(status().isOk()).andReturn();
+        final var mvcResult = performMvcPostRequest(PAY_BILL_ENDPOINT, param, 200, user.getUsername(), authorities);
 
         //then
         final var result = mvcResult.getResponse().getContentAsString();
@@ -143,21 +142,26 @@ class ResolveBillControllerTest {
     @DisplayName("Should call facade with proper values")
     void shouldCallFacadeWithProperValues() throws Exception {
         //Given
+        final var user = UserFixture.getDefault();
         final var param = PaymentResourceFixture.getDefault();
-        final var value = mapper.writeValueAsString(param);
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("123"));
         when(paymentFacade.payBill(any())).thenReturn(BigDecimal.TEN);
 
         //when / then
-        this.mockMvc.perform(post(PAY_BILL_ENDPOINT)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(value).header(JWT_HEADER, JWT_PREFIX + jwtService.generateToken(UserFixture.getDefault())))
-                .andExpect(status().isOk()).andReturn();
+        performMvcPostRequest(PAY_BILL_ENDPOINT, param, 200, user.getUsername(), authorities);
 
         verify(paymentFacade).payBill(captor.capture());
         final PaymentInformationDTO calledArgument = captor.getValue();
         assertThat(calledArgument.getAmount()).isEqualTo(param.getPaymentAmount());
         assertThat(calledArgument.getBillId()).isEqualTo(param.getId());
         assertThat(calledArgument.getEmail()).isEqualTo(UserFixture.getDefault().getUsername());
+    }
+
+    private <T> MvcResult performMvcPostRequest(String path, T body, int resultCode, String email, List<GrantedAuthority> authorities) throws Exception {
+        return mockMvc.perform(post(path).with(user(email).authorities(authorities))
+                .contentType(MediaType.APPLICATION_JSON_VALUE).content(mapper.writeValueAsString(body)))
+                .andExpect(status().is(resultCode)).andReturn();
     }
 
 
