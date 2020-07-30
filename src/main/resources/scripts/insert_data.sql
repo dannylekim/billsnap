@@ -345,3 +345,5 @@ INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (103, 1101, 50, current_timestamp); --bill IN_PROGRESS status
 INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (104, 1221, 50, current_timestamp);
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (105, 1400, 2000, current_timestamp);
