@@ -778,6 +778,28 @@ class BillControllerIT {
         assertThat(apiError.getMessage()).isEqualTo("Access is denied");
     }
 
+    @Test
+    @DisplayName("Should return bill split after association")
+    void shouldReturnBillSplitAfterAssociation() throws Exception {
+        //Given
+        final var associateBillResource = AssociateBillFixture.getDefault();
+        associateBillResource.getItemsPerAccount().get(0).setEmail("paymentowed@test.com");
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setItemId(1014L);
+        associateBillResource.getItemsPerAccount().get(0).getItems().get(0).setPercentage(BigDecimal.valueOf(100));
+        associateBillResource.getItemsPerAccount().get(1).getItems().get(0).setItemId(1015L);
+        associateBillResource.getItemsPerAccount().get(1).getItems().get(0).setPercentage(BigDecimal.valueOf(100));
+
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + associateBillResource.getId()));
+
+        //When/Then
+        final MvcResult result = performMvcPutRequestWithoutBearer(BILL_ENDPOINT, associateBillResource, 200, "test@email.com", authorities);
+        final String content = result.getResponse().getContentAsString();
+        final BillSplitResource billSplit = mapper.readValue(content, BillSplitResource.class);
+
+        assertThat(billSplit.getId()).isEqualByComparingTo(1002L);
+    }
+
     @ParameterizedTest
     @EnumSource(value = BillStatusEnum.class, names = {"IN_PROGRESS", "RESOLVED"})
     @DisplayName("Should return exception if Bill is not in Open status for Associate Bills")
@@ -1119,6 +1141,23 @@ class BillControllerIT {
     }
 
     @Test
+    @DisplayName("Should return error bill id null when bill start")
+    void shouldReturnErrorBillIdNullWhenBillStart() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("test@email.com", "notEncrypted");
+        final var startBillResource = StartBillResourceFixture.getStartBillResourceCustom(null);
+        final var authorities = new ArrayList<GrantedAuthority>();
+
+        // When
+        final var mvcResult = performMvcPostRequestWithoutBearer(BILL_START_ENDPOINT, startBillResource, 403, user.getUsername(), authorities);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
+    }
+
+    @Test
     @DisplayName("Should return error bill is not open")
     void shouldReturnErrorBillIsNotOpen() throws Exception {
         // Given
@@ -1316,6 +1355,61 @@ class BillControllerIT {
 
         // Then
         assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ITEM_ID_DOES_NOT_EXIST.getMessage(Long.toString(nonExistentItem)));
+    }
+
+    @Test
+    @DisplayName("Should return error when edit bill when taxes are null")
+    void shouldReturnErrorWhenEditBillTaxesNull() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var existentBillId = 1102L;
+        final var editBillResource = EditBillResourceFixture.getDefault();
+        editBillResource.setResponsible("editBill@email.com");
+        editBillResource.setTaxes(null);
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
+
+        // When
+        final var mvcResult = performMvcPutRequestWithoutBearer(endpoint, editBillResource, 400, user.getUsername(), authorities);
+        final var content = mvcResult.getResponse().getContentAsString();
+        final ApiError error = mapper.readValue(content, ApiError.class);
+
+        // Then
+        assertThat(error.getMessage()).isEqualTo("Invalid Inputs. Please fix the following errors");
+    }
+
+    @Test
+    @DisplayName("Should return error when edit bill when tipAmount or percent is wrong")
+    void shouldReturnErrorWhenEditBillWrongTip() throws Exception {
+        // Given
+        final var user = UserFixture.getDefaultWithEmailAndPassword("editBill@email.com", "notEncrypted");
+        final var existentBillId = 1102L;
+        final var editBillResource1 = EditBillResourceFixture.getDefault();
+        editBillResource1.setResponsible("editBill@email.com");
+        editBillResource1.setTipAmount(BigDecimal.valueOf(1111111111111111111111111111111111111111111111.1232312312));
+        final var editBillResource2 = EditBillResourceFixture.getDefault();
+        editBillResource2.setResponsible("editBill@email.com");
+        editBillResource2.setTipPercent(BigDecimal.valueOf(1321312312323122.123));
+
+        final var endpoint = String.format(BILL_EDIT_ENDPOINT, existentBillId);
+
+        final var authorities = new ArrayList<GrantedAuthority>();
+        authorities.add(new SimpleGrantedAuthority("RESPONSIBLE_" + existentBillId));
+
+        // When
+        final var mvcResult1 = performMvcPutRequestWithoutBearer(endpoint, editBillResource1, 400, user.getUsername(), authorities);
+        final var content1 = mvcResult1.getResponse().getContentAsString();
+        final ApiError error1 = mapper.readValue(content1, ApiError.class);
+
+        final var mvcResult2 = performMvcPutRequestWithoutBearer(endpoint, editBillResource2, 400, user.getUsername(), authorities);
+        final var content2 = mvcResult2.getResponse().getContentAsString();
+        final ApiError error2 = mapper.readValue(content2, ApiError.class);
+
+        // Then
+        assertThat(error1.getMessage()).isEqualTo("Invalid Inputs. Please fix the following errors");
+        assertThat(error2.getMessage()).isEqualTo("Invalid Inputs. Please fix the following errors");
     }
 
     @Test

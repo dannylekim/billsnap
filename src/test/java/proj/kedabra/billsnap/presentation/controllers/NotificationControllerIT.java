@@ -113,43 +113,25 @@ class NotificationControllerIT {
     void shouldReturn400WhenAnswerInvitationNull() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-<<<<<<< HEAD
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long billId = 1220L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
-=======
-        final long invitationId = 101L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(null);
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
 
         //When/Then
-<<<<<<< HEAD
-        final MvcResult mvcResult = performMvcPostRequest(bearerToken, path, answer, 400);
-        verifyInvalidInputs(mvcResult);
-=======
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 400, user.getUsername(), authorities);
-        verifyInvalidInputs(mvcResult, 1);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
+        verifyInvalidInputs(mvcResult);
     }
 
     @Test
     @DisplayName("Should return 403 when user answering invitation is not associated to invitation")
     void shouldReturn403WhenUserAnsweringInvitationNotAssociated() throws Exception {
         //Given
-<<<<<<< HEAD
         final var user = UserFixture.getDefaultWithEmailAndPassword("userNot@inbill.com", "notEncrypted");
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long billId = 1220L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
-=======
-        final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-        final long invitationId = 102L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
 
@@ -157,7 +139,7 @@ class NotificationControllerIT {
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 403, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
-        assertThat(error.getMessage()).isEqualTo("Access is denied");
+        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
     }
 
     @Test
@@ -165,17 +147,11 @@ class NotificationControllerIT {
     void shouldReturn404WhenBillIdDoesNotExist() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-<<<<<<< HEAD
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long billId = 123456789L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
-=======
-        final long invitationId = 123456789L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 404, user.getUsername(), authorities);
@@ -189,17 +165,11 @@ class NotificationControllerIT {
     void shouldReturn405WhenBillNotOpenStatus() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-<<<<<<< HEAD
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long billId = 1101L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
-=======
-        final long invitationId = 103L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);
@@ -213,17 +183,11 @@ class NotificationControllerIT {
     void shouldReturn405WhenInvitationStatusNotPending() throws Exception {
         //Given
         final var user = UserFixture.getDefaultWithEmailAndPassword("user@inbill.com", "notEncrypted");
-<<<<<<< HEAD
-        final var bearerToken = JWT_PREFIX + jwtService.generateToken(user);
         final long billId = 1221L;
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
-=======
-        final long invitationId = 104L;
-        final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, invitationId);
->>>>>>> c3c524b... feat(9mn1b1_#a6k592): add preAuthorize in resolveBill and notification controller
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + invitationId));
+        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);

@@ -52,7 +52,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         });
 
         user.getNotifications().forEach(notification ->
-            authorities.add(new SimpleGrantedAuthority("INVITATION_" + notification.getId()));
+                authorities.add(new SimpleGrantedAuthority("INVITATION_" + notification.getId()))
         );
 
         return User.withUsername(user.getEmail())
