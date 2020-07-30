@@ -139,7 +139,7 @@ class NotificationControllerIT {
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 403, user.getUsername(), authorities);
         final var content = mvcResult.getResponse().getContentAsString();
         final ApiError error = mapper.readValue(content, ApiError.class);
-        assertThat(error.getMessage()).isEqualTo(ErrorMessageEnum.ACCOUNT_NOT_ASSOCIATED_TO_NOTIFICATION.getMessage());
+        assertThat(error.getMessage()).isEqualTo("Access is denied");
     }
 
     @Test

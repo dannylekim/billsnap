@@ -54,6 +54,7 @@ public class NotificationController {
     @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The invitation does not exist.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority('INVITATION_' + #billId)")
     public BillSplitResource answerInvitation(@Parameter(required = true, name = "billId", description = "Bill ID")
                                               @PathVariable("billId") final Long billId,
                                               @Parameter(required = true, name = "Answer to bill invitation", description = "Answer to bill invitation")
