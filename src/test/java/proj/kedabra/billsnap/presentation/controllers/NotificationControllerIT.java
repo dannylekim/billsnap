@@ -70,7 +70,7 @@ class NotificationControllerIT {
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult result = performMvcPostRequestWithoutBearer(path, answer, 200, user.getUsername(), authorities);
@@ -95,7 +95,7 @@ class NotificationControllerIT {
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(false);
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult result = performMvcPostRequestWithoutBearer(path, answer, 200, user.getUsername(), authorities);
@@ -118,7 +118,7 @@ class NotificationControllerIT {
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         answer.setAnswer(null);
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 400, user.getUsername(), authorities);
@@ -151,7 +151,7 @@ class NotificationControllerIT {
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 404, user.getUsername(), authorities);
@@ -169,7 +169,7 @@ class NotificationControllerIT {
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);
@@ -187,7 +187,7 @@ class NotificationControllerIT {
         final var path = String.format(INVITATION_INVITATIONID_ENDPOINT, billId);
         final AnswerNotificationResource answer = AnswerNotificationResourceFixture.getDefault();
         final var authorities = new ArrayList<GrantedAuthority>();
-        authorities.add(new SimpleGrantedAuthority("INVITATION_" + billId));
+        authorities.add(new SimpleGrantedAuthority(String.valueOf(billId)));
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 405, user.getUsername(), authorities);

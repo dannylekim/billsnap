@@ -51,10 +51,6 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             authorities.add(new SimpleGrantedAuthority(bill.getId().toString()));
         });
 
-        user.getNotifications().forEach(notification ->
-                authorities.add(new SimpleGrantedAuthority("INVITATION_" + notification.getId()))
-        );
-
         return User.withUsername(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)

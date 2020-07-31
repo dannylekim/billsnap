@@ -83,9 +83,6 @@ class UserDetailsServiceImplTest {
 
         accountObj.setBills(Set.of(accountBill1, accountBill2));
 
-        final var notifications = NotificationsFixture.getDefault();
-
-        accountObj.setNotifications(Set.of(notifications));
 
         //When
         final UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);
@@ -93,8 +90,8 @@ class UserDetailsServiceImplTest {
         //Then
         assertThat(userDetailsObj.getUsername()).isEqualTo(accountObj.getEmail());
         assertThat(userDetailsObj.getPassword()).isEqualTo(accountObj.getPassword());
-        assertThat(userDetailsObj.getAuthorities()).hasSize(4);
+        assertThat(userDetailsObj.getAuthorities()).hasSize(3);
         final var authorities = userDetailsObj.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        assertThat(authorities).containsOnly("RESPONSIBLE_" + bill1.getId(), bill1.getId().toString(), bill2.getId().toString(), "INVITATION_" + notifications.getId());
+        assertThat(authorities).containsOnly("RESPONSIBLE_" + bill1.getId(), bill1.getId().toString(), bill2.getId().toString());
     }
 }
