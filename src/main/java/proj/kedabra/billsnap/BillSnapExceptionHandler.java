@@ -1,6 +1,7 @@
 package proj.kedabra.billsnap;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -41,9 +42,9 @@ public class BillSnapExceptionHandler extends ResponseEntityExceptionHandler {
         return new ApiError(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler(AccessForbiddenException.class)
+    @ExceptionHandler({AccessForbiddenException.class, AccessDeniedException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    protected ApiError handleHttpAccessForbidden(final AccessForbiddenException ex) {
+    protected ApiError handleHttpAccessForbidden(final Exception ex) {
         return new ApiError(HttpStatus.FORBIDDEN, ex.getMessage());
     }
 

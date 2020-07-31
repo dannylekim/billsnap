@@ -308,6 +308,10 @@ INSERT INTO item (id, bill_id, name, cost)
 VALUES (1012, 2000, 'shoes', 69.00);
 INSERT INTO item (id, bill_id, name, cost)
 VALUES (1013, 1102, 'notEditedItem', 123.00);
+INSERT INTO item (id, bill_id, name, cost)
+VALUES (1014, 1002, 'object', 123.00);
+INSERT INTO item (id, bill_id, name, cost)
+VALUES (1015, 1002, 'object', 123.00);
 
 INSERT INTO items_vs_accounts (item_id, account_id, percentage)
 VALUES (1000, 2000, 100.0);
@@ -345,3 +349,5 @@ INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (103, 1101, 50, current_timestamp); --bill IN_PROGRESS status
 INSERT INTO notifications (id, bill_id, account_id, time_sent)
 VALUES (104, 1221, 50, current_timestamp);
+INSERT INTO notifications (id, bill_id, account_id, time_sent)
+VALUES (105, 1400, 2000, current_timestamp);

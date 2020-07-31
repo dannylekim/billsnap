@@ -48,7 +48,11 @@ class UserDetailsServiceImplIT {
         assertThat(userDetailsObj.getUsername()).isEqualTo(accountObj.getEmail());
         assertThat(userDetailsObj.getPassword()).isEqualTo(accountObj.getPassword());
         assertThat(userDetailsObj.getAuthorities()).hasSize(4);
-        assertThat(userDetailsObj.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList())).containsExactly("1002", "1100", "1400", "RESPONSIBLE_1400");
+        assertThat(userDetailsObj.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList()))
+                .containsExactly("1002", "1100", "1400", "RESPONSIBLE_1400");
     }
 
     @Test

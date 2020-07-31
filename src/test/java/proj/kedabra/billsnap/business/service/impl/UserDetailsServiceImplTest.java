@@ -18,9 +18,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 import proj.kedabra.billsnap.business.model.entities.AccountBill;
+import proj.kedabra.billsnap.business.model.entities.Notifications;
 import proj.kedabra.billsnap.business.repository.AccountRepository;
 import proj.kedabra.billsnap.fixtures.AccountEntityFixture;
 import proj.kedabra.billsnap.fixtures.BillEntityFixture;
+import proj.kedabra.billsnap.fixtures.NotificationsFixture;
 
 @ExtendWith(MockitoExtension.class)
 class UserDetailsServiceImplTest {
@@ -80,6 +82,7 @@ class UserDetailsServiceImplTest {
         accountBill2.setBill(bill2);
 
         accountObj.setBills(Set.of(accountBill1, accountBill2));
+
 
         //When
         final UserDetails userDetailsObj = userDetailsService.loadUserByUsername(email);

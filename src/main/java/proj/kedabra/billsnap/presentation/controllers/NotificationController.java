@@ -5,7 +5,9 @@ import java.security.Principal;
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +29,7 @@ import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
 import proj.kedabra.billsnap.presentation.resources.AnswerNotificationResource;
 import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
+import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
 public class NotificationController {
@@ -41,7 +44,8 @@ public class NotificationController {
         this.billMapper = billMapper;
     }
 
-    @PostMapping("/invitations/{invitationId}")
+    @CachePut(value = CacheNames.BILLS, key = "#billId")
+    @PostMapping("/invitations/{billId}")
     @Operation(summary = "Answer bill invitation", description = "Answer an invitation to join a bill")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "Successfully answered invitation.")
     @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "There is an error with the input parameters.")
@@ -50,8 +54,9 @@ public class NotificationController {
     @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The invitation does not exist.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
-    public BillSplitResource answerInvitation(@Parameter(required = true, name = "invitationId", description = "invitation ID")
-                                              @PathVariable("invitationId") final Long invitationId,
+    @PreAuthorize("hasAuthority(#billId)")
+    public BillSplitResource answerInvitation(@Parameter(required = true, name = "billId", description = "Bill ID")
+                                              @PathVariable("billId") final Long billId,
                                               @Parameter(required = true, name = "Answer to bill invitation", description = "Answer to bill invitation")
                                               @RequestBody @Valid final AnswerNotificationResource answerInvitationResource,
                                               final BindingResult bindingResult,
@@ -59,7 +64,7 @@ public class NotificationController {
         verifyBindingResult(bindingResult);
 
         final boolean answer = answerInvitationResource.getAnswer();
-        final var billSplitDTO = notificationFacade.answerInvitation(new AnswerNotificationDTO(invitationId, answer, principal.getName()));
+        final var billSplitDTO = notificationFacade.answerInvitation(new AnswerNotificationDTO(billId, answer, principal.getName()));
 
         if (answer) {
             return billMapper.toResource(billSplitDTO);

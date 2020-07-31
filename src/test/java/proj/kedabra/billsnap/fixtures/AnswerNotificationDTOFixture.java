@@ -9,7 +9,7 @@ public final class AnswerNotificationDTOFixture {
 
     public static AnswerNotificationDTO getDefault() {
         final AnswerNotificationDTO dto = new AnswerNotificationDTO();
-        dto.setInvitationId(1235L);
+        dto.setBillId(1235L);
         dto.setAnswer(true);
         dto.setEmail("hellomotto@email.com");
         return dto;
