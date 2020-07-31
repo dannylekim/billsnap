@@ -789,47 +789,18 @@ class BillServiceImplIT {
     }
 
     @Test
-    @DisplayName("Should throw exception when account is not part of the bill")
-    void shouldThrowExceptionWhenAccountIsNotPartOfTheBill() {
-        //Given
-        final Account account = accountRepository.getAccountByEmail("nobills@inthisemail.com");
-        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        final var existentBillId = 1000L;
-
-        //When/Then
-        assertThatExceptionOfType(AccessForbiddenException.class)
-                .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
-                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage(List.of(existentBillId).toString()));
-    }
-
-    @Test
     @DisplayName("Should throw exception when bill already started")
     void shouldThrowExceptionWhenBillAlreadyStarted() {
         //Given
         final Account account = accountRepository.getAccountByEmail("test@email.com");
         final EditBillDTO editBill = EditBillDTOFixture.getDefault();
         final var existentBillId = 1000L;
-        billService.startBill(1000L, "test@email.com");
+        billService.startBill(1000L);
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
-    }
-
-    @Test
-    @DisplayName("Should throw exception when responsible is not part of bill")
-    void shouldThrowExceptionWhenResponsibleIsNotPartOfBill() {
-        //Given
-        final Account account = accountRepository.getAccountByEmail("test@email.com");
-        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
-        editBill.setResponsible("random@email.com");
-        final var existentBillId = 1000L;
-
-        //When/Then
-        assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billService.editBill(existentBillId, account, editBill))
-                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage("random@email.com"));
     }
 
     @Test

@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -53,6 +54,7 @@ public class NotificationController {
     @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The invitation does not exist.")
     @ApiResponse(responseCode = "405", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "The bill is not in Open status.")
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasAuthority(#billId)")
     public BillSplitResource answerInvitation(@Parameter(required = true, name = "billId", description = "Bill ID")
                                               @PathVariable("billId") final Long billId,
                                               @Parameter(required = true, name = "Answer to bill invitation", description = "Answer to bill invitation")

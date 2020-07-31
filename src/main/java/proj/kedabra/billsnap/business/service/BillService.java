@@ -30,7 +30,7 @@ public interface BillService {
 
     void verifyUserIsBillResponsible(Bill bill, String userEmail);
 
-    Bill startBill(Long id, String userEmail);
+    Bill startBill(Long id);
 
     Bill editBill(Long id, Account account, EditBillDTO editBill);
 
