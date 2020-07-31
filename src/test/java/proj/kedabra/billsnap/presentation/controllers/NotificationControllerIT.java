@@ -122,6 +122,7 @@ class NotificationControllerIT {
 
         //When/Then
         final MvcResult mvcResult = performMvcPostRequestWithoutBearer(path, answer, 400, user.getUsername(), authorities);
+
         verifyInvalidInputs(mvcResult);
     }
 
