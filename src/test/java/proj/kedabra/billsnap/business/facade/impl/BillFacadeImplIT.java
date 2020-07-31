@@ -288,11 +288,24 @@ class BillFacadeImplIT {
         final var bill = billRepository.findById(dto.getId()).orElseThrow();
         final var item = bill.getItems().iterator().next();
         dto.getItems().get(0).getItems().get(0).setPercentage(new BigDecimal(10));
+        final var responsibleEmail = bill.getResponsible().getEmail();
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(10)));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if responsible is not the caller for associate bill")
+    void shouldThrowExceptionIfResponsibleIsNotTheCallerForAssociateBill() {
+        //Given
+        final var dto = AssociateBillDTOFixture.getDefault();
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, "notResponsibleEmail@email.com"))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
     @ParameterizedTest
@@ -303,11 +316,12 @@ class BillFacadeImplIT {
         final var dto = AssociateBillDTOFixture.getDefault();
         final var bill = billRepository.findById(dto.getId()).orElseThrow();
         bill.setStatus(status);
+        final var responsibleEmail = bill.getResponsible().getEmail();
 
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
@@ -324,10 +338,11 @@ class BillFacadeImplIT {
         associateBillDTO.setItems(List.of(itemAssociationDTO));
 
         final var existentBill = billRepository.getBillById(2000L);
+        final var responsibleEmail = existentBill.getResponsible().getEmail();
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(associateBillDTO, responsibleEmail))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DECLINED.getMessage(List.of(email).toString()));
 
     }
@@ -341,7 +356,7 @@ class BillFacadeImplIT {
         final var item = bill.getItems().iterator().next();
 
         //When
-        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
+        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto, bill.getResponsible().getEmail());
 
         //Then
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
@@ -351,10 +366,27 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should return error if User requesting POST bills/{billId}/accounts is not the Bill responsible")
+    void shouldReturnErrorIfUserMakingRequestIsNotBillResponsible() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billId = 1000L;
+        final var notBillResponsible = "nobills@inthisemail.com";
+        final var accounts = inviteRegisteredResource.getAccounts();
+
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, accounts))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
     @DisplayName("Should throw error if bill does not exist in Invite Registered call")
     void shouldThrowErrorIfBillDoesNotExistInInviteRegistered() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var principal = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var nonExistentBillId = 90019001L;
         final var accounts = List.of(accountNotInBill);
@@ -362,7 +394,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, accounts))
                 .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(String.valueOf(nonExistentBillId)));
     }
 
@@ -371,6 +403,7 @@ class BillFacadeImplIT {
     void shouldThrowErrorIfOneAccountDoesNotExistInInviteRegistered() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var nonExistentEmail = "clearly@nonexistent.gov";
         final var existentBillId = 1000L;
@@ -379,7 +412,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail).toString()));
     }
 
@@ -388,6 +421,7 @@ class BillFacadeImplIT {
     void shouldThrowErrorIfManyAccountDoNotExistInInviteRegistered() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var nonExistentEmail = "clearly@nonexistent.gov";
         final var secondNonExistentEmail = "veryfake@fake.ca";
@@ -397,7 +431,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(List.of(nonExistentEmail, secondNonExistentEmail).toString()));
     }
 
@@ -406,6 +440,7 @@ class BillFacadeImplIT {
     void shouldThrowErrorIfOneAccountIsAlreadyPartOfBillInInviteRegistered() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "user@withABill.com";
         final var accountInBill = "user@hasbills.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1005L;
@@ -414,7 +449,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(accountInBill).toString()));
     }
 
@@ -432,7 +467,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessageContaining(billResponsible).withMessageContaining(accountInBill);
     }
 
@@ -441,13 +476,14 @@ class BillFacadeImplIT {
     void shouldReturnMappedBillSplitDTOInInviteRegisteredWithPendingAccounts() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final var existentBillId = 1000L;
         final List<String> accountsList = List.of(accountNotInBill);
         inviteRegisteredResource.setAccounts(accountsList);
 
         //When
-        final var billSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, inviteRegisteredResource.getAccounts());
+        final var billSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
 
         //Then
         final var bill = billRepository.getBillById(existentBillId);
@@ -463,6 +499,7 @@ class BillFacadeImplIT {
     void shouldThrowExceptionIfBillIsNotStatusOpenInviteRegistered(BillStatusEnum status) {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var billResponsible = "test@email.com";
         final var existentBillId = 1000L;
         final var bill = billRepository.findById(existentBillId).orElseThrow();
         bill.setStatus(status);
@@ -470,7 +507,7 @@ class BillFacadeImplIT {
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accounts))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
@@ -479,9 +516,10 @@ class BillFacadeImplIT {
     void shouldReturnBillSplitDTOInGetDetailedBillWithBillCreator() {
         //Given user that is bill's creator
         final var billId = 2000L;
+        final var userEmail = "user@hasbills.com";
 
         //When
-        final var billSplitDTO = billFacade.getDetailedBill(billId);
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
         final var bill = billRepository.getBillById(billId);
@@ -494,9 +532,10 @@ class BillFacadeImplIT {
     void shouldReturnBillSplitDTOInGetDetailedBillUserInBillAccounts() {
         //Given user is in bill's accounts
         final var billId = 1100L;
+        final var userEmail = "userdetails@service.com";
 
         //When
-        final var billSplitDTO = billFacade.getDetailedBill(billId);
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
         final var bill = billRepository.getBillById(billId);
@@ -504,13 +543,27 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var billId = 1000L;
+        final var userEmail = "nonexistent@user.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
+    }
+
+    @Test
     @DisplayName("Should return BillSplitDTO with status IN_PROGRESS when Start Bill")
     void ShouldReturnBillSplitDTOWhenStartBill() {
         //Given
         final var billId = 1100L;
+        final var userEmail = "user@hasbills.com";
 
         //When
-        final BillSplitDTO billSplitDTO = billFacade.startBill(billId);
+        final BillSplitDTO billSplitDTO = billFacade.startBill(billId, userEmail);
 
         //Then
         assertThat(billSplitDTO.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
@@ -521,9 +574,10 @@ class BillFacadeImplIT {
     void shouldThrowExceptionIfBillIsResolvedNotOpenInStartBill() {
         //Given
         final var billId = 1001L;
+        final var userEmail = "test@email.com";
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId))
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
     }
 
@@ -532,10 +586,24 @@ class BillFacadeImplIT {
     void shouldThrowExceptionIfBillIsInProgressNotOpenInStartBill() {
         //Given
         final var billId = 1101L;
+        final var userEmail = "user@hasbills.com";
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId))
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billFacade.startBill(billId, userEmail))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if the given User email is not the Bill Responsible in startBill call")
+    void shouldThrowExceptionIfGivenEmailIsNotBillResponsibleInStartBill() {
+        //Given
+        final var billId = 1100L;
+        final String notBillResponsible = "notbillresponsible@email.com";
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.startBill(billId, notBillResponsible))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
     @Test
@@ -651,6 +719,22 @@ class BillFacadeImplIT {
     }
 
     @Test
+    @DisplayName("Should throw exception when responsible is not part of bill when editing bill")
+    void shouldThrowExceptionWhenAccountIsNotPartOfTheBillWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var emailNotInBill = "user@user.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+        editBill.getItems().get(0).setId(1013L);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, emailNotInBill, editBill))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage(List.of(billId).toString()));
+
+    }
+
+    @Test
     @DisplayName("Should throw exception when bill already started when editing bill")
     void shouldThrowExceptionWhenBillAlreadyStartedWhenEditingBill() {
         //Given
@@ -658,12 +742,29 @@ class BillFacadeImplIT {
         final var userEmail = "editBill@email.com";
         final var editBill = EditBillDTOFixture.getDefault();
         editBill.setResponsible("editBill@email.com");
-        billFacade.startBill(billId);
+        billFacade.startBill(billId, userEmail);
 
         //When/Then
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.name()));
+    }
+
+    @Test
+    @DisplayName("Should throw exception when account is not part of the bill when editing bill")
+    void shouldThrowExceptionWhenResponsibleIsNotPartOfBillWhenEditingBill() {
+        //Given
+        final var billId = 1102L;
+        final var userEmail = "editBill@email.com";
+        final var emailNotInBill = "user@user.com";
+        final var editBill = EditBillDTOFixture.getDefault();
+
+        editBill.setResponsible(emailNotInBill);
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billFacade.editBill(billId, userEmail, editBill))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(emailNotInBill));
     }
 
     @Test

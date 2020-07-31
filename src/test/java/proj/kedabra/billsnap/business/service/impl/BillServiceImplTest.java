@@ -544,8 +544,25 @@ class BillServiceImplTest {
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 
         //When/Then
-        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.startBill(billId))
+        assertThatExceptionOfType(FunctionalWorkflowException.class).isThrownBy(() -> billService.startBill(billId, billResponsible))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw exception if the given User email is not the Bill Responsible in Start Bill")
+    void shouldThrowExceptionIfGivenEmailIsNotBillResponsibleInStartBill() {
+        //Given
+        final long billId = 123L;
+        final Bill bill = BillEntityFixture.getDefault();
+        final String notBillResponsible = "notbillresponsible@email.com";
+        bill.setStatus(BillStatusEnum.OPEN);
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.startBill(billId, notBillResponsible))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
     }
 
     @Test
@@ -579,7 +596,7 @@ class BillServiceImplTest {
         when(billRepository.findById(any())).thenReturn(Optional.of(bill));
 
         //When
-        final var startedBill = billService.startBill(billId);
+        final var startedBill = billService.startBill(billId, billResponsible);
 
         //Then
         assertThat(startedBill.getStatus()).isEqualTo(BillStatusEnum.IN_PROGRESS);
@@ -662,6 +679,24 @@ class BillServiceImplTest {
     }
 
     @Test
+    @DisplayName("Should throw exception when user is not responsible of bill")
+    void shouldThrowExceptionWhenUserIsNotResponsibleOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        account.setEmail("someEmail@email.com");
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+        final Bill bill = BillEntityFixture.getDefault();
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.USER_IS_NOT_BILL_RESPONSIBLE.getMessage());
+    }
+
+    @Test
     @DisplayName("Should throw exception when bill already started")
     void shouldThrowExceptionWhenBillAlreadyStarted() {
         //Given
@@ -677,6 +712,28 @@ class BillServiceImplTest {
         assertThatExceptionOfType(FunctionalWorkflowException.class)
                 .isThrownBy(() -> billService.editBill(billId, account, editBill))
                 .withMessage(ErrorMessageEnum.WRONG_BILL_STATUS.getMessage(BillStatusEnum.OPEN.toString()));
+    }
+
+    @Test
+    @DisplayName("Should throw if account is not part of bill")
+    void shouldThrowIfAccountIsNotPartOfBill() {
+        //Given
+        final long billId = 123L;
+        final Account account = AccountEntityFixture.getDefaultAccount();
+        final EditBillDTO editBill = EditBillDTOFixture.getDefault();
+
+        final var accountBill = AccountBillEntityFixture.getDefault();
+        accountBill.setAccount(account);
+
+        final Bill bill = BillEntityFixture.getDefault();
+        bill.setAccounts(Set.of(accountBill));
+
+        when(billRepository.findById(any())).thenReturn(Optional.of(bill));
+
+        //When/Then
+        assertThatExceptionOfType(IllegalArgumentException.class)
+                .isThrownBy(() -> billService.editBill(billId, account, editBill))
+                .withMessage(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(editBill.getResponsible()));
     }
 
     @Test

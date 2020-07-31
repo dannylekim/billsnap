@@ -19,13 +19,13 @@ public interface BillFacade {
     @Transactional(readOnly = true)
     List<BillSplitDTO> getAllBillsByEmailPageable(GetBillPaginationDTO dto);
 
-    BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO);
+    BillSplitDTO associateAccountsToBill(AssociateBillDTO associateBillDTO, String responsibleEmail);
 
-    BillSplitDTO inviteRegisteredToBill(Long billId, List<String> accounts);
+    BillSplitDTO inviteRegisteredToBill(Long billId, String userEmail, List<String> accounts);
 
-    BillSplitDTO getDetailedBill(Long billId);
+    BillSplitDTO getDetailedBill(Long billId, String userEmail);
 
-    BillSplitDTO startBill(Long billId);
+    BillSplitDTO startBill(Long billId, String userEmail);
 
     BillSplitDTO getBillSplitDTO(Bill bill);
 

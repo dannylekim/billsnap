@@ -215,6 +215,23 @@ class BillFacadeImplTest {
     }
 
     @Test
+    @DisplayName("Should throw exception if responsible not the caller of associate bill")
+    void shouldThrowExceptionIfNotResponsibleAssociateBill() {
+        //Given bill with 1 item {name: yogurt, cost: 4}
+        final var dto = AssociateBillDTOFixture.getDefault();
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixtureGivenSplitPercentage(BigDecimal.valueOf(150));
+        final var billSplitDTO = BillSplitDTOFixture.getDefault();
+        billSplitDTO.setInformationPerAccount(null);
+
+        when(billService.getBill(any())).thenReturn(bill);
+        doThrow(AccessForbiddenException.class).when(billService).verifyUserIsBillResponsible(any(), any());
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, "nonExistent@email.com"));
+    }
+
+    @Test
     @DisplayName("Should throw exception if bill items percentage split does not add up to hundred")
     void shouldThrowExceptionIfItemPercentagesDoNotAddToHundred() {
         //Given bill with 1 item {name: yogurt, cost: 4}
@@ -224,6 +241,7 @@ class BillFacadeImplTest {
         final var accountPercentageSplit = BigDecimal.valueOf(50);
         final var billSplitDTO = BillSplitDTOFixture.getDefault();
         billSplitDTO.setInformationPerAccount(null);
+        final var responsibleEmail = bill.getResponsible().getEmail();
 
         when(billService.associateItemsToAccountBill(any())).thenReturn(bill);
         when(billMapper.toBillSplitDTO(any())).thenReturn(billSplitDTO);
@@ -242,7 +260,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.associateAccountsToBill(dto))
+                .isThrownBy(() -> billFacade.associateAccountsToBill(dto, responsibleEmail))
                 .withMessage(String.format(ITEM_PERCENTAGES_MUST_ADD_TO_100, item.getName(), BigDecimal.valueOf(300)));
     }
 
@@ -283,7 +301,7 @@ class BillFacadeImplTest {
         );
 
         //When
-        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto);
+        final BillSplitDTO returnBillSplitDTO = billFacade.associateAccountsToBill(dto, bill.getResponsible().getEmail());
 
         //Then
         verifyBillSplitDTOToBill(returnBillSplitDTO, bill);
@@ -297,6 +315,7 @@ class BillFacadeImplTest {
     void shouldThrowErrorIfNonExistentBillIdInInviteRegistered() {
         //Given
         final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var principal = "test@email.com";
         final var accountNotInBill = "nobills@inthisemail.com";
         final Long nonExistentBillId = 90019001L;
         final var accounts = List.of(accountNotInBill);
@@ -306,8 +325,32 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, accounts))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(nonExistentBillId, principal, accounts))
                 .withMessage(ErrorMessageEnum.BILL_ID_DOES_NOT_EXIST.getMessage(nonExistentBillId.toString()));
+    }
+
+    @Test
+    @DisplayName("Should return error if User requesting POST bills/{billId}/accounts is not the Bill responsible")
+    void shouldReturnErrorIfUserMakingRequestIsNotBillResponsible() {
+        //Given
+        final var inviteRegisteredResource = InviteRegisteredResourceFixture.getDefault();
+        final var accounts = inviteRegisteredResource.getAccounts();
+        final var billId = 1000L;
+        final var notBillResponsible = "nobills@inthisemail.com";
+        final var bill = BillEntityFixture.getDefault();
+        final var billResponsible = "bill@responsible.com";
+        final var principal = AccountEntityFixture.getDefaultAccount();
+        principal.setEmail(billResponsible);
+        bill.setResponsible(principal);
+        bill.setId(billId);
+
+        doThrow(AccessForbiddenException.class).when(billService).verifyUserIsBillResponsible(any(), any());
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        verifyNoInteractions(accountService);
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(billId, notBillResponsible, accounts));
     }
 
     @Test
@@ -335,7 +378,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(ResourceNotFoundException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accountsList))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accountsList))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_DOES_NOT_EXIST.getMessage(nonExistentEmails.toString()));
     }
 
@@ -375,7 +418,7 @@ class BillFacadeImplTest {
 
         //When/Then
         assertThatExceptionOfType(IllegalArgumentException.class)
-                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, accountsList))
+                .isThrownBy(() -> billFacade.inviteRegisteredToBill(existentBillId, billResponsible, accountsList))
                 .withMessage(ErrorMessageEnum.LIST_ACCOUNT_ALREADY_IN_BILL.getMessage(List.of(emailInBill).toString()));
     }
 
@@ -452,7 +495,7 @@ class BillFacadeImplTest {
         when(billMapper.toBillSplitDTO(any())).thenReturn(pendingRegisteredBillSplitDTOFixture);
 
         //When
-        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, inviteRegisteredResource.getAccounts());
+        final var pendingRegisteredBillSplitDTO = billFacade.inviteRegisteredToBill(existentBillId, billResponsible, inviteRegisteredResource.getAccounts());
 
         //Then
         verifyBillSplitDTOToBill(pendingRegisteredBillSplitDTO, bill);
@@ -466,6 +509,7 @@ class BillFacadeImplTest {
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         bill.getTaxes().clear();
         final var billId = bill.getId();
+        final var userEmail = "accountentity@test.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
 
         when(billService.getBill(any())).thenReturn(bill);
@@ -483,7 +527,7 @@ class BillFacadeImplTest {
         );
 
         //When
-        final var billSplitDTO = billFacade.getDetailedBill(billId);
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
         verifyBillSplitDTOToBill(billSplitDTO, bill);
@@ -497,6 +541,7 @@ class BillFacadeImplTest {
         final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
         bill.getTaxes().clear();
         final var billId = bill.getId();
+        final var userEmail = "hellomotto@cell.com";
         final var accountPercentageSplit = BigDecimal.valueOf(50);
 
         when(billService.getBill(any())).thenReturn(bill);
@@ -514,10 +559,27 @@ class BillFacadeImplTest {
         );
 
         //When
-        final var billSplitDTO = billFacade.getDetailedBill(billId);
+        final var billSplitDTO = billFacade.getDetailedBill(billId, userEmail);
 
         //Then
         verifyBillSplitDTOToBill(billSplitDTO, bill);
+    }
+
+    @Test
+    @DisplayName("Should throw Exception in getDetailedBill if user not part of bill")
+    void shouldReturnExceptionIfUserNotPartOfBill() {
+        //Given
+        final var bill = BillEntityFixture.getMappedBillSplitDTOFixture();
+        final var billId = 1000L;
+        bill.setId(billId);
+        final var userEmail = "nonexistent@email.com";
+
+        when(billService.getBill(any())).thenReturn(bill);
+
+        //When/Then
+        assertThatExceptionOfType(AccessForbiddenException.class)
+                .isThrownBy(() -> billFacade.getDetailedBill(billId, userEmail))
+                .withMessage(ErrorMessageEnum.ACCOUNT_IS_NOT_ASSOCIATED_TO_BILL.getMessage());
     }
 
     private void verifyBillSplitDTOToBill(BillSplitDTO billSplitDTO, Bill bill) {

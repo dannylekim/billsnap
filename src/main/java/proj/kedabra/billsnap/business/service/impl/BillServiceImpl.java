@@ -137,8 +137,9 @@ public class BillServiceImpl implements BillService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Bill startBill(Long id) {
+    public Bill startBill(Long id, String userEmail) {
         final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, userEmail);
         verifyBillStatus(bill, BillStatusEnum.OPEN);
         bill.setStatus(BillStatusEnum.IN_PROGRESS);
         bill.getAccounts().stream().filter(ab -> ab.getStatus() == InvitationStatusEnum.ACCEPTED).forEach(ab -> ab.setPaymentStatus(PaymentStatusEnum.IN_PROGRESS));
@@ -149,7 +150,9 @@ public class BillServiceImpl implements BillService {
     @Transactional(rollbackFor = Exception.class)
     public Bill editBill(Long id, Account account, EditBillDTO editBill) {
         final Bill bill = getBill(id);
+        verifyUserIsBillResponsible(bill, account.getEmail());
         verifyBillStatus(bill, BillStatusEnum.OPEN);
+        verifyIfAccountInBill(bill, editBill.getResponsible());
         verifyExistenceofTaxesInBill(editBill, bill);
 
         billMapper.updatebill(bill, editBill);
@@ -294,6 +297,13 @@ public class BillServiceImpl implements BillService {
 
         if (!duplicateSet.isEmpty()) {
             throw new IllegalArgumentException(ErrorMessageEnum.DUPLICATE_EMAILS_IN_ASSOCIATE_USERS.getMessage(duplicateSet.toString()));
+        }
+    }
+
+    private void verifyIfAccountInBill(final Bill bill, final String email) {
+        final List<String> billEmails = bill.getAccounts().stream().map(AccountBill::getAccount).map(Account::getEmail).collect(Collectors.toList());
+        if (!billEmails.contains(email)) {
+            throw new IllegalArgumentException(ErrorMessageEnum.SOME_ACCOUNTS_NONEXISTENT_IN_BILL.getMessage(email));
         }
     }
 
