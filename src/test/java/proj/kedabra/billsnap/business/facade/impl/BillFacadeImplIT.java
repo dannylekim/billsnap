@@ -8,10 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -26,6 +29,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.comparator.Comparators;
 
 import proj.kedabra.billsnap.business.dto.AccountDTO;
 import proj.kedabra.billsnap.business.dto.AssociateBillDTO;
@@ -278,6 +282,25 @@ class BillFacadeImplIT {
         //Then
         assertThat(result).hasSize(2);
         assertThat(result.get(0).getName()).isEqualTo("bill pagination 5");
+    }
+
+    @Test
+    @DisplayName("Should return bill according to pagination when sorted by name")
+    void shouldReturnBillAccordingToPaginationWhenSortedByName() {
+        //Given
+        final List<SortByEnum> sortByList = new ArrayList<>();
+        sortByList.add(SortByEnum.NAME);
+        final var billPagination = GetBillPaginationDTOFixture.getCustom(null, OrderByEnum.ASC, sortByList, 0, 2);
+
+        //When
+        final List<BillSplitDTO> result = billFacade.getAllBillsByEmailPageable(billPagination);
+
+        //Then
+        assertThat(result).hasSize(2);
+        final var billNames = result.stream().map(BillSplitDTO::getName).collect(Collectors.toList());
+        final var sortedBillNames = new ArrayList<>(billNames);
+        Collections.sort(sortedBillNames);
+        assertThat(sortedBillNames).isEqualTo(billNames);
     }
 
     @Test
