@@ -39,4 +39,8 @@ public class ShortBillResource implements Serializable {
     @JsonSerialize(using = MoneySerializer.class)
     private BigDecimal balance;
 
+    @Schema(description = "the total amount remaining to be paid by user")
+    @JsonSerialize(using = MoneySerializer.class)
+    private BigDecimal amountOwed;
+
 }
