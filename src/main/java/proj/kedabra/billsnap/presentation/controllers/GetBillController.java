@@ -99,7 +99,7 @@ public class GetBillController {
         billPaginationDTO.setPageable(pageRequest);
 
         final List<BillSplitDTO> billsFromEmail = billFacade.getAllBillsByEmailPageable(billPaginationDTO);
-        return billsFromEmail.stream().map(billMapper::toShortBillResource).collect(Collectors.toList());
+        return billsFromEmail.stream().map(bsdto -> billMapper.toShortBillResource(bsdto, principal.getName())).collect(Collectors.toList());
 
     }
 
