@@ -23,10 +23,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
 import proj.kedabra.billsnap.business.dto.PaymentInformationDTO;
 import proj.kedabra.billsnap.business.exception.FieldValidationException;
+import proj.kedabra.billsnap.business.facade.BillFacade;
 import proj.kedabra.billsnap.business.facade.PaymentFacade;
+import proj.kedabra.billsnap.business.mapper.BillMapper;
 import proj.kedabra.billsnap.presentation.ApiError;
+import proj.kedabra.billsnap.presentation.resources.BillSplitResource;
 import proj.kedabra.billsnap.presentation.resources.PaymentResource;
-import proj.kedabra.billsnap.presentation.resources.RemainingPaymentResource;
 import proj.kedabra.billsnap.utils.CacheNames;
 
 @RestController
@@ -35,22 +37,28 @@ public class ResolveBillController {
 
     private final PaymentFacade paymentFacade;
 
-    public ResolveBillController(final PaymentFacade paymentFacade) {
+    private final BillFacade billFacade;
+
+    private final BillMapper mapper;
+
+    public ResolveBillController(final PaymentFacade paymentFacade, final BillFacade billFacade, final BillMapper mapper) {
         this.paymentFacade = paymentFacade;
+        this.billFacade = billFacade;
+        this.mapper = mapper;
     }
 
     @CacheEvict(value = CacheNames.PAYMENTS, key = "#principal.name")
     @PostMapping
     @Operation(summary = "Add a bill", description = "Pay a personal bill.")
-    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = RemainingPaymentResource.class)), description = "You've successfully paid a bill!")
+    @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = BillSplitResource.class)), description = "You've successfully paid a bill!")
     @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "Cannot pay a bill with wrong inputs.")
     @ApiResponse(responseCode = "401", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are unauthorized to access this resource.")
     @ApiResponse(responseCode = "403", content = @Content(schema = @Schema(implementation = ApiError.class)), description = "You are forbidden to access this resource.")
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("hasAuthority(#payment.id)")
-    public RemainingPaymentResource payBill(@RequestBody @Valid @Parameter(required = true, name = "Payment details", description = "Amount paid to bill") final PaymentResource payment,
-                                            final BindingResult bindingResult,
-                                            @AuthenticationPrincipal Principal principal) {
+    public BillSplitResource payBill(@RequestBody @Valid @Parameter(required = true, name = "Payment details", description = "Amount paid to bill") final PaymentResource payment,
+                                     final BindingResult bindingResult,
+                                     @AuthenticationPrincipal Principal principal) {
         if (bindingResult.hasErrors()) {
             throw new FieldValidationException(bindingResult.getAllErrors());
         }
@@ -61,10 +69,8 @@ public class ResolveBillController {
         paymentInformationDTO.setBillId(payment.getId());
         paymentInformationDTO.setEmail(email);
 
-        final var remainingBalance = paymentFacade.payBill(paymentInformationDTO);
-        final var remainingPaymentResource = new RemainingPaymentResource();
-        remainingPaymentResource.setRemainingBalance(remainingBalance);
+        paymentFacade.payBill(paymentInformationDTO);
 
-        return remainingPaymentResource;
+        return mapper.toResource(billFacade.getDetailedBill(payment.getId()));
     }
 }
