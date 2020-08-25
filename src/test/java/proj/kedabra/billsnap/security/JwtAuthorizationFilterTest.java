@@ -19,12 +19,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
+import proj.kedabra.billsnap.business.service.impl.UserDetailsServiceImpl;
 import proj.kedabra.billsnap.fixtures.UserFixture;
 
 class JwtAuthorizationFilterTest {
@@ -39,6 +41,9 @@ class JwtAuthorizationFilterTest {
 
     @Mock
     private AuthenticationManager authenticationManager;
+
+    @Mock
+    private UserDetailsService userDetailsService;
 
     private static final String TOKEN_PREFIX = "Bearer ";
 
@@ -56,7 +61,7 @@ class JwtAuthorizationFilterTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.initMocks(this);
-        filter = new JwtAuthorizationFilter(authenticationManager, jwtService);
+        filter = new JwtAuthorizationFilter(authenticationManager, jwtService, userDetailsService);
         SecurityContextHolder.setContext(securityContext);
     }
 
@@ -70,7 +75,7 @@ class JwtAuthorizationFilterTest {
 
         User defaultUser = UserFixture.getDefault();
         when(jwtService.getJwtUsername(any())).thenReturn(defaultUser.getUsername());
-        when(jwtService.getJwtAuthorities(any())).thenReturn(defaultUser.getAuthorities());
+        when(userDetailsService.loadUserByUsername(any())).thenReturn(defaultUser);
 
         final String testToken = TOKEN_PREFIX + "test-token";
         req.addHeader("Authorization", testToken);

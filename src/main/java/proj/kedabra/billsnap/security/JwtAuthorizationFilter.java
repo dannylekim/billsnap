@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,6 +25,8 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
+
+    private final UserDetailsService userDetailsService;
 
     private JwtService jwtService;
 
@@ -43,9 +46,10 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
     private static final String INVALID_AUTHORIZATION_HEADER_LOG = "JWT is empty or does not start with 'Bearer ' in Authorization header";
 
-    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public JwtAuthorizationFilter(AuthenticationManager authenticationManager, JwtService jwtService, UserDetailsService userDetailsService) {
         super(authenticationManager);
         this.jwtService = jwtService;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
@@ -65,7 +69,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
         if (StringUtils.isNotEmpty(token) && token.startsWith(TOKEN_PREFIX)) {
             try {
                 String username = jwtService.getJwtUsername(token);
-                Collection<GrantedAuthority> authorities = jwtService.getJwtAuthorities(token);
+                jwtService.getJwtAuthorities(token);
+                final Collection<? extends GrantedAuthority> authorities = userDetailsService.loadUserByUsername(username).getAuthorities();
 
                 if (StringUtils.isNotEmpty(username)) {
                     return Optional.of(new UsernamePasswordAuthenticationToken(username, null, authorities));

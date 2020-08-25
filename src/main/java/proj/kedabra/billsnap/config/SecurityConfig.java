@@ -119,7 +119,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private JwtAuthorizationFilter jwtAuthorizationFilter() throws Exception {
-        return new JwtAuthorizationFilter(authenticationManager(), jwtService);
+        return new JwtAuthorizationFilter(authenticationManager(), jwtService, userDetailsServiceImpl);
     }
 
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
