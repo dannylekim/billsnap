@@ -102,7 +102,7 @@ public class Bill implements Serializable {
     @Column(name = "active", nullable = false)
     private Boolean active;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "bill", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Item> items = new HashSet<>();
