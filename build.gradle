@@ -10,7 +10,7 @@ plugins {
 }
 
 group = 'proj.kedabra'
-version = '0.0.18-SNAPSHOT'
+version = '1.0.1-SNAPSHOT'
 sourceCompatibility = '13'
 
 configurations {
